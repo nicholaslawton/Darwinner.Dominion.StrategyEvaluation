@@ -16,7 +16,17 @@ newtype ParseError = ParseError String
   deriving (Eq, Show)
 
 parseEvaluationParameters :: ByteString -> Either ParseError EvaluationParameters
-parseEvaluationParameters = toEither . parseByteString parser mempty
+parseEvaluationParameters s = parse s >>= validatePlayerCount
+
+parse :: ByteString -> Either ParseError EvaluationParameters
+parse = toEither . parseByteString parser mempty
+
+validatePlayerCount :: EvaluationParameters -> Either ParseError EvaluationParameters
+validatePlayerCount (EvaluationParameters players) =
+  case length players of
+    x | x < 2             -> Left $ ParseError "Insufficient number of players (minimum two)"
+    x | 2 <= x && x <= 4  -> Right $ EvaluationParameters players
+    x | x > 4             -> Left $ ParseError "Too many players (maximum four)"
 
 parser :: Parser EvaluationParameters
 parser = whiteSpace *> evaluationParameters <* eof
@@ -52,7 +62,7 @@ field :: String -> Parser a -> Parser a
 field name p =  string name *> token (char ':') *> p
 
 literal :: String -> a -> Parser a
-literal s value = const value <$> token (string s)
+literal s value = value <$ token (string s)
 
 toEither :: Result a -> Either ParseError a
 toEither (Failure info) = Left $ ParseError $ show $ _errDoc info
