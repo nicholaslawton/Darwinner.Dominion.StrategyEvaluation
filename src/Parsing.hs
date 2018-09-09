@@ -1,53 +1,29 @@
-module GameDefinition
-  ( GameDefinition(..)
-  , Player(..)
-  , PlayerId(..)
-  , Strategy(..)
-  , Card(..)
-  , ParseError(..)
-  , parse
+module Parsing
+  ( ParseError(..)
+  , parseEvaluationParameters
   ) where
+
+import Card
+import Strategy
+import Player
+import EvaluationParameters
 
 import Control.Applicative
 import Data.ByteString (ByteString)
 import Text.Trifecta
 
-data GameDefinition = GameDefinition [Player]
-  deriving (Eq, Show)
-
-data Player = Player
-  { playerId :: PlayerId
-  , strategy :: Strategy
-  }
-  deriving (Eq, Show)
-
-data Strategy = Strategy [Card]
-  deriving (Eq, Show)
-
-data Card
-  = Province
-  | Duchy
-  | Estate
-  | Gold
-  | Silver
-  | Copper
-  deriving (Eq, Show)
-
-newtype PlayerId = PlayerId String
-  deriving (Eq, Show)
-
 newtype ParseError = ParseError String
   deriving (Eq, Show)
 
-parse :: ByteString -> Either ParseError GameDefinition
-parse = toEither . parseByteString parser mempty
+parseEvaluationParameters :: ByteString -> Either ParseError EvaluationParameters
+parseEvaluationParameters = toEither . parseByteString parser mempty
 
-parser :: Parser GameDefinition
-parser = whiteSpace *> gameDefinition <* eof
+parser :: Parser EvaluationParameters
+parser = whiteSpace *> evaluationParameters <* eof
 
-gameDefinition :: Parser GameDefinition
-gameDefinition = braces $
-  field "players" $ GameDefinition <$> list player
+evaluationParameters :: Parser EvaluationParameters
+evaluationParameters = braces $
+  field "players" $ EvaluationParameters <$> list player
 
 player :: Parser Player
 player = braces $

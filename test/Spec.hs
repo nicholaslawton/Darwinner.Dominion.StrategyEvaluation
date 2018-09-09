@@ -3,7 +3,11 @@
 
 module Main where
 
-import GameDefinition
+import Parsing
+import EvaluationParameters
+import Card
+import Strategy
+import Player
 
 import Data.ByteString (ByteString)
 import Test.Hspec
@@ -15,14 +19,14 @@ main = hspec $
   describe "GameDefinition.parse" $
 
     it "parses simple definition" $
-      GameDefinition.parse ([r|
+      Parsing.parseEvaluationParameters ([r|
             { players:
               [ { id: first, strategy: [Province, Gold, Duchy, Silver, Estate] }
               , { id: second, strategy: [Gold, Silver, Copper] }
               ]
             }
           |] :: ByteString)
-        `shouldBe` Right ( GameDefinition
+        `shouldBe` Right ( EvaluationParameters
           [ Player (PlayerId "first") (Strategy [Province, Gold, Duchy, Silver, Estate])
           , Player (PlayerId "second") (Strategy [Gold, Silver, Copper])
           ])

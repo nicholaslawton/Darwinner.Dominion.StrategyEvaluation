@@ -6,12 +6,12 @@ import Data.ByteString.Lazy
 import Network.HTTP.Types.Status
 import Web.Scotty
 
-import GameDefinition
+import Parsing
 
 main :: IO ()
 main = scotty 3000 $
   post "/evaluate" $
-    GameDefinition.parse . toStrict <$> body >>= toStatus
+    Parsing.parseEvaluationParameters . toStrict <$> body >>= toStatus
   where
     toStatus (Left _) = status badRequest400
     toStatus (Right _) = status ok200
