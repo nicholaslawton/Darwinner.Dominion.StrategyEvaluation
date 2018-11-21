@@ -20,6 +20,9 @@
 # resolver: https://example.com/snapshots/2018-01-01.yaml
 resolver: lts-8.24
 
+ghc-options:
+  "$locals": -Wall -Werror
+
 # User packages to be built.
 # Various formats can be used as shown in the example below.
 #
