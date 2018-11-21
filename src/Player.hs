@@ -12,4 +12,4 @@ data Player = Player
   deriving (Eq, Show)
 
 newtype PlayerId = PlayerId String
-  deriving (Eq, Show)
+  deriving (Eq, Ord, Show)

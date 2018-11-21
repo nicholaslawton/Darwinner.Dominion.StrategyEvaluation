@@ -25,6 +25,8 @@ dependencies:
 - trifecta
 - bytestring
 - http-types
+- random
+- transformers
 
 library:
   source-dirs: src
@@ -52,3 +54,4 @@ tests:
     - DominionStrategyEvaluation
     - hspec
     - raw-strings-qq
+    - QuickCheck
