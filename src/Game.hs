@@ -5,6 +5,7 @@ module Game
   , players
   ) where
 
+import Card
 import Event
 import Player
 
@@ -18,6 +19,7 @@ data Game = Game
 
 data GameState
   = New [Player]
+  | PreparingSupply [Player] [Card]
   | Prepared
   deriving (Eq, Show)
 
