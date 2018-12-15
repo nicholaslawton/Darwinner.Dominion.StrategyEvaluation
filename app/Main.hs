@@ -24,13 +24,15 @@ main = scotty 3000 $
 evaluate :: Int -> EvaluationParameters -> [Event]
 evaluate seed parameters = history (execState (runReaderT Engine.run parameters) (Game.new seed))
 
-response :: (Show a, Show b) => Either a b -> ActionM ()
-response (Left a) = stringContent a >> status badRequest400
-response (Right b) = stringContent b >> status ok200
+response :: (Show a) => Either a [Event] -> ActionM ()
+response (Left a) = showContent a >> status badRequest400
+response (Right events) = stringContent (formatEvents events) >> status ok200
 
-stringContent :: Show a => a -> ActionM ()
-stringContent = text . pack . show
+formatEvents :: [Event] -> String
+formatEvents = foldr (\a b -> show a ++ "\n" ++ b) ""
 
-toStatus :: Either a b -> ActionM ()
-toStatus (Left _) = status badRequest400
-toStatus (Right _) = status ok200
+showContent :: Show a => a -> ActionM ()
+showContent = stringContent . show
+
+stringContent :: String -> ActionM ()
+stringContent = text . pack
