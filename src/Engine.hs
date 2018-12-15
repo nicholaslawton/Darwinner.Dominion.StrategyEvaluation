@@ -17,20 +17,22 @@ runUntil predicate = do
   game <- lift get
   unless (predicate game) $ do
     parameters <- ask
-    lift . put $ apply (nextEvent parameters game) game
+    lift . put $ apply (nextEvent parameters (Game.state game)) game
     runUntil predicate
-
-nextEvent :: EvaluationParameters -> Game -> Event
-nextEvent (EvaluationParameters candidates) game = fromMaybe Noop $ AddPlayer <$> nextPlayer
-  where
-    nextPlayer = listToMaybe $ filter (not . playerInGame) candidates
-    playerInGame player = playerId player `elem` (playerId <$> players game)
 
 apply :: Event -> Game -> Game
 apply event = record event . updateState (update event)
 
 record :: Event -> Game -> Game
 record event game = game { history = event : history game }
+
+nextEvent :: EvaluationParameters -> GameState -> Event
+nextEvent (EvaluationParameters candidates) (New ps) = fromMaybe Noop $ AddPlayer <$> nextPlayer
+  where
+    nextPlayer = listToMaybe $ filter (not . playerInGame) candidates
+    playerInGame player = playerId player `elem` (playerId <$> ps)
+nextEvent _ (PreparingSupply _ _) = Noop
+nextEvent _ Prepared = Noop
 
 update :: Event -> GameState -> GameState
 update (AddPlayer player) = addPlayer player
