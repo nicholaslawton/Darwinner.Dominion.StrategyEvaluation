@@ -23,9 +23,9 @@ runUntil predicate = do
     runUntil predicate
 
 nextEvent :: EvaluationParameters -> Game -> Event
-nextEvent (EvaluationParameters canidates) game = fromMaybe Noop $ AddPlayer <$> nextPlayer
+nextEvent (EvaluationParameters candidates) game = fromMaybe Noop $ AddPlayer <$> nextPlayer
   where
-    nextPlayer = listToMaybe $ filter (not . playerInGame) canidates
+    nextPlayer = listToMaybe $ filter (not . playerInGame) candidates
     playerInGame player = playerId player `elem` (playerId <$> players game)
 
 apply :: Event -> Game -> Game
