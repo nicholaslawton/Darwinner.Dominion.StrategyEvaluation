@@ -42,8 +42,9 @@ updateState f game = game { Game.state = f (Game.state game) }
 
 addPlayer :: Player -> GameState -> GameState
 addPlayer player (New ps) = New $ player : ps
-addPlayer _ _ = error "A player may only be added to a new game"
+addPlayer _ _ = error "A player may not be added after preparation of the game has commenced"
 
 addCardToSupply :: Card -> GameState -> GameState
+addCardToSupply card (New ps) = PreparingSupply ps [card]
 addCardToSupply card (PreparingSupply ps supply) = PreparingSupply ps $ card : supply
-addCardToSupply _ _ = error "A card may only be added to the supply during supply preparation"
+addCardToSupply _ _ = error "A card may not be added to the supply after supply preparation has completed"
