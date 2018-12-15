@@ -17,9 +17,7 @@ runUntil predicate = do
   game <- lift get
   unless (predicate game) $ do
     parameters <- ask
-    let event = nextEvent parameters game
-    let newGame = apply event game
-    lift $ put newGame
+    lift . put $ apply (nextEvent parameters game) game
     runUntil predicate
 
 nextEvent :: EvaluationParameters -> Game -> Event
