@@ -41,6 +41,7 @@ executables:
     - -with-rtsopts=-N
     dependencies:
     - DominionStrategyEvaluation
+    - text
 
 tests:
   DominionStrategyEvaluation-test:

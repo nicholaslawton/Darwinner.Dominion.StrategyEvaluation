@@ -9,3 +9,4 @@ data Event
   = Noop
   | AddPlayer Player
   | AddCardToSupply Card
+  deriving (Eq, Show)

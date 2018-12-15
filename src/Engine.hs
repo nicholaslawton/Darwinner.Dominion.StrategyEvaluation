@@ -1,4 +1,4 @@
-module Engine (runUntil) where
+module Engine (run, runUntil) where
 
 import Card
 import Game
@@ -11,6 +11,9 @@ import Control.Monad
 import Control.Monad.Trans.Reader
 import Control.Monad.Trans.State
 import Control.Monad.Trans.Class
+
+run :: ReaderT EvaluationParameters (State Game) ()
+run = runUntil ((== Prepared) . Game.state)
 
 runUntil :: (Game -> Bool) -> ReaderT EvaluationParameters (State Game) ()
 runUntil predicate = do
@@ -37,7 +40,7 @@ nextEvent _ Prepared = Noop
 update :: Event -> GameState -> GameState
 update (AddPlayer player) = addPlayer player
 update (AddCardToSupply card) = addCardToSupply card
-update Noop = id
+update Noop = const Prepared
 
 updateState :: (GameState -> GameState) -> Game -> Game
 updateState f game = game { Game.state = f (Game.state game) }
