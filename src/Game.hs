@@ -1,6 +1,8 @@
 module Game
-  ( Game(..)
+  ( Game(state, gen)
   , GameState(..)
+  , recordEvent
+  , history
   , new
   , players
   ) where
@@ -13,7 +15,7 @@ import System.Random
 
 data Game = Game
   { state :: GameState
-  , history :: [Event]
+  , events :: [Event]
   , gen :: StdGen
   }
 
@@ -22,6 +24,12 @@ data GameState
   | PreparingSupply [Player] [Card]
   | Prepared
   deriving (Eq, Show)
+
+recordEvent :: Event -> Game -> Game
+recordEvent event game = game { events = event : events game }
+
+history :: Game -> [Event]
+history = reverse . events
 
 new :: Int -> Game
 new = Game (New []) [] . mkStdGen

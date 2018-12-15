@@ -24,10 +24,7 @@ runUntil predicate = do
     runUntil predicate
 
 apply :: Event -> Game -> Game
-apply event = record event . updateState (update event)
-
-record :: Event -> Game -> Game
-record event game = game { history = event : history game }
+apply event = recordEvent event . updateState (update event)
 
 nextEvent :: EvaluationParameters -> GameState -> Event
 nextEvent (EvaluationParameters candidates) (New ps) = fromMaybe (AddCardToSupply Copper) $ AddPlayer <$> nextPlayer
