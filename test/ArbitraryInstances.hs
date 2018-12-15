@@ -3,9 +3,11 @@
 module ArbitraryInstances where
 
 import Control.Applicative
+import Control.Monad
 import Test.QuickCheck
 
 import Card
+import EvaluationParameters
 import Player
 import Strategy
 
@@ -20,3 +22,39 @@ instance Arbitrary PlayerId where
 
 instance Arbitrary Strategy where
   arbitrary = Strategy <$> arbitrary
+
+instance Arbitrary EvaluationParameters where
+  arbitrary = EvaluationParameters . validPlayers <$> arbitrary
+
+data ValidPlayers
+  = TwoPlayers Player Player
+  | ThreePlayers Player Player Player
+  | FourPlayers Player Player Player Player
+  deriving (Eq, Show)
+
+instance Arbitrary ValidPlayers where
+  arbitrary = oneof
+    [ liftA2 TwoPlayers
+        (uniquePlayer '1' <$> arbitrary)
+        (uniquePlayer '2' <$> arbitrary)
+    , liftA3 ThreePlayers
+        (uniquePlayer '1' <$> arbitrary)
+        (uniquePlayer '2' <$> arbitrary)
+        (uniquePlayer '3' <$> arbitrary)
+    , liftM4 FourPlayers
+        (uniquePlayer '1' <$> arbitrary)
+        (uniquePlayer '2' <$> arbitrary)
+        (uniquePlayer '3' <$> arbitrary)
+        (uniquePlayer '4' <$> arbitrary)
+    ]
+    where
+      uniquePlayer :: Char -> Player -> Player
+      uniquePlayer x p = p { playerId = mapPlayerId ((:) x) $ playerId p }
+
+      mapPlayerId :: (String -> String) -> PlayerId -> PlayerId
+      mapPlayerId f (PlayerId pid) = PlayerId $ f pid
+
+validPlayers :: ValidPlayers -> [Player]
+validPlayers (TwoPlayers p1 p2) = [p1, p2]
+validPlayers (ThreePlayers p1 p2 p3) = [p1, p2, p3]
+validPlayers (FourPlayers p1 p2 p3 p4) = [p1, p2, p3, p4]

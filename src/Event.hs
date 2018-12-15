@@ -2,4 +2,8 @@ module Event
   ( Event(..)
   ) where
 
-data Event = Noop
+import Player
+
+data Event
+  = Noop
+  | AddPlayer Player
