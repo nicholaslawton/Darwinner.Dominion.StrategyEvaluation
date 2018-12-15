@@ -37,15 +37,15 @@ record event game = game { history = event : history game }
 update :: Event -> GameState -> GameState
 update (AddPlayer player) = addPlayer player
 update (AddCardToSupply card) = addCardToSupply card
-update _ = id
+update Noop = id
 
 updateState :: (GameState -> GameState) -> Game -> Game
 updateState f game = game { Game.state = f (Game.state game) }
 
 addPlayer :: Player -> GameState -> GameState
 addPlayer player (New ps) = New $ player : ps
-addPlayer _ game = game
+addPlayer _ _ = error "A player may only be added to a new game"
 
 addCardToSupply :: Card -> GameState -> GameState
 addCardToSupply card (PreparingSupply ps supply) = PreparingSupply ps $ card : supply
-addCardToSupply _ game = game
+addCardToSupply _ _ = error "A card may only be added to the supply during supply preparation"
