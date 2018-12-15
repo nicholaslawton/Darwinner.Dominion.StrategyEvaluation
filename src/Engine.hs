@@ -27,7 +27,7 @@ record :: Event -> Game -> Game
 record event game = game { history = event : history game }
 
 nextEvent :: EvaluationParameters -> GameState -> Event
-nextEvent (EvaluationParameters candidates) (New ps) = fromMaybe Noop $ AddPlayer <$> nextPlayer
+nextEvent (EvaluationParameters candidates) (New ps) = fromMaybe (AddCardToSupply Copper) $ AddPlayer <$> nextPlayer
   where
     nextPlayer = listToMaybe $ filter (not . playerInGame) candidates
     playerInGame player = playerId player `elem` (playerId <$> ps)
