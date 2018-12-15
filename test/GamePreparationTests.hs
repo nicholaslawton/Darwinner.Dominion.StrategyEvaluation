@@ -26,7 +26,7 @@ execUntil :: (Game -> Bool) -> EvaluationParameters -> Game -> Game
 execUntil predicate parameters = execState $ runReaderT (Engine.runUntil predicate) parameters
 
 prepared :: Game -> Bool
-prepared = liftA2 (||) ((== Prepared) . Game.state) ((>10) . length . Game.history)
+prepared = liftA2 (||) ((== Prepared) . Game.state) ((>100) . length . Game.history)
 
 playerAdded :: Event -> Maybe Player
 playerAdded (AddPlayer player) = Just player
