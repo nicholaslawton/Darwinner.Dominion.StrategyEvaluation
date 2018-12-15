@@ -1,5 +1,6 @@
 module Engine (runUntil) where
 
+import Card
 import Game
 import Player
 import Event
@@ -35,8 +36,13 @@ record event game = game { history = event : history game }
 
 update :: Event -> Game -> Game
 update (AddPlayer player) game = game { Game.state = addPlayer player (Game.state game) }
+update (AddCardToSupply card) game = game { Game.state = addCardToSupply card (Game.state game) }
 update _ game = game
 
 addPlayer :: Player -> GameState -> GameState
 addPlayer player (New ps) = New $ player : ps
 addPlayer _ game = game
+
+addCardToSupply :: Card -> GameState -> GameState
+addCardToSupply card (PreparingSupply ps supply) = PreparingSupply ps $ card : supply
+addCardToSupply _ game = game
