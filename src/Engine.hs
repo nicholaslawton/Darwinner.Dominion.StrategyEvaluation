@@ -35,9 +35,12 @@ record :: Event -> Game -> Game
 record event game = game { history = event : history game }
 
 update :: Event -> Game -> Game
-update (AddPlayer player) game = game { Game.state = addPlayer player (Game.state game) }
+update (AddPlayer player) game = updateState (addPlayer player) game
 update (AddCardToSupply card) game = game { Game.state = addCardToSupply card (Game.state game) }
 update _ game = game
+
+updateState :: (GameState -> GameState) -> Game -> Game
+updateState f game = game { Game.state = f (Game.state game) }
 
 addPlayer :: Player -> GameState -> GameState
 addPlayer player (New ps) = New $ player : ps
