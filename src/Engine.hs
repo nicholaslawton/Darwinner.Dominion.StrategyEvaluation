@@ -35,7 +35,7 @@ record event game = game { history = event : history game }
 
 update :: Event -> Game -> Game
 update (AddPlayer player) game = game { Game.state = addPlayer player (Game.state game) }
-update Noop game = game
+update _ game = game
 
 addPlayer :: Player -> GameState -> GameState
 addPlayer player (New ps) = New $ player : ps
