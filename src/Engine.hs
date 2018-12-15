@@ -29,7 +29,7 @@ nextEvent (EvaluationParameters candidates) game = fromMaybe Noop $ AddPlayer <$
     playerInGame player = playerId player `elem` (playerId <$> players game)
 
 apply :: Event -> Game -> Game
-apply event game = record event (updateState (update event) game)
+apply event = record event . updateState (update event)
 
 record :: Event -> Game -> Game
 record event game = game { history = event : history game }
