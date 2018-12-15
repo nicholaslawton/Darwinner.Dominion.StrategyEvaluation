@@ -39,4 +39,4 @@ update Noop game = game
 
 addPlayer :: Player -> GameState -> GameState
 addPlayer player (New ps) = New $ player : ps
-addPlayer _ Prepared = Prepared
+addPlayer _ game = game
