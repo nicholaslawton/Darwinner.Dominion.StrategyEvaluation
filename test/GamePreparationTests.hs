@@ -21,10 +21,13 @@ gamePreparationTests :: SpecWith ()
 gamePreparationTests = describe "game preparation" $ do
 
   it "adds all players" $ property $ \seed (params@(EvaluationParameters candidates)) ->
-    (playerIds . mapMaybe playerAdded . history . execUntil prepared params) (Game.new seed) == playerIds candidates
+    (playerIds . mapMaybe playerAdded . history . prepareGame seed) params == playerIds candidates
 
-  it "adds copper to supply" $ property $ \seed params ->
-    Copper `elem` (mapMaybe cardAddedToSupply . history . execUntil prepared params) (Game.new seed)
+  it "adds copper to supply" $ property $ 
+    elem Copper . mapMaybe cardAddedToSupply . history . uncurry prepareGame
+
+prepareGame :: Int -> EvaluationParameters -> Game
+prepareGame seed params = execUntil prepared params (Game.new seed)
 
 execUntil :: (Game -> Bool) -> EvaluationParameters -> Game -> Game
 execUntil predicate parameters = execState $ runReaderT (Engine.runUntil predicate) parameters
