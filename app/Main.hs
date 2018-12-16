@@ -26,10 +26,10 @@ evaluate seed parameters = history (execState (runReaderT Engine.run parameters)
 
 response :: (Show a) => Either a [Command] -> ActionM ()
 response (Left a) = showContent a >> status badRequest400
-response (Right events) = stringContent (formatEvents events) >> status ok200
+response (Right commands) = stringContent (formatCommands commands) >> status ok200
 
-formatEvents :: [Command] -> String
-formatEvents = foldr (\a b -> show a ++ "\n" ++ b) ""
+formatCommands :: [Command] -> String
+formatCommands = foldr (\a b -> show a ++ "\n" ++ b) ""
 
 showContent :: Show a => a -> ActionM ()
 showContent = stringContent . show

@@ -1,7 +1,7 @@
 module Game
   ( Game(state, gen)
   , GameState(..)
-  , recordEvent
+  , recordCommand
   , history
   , new
   , players
@@ -15,7 +15,7 @@ import System.Random
 
 data Game = Game
   { state :: GameState
-  , events :: [Command]
+  , commands :: [Command]
   , gen :: StdGen
   }
 
@@ -25,11 +25,11 @@ data GameState
   | Prepared
   deriving (Eq, Show)
 
-recordEvent :: Command -> Game -> Game
-recordEvent event game = game { events = event : events game }
+recordCommand :: Command -> Game -> Game
+recordCommand event game = game { commands = event : commands game }
 
 history :: Game -> [Command]
-history = reverse . events
+history = reverse . commands
 
 new :: Int -> Game
 new = Game (New []) [] . mkStdGen

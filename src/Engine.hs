@@ -20,29 +20,29 @@ runUntil predicate = do
   game <- lift get
   unless (predicate game) $ do
     parameters <- ask
-    lift . put $ apply (nextEvent parameters (Game.state game)) game
+    lift . put $ apply (nextCommand parameters (Game.state game)) game
     runUntil predicate
 
 apply :: Command -> Game -> Game
-apply event = recordEvent event . updateState (update event)
+apply command = recordCommand command . updateState (update command)
 
-nextEvent :: EvaluationParameters -> GameState -> Command
-nextEvent (EvaluationParameters candidates) (New ps) = fromMaybe PlayersReady $ AddPlayer <$> nextPlayer
+updateState :: (GameState -> GameState) -> Game -> Game
+updateState f game = game { Game.state = f (Game.state game) }
+
+nextCommand :: EvaluationParameters -> GameState -> Command
+nextCommand (EvaluationParameters candidates) (New ps) = fromMaybe PlayersReady $ AddPlayer <$> nextPlayer
   where
     nextPlayer = listToMaybe $ filter (not . playerInGame) candidates
     playerInGame player = playerId player `elem` (playerId <$> ps)
-nextEvent _ (PreparingSupply _ []) = PlaceCardInSupply Copper
-nextEvent _ (PreparingSupply _ _) = Noop
-nextEvent _ Prepared = Noop
+nextCommand _ (PreparingSupply _ []) = PlaceCardInSupply Copper
+nextCommand _ (PreparingSupply _ _) = Noop
+nextCommand _ Prepared = Noop
 
 update :: Command -> GameState -> GameState
 update (AddPlayer player) = addPlayer player
 update PlayersReady = beginPreparingSupply
 update (PlaceCardInSupply card) = placeCardInSupply card
 update Noop = const Prepared
-
-updateState :: (GameState -> GameState) -> Game -> Game
-updateState f game = game { Game.state = f (Game.state game) }
 
 addPlayer :: Player -> GameState -> GameState
 addPlayer player (New ps) = New $ player : ps
