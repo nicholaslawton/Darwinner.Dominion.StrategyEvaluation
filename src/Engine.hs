@@ -31,14 +31,14 @@ nextEvent (EvaluationParameters candidates) (New ps) = fromMaybe PlayersReady $ 
   where
     nextPlayer = listToMaybe $ filter (not . playerInGame) candidates
     playerInGame player = playerId player `elem` (playerId <$> ps)
-nextEvent _ (PreparingSupply _ []) = AddCardToSupply Copper
+nextEvent _ (PreparingSupply _ []) = PlaceCardInSupply Copper
 nextEvent _ (PreparingSupply _ _) = Noop
 nextEvent _ Prepared = Noop
 
 update :: Event -> GameState -> GameState
 update (AddPlayer player) = addPlayer player
 update PlayersReady = beginPreparingSupply
-update (AddCardToSupply card) = addCardToSupply card
+update (PlaceCardInSupply card) = placeCardInSupply card
 update Noop = const Prepared
 
 updateState :: (GameState -> GameState) -> Game -> Game
@@ -52,6 +52,6 @@ beginPreparingSupply :: GameState -> GameState
 beginPreparingSupply (New ps) = PreparingSupply ps []
 beginPreparingSupply _ = error "Cannot prepare the supply of a game which has already begun"
 
-addCardToSupply :: Card -> GameState -> GameState
-addCardToSupply card (PreparingSupply ps supply) = PreparingSupply ps $ card : supply
-addCardToSupply _ _ = error "A card may only be added to the supply during preparation"
+placeCardInSupply :: Card -> GameState -> GameState
+placeCardInSupply card (PreparingSupply ps supply) = PreparingSupply ps $ card : supply
+placeCardInSupply _ _ = error "A card may only be placed in the supply during preparation"

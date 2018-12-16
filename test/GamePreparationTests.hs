@@ -23,8 +23,8 @@ gamePreparationTests = describe "game preparation" $ do
   it "adds all players" $ property $ \seed (params@(EvaluationParameters candidates)) ->
     (playerIds . mapMaybe playerAdded . history . prepareGame seed) params == playerIds candidates
 
-  it "adds copper to supply" $ property $ 
-    elem Copper . mapMaybe cardAddedToSupply . history . uncurry prepareGame
+  it "places copper in supply" $ property $ 
+    elem Copper . mapMaybe cardPlacedInSupply . history . uncurry prepareGame
 
 prepareGame :: Int -> EvaluationParameters -> Game
 prepareGame seed params = execUntil prepared params (Game.new seed)
@@ -42,6 +42,6 @@ playerAdded :: Event -> Maybe Player
 playerAdded (AddPlayer player) = Just player
 playerAdded _ = Nothing
 
-cardAddedToSupply :: Event -> Maybe Card
-cardAddedToSupply (AddCardToSupply card) = Just card
-cardAddedToSupply _ = Nothing
+cardPlacedInSupply :: Event -> Maybe Card
+cardPlacedInSupply (PlaceCardInSupply card) = Just card
+cardPlacedInSupply _ = Nothing
