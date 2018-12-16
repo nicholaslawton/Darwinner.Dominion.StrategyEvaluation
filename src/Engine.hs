@@ -38,7 +38,10 @@ nextCommand (EvaluationParameters candidates) (PreparingSupply _ supply)
   | length (filter (== Copper) supply) < 60 - length candidates * 7 = PlaceCardInSupply Copper
   | length (filter (== Silver) supply) < 40 = PlaceCardInSupply Silver
   | length (filter (== Gold) supply) < 30 = PlaceCardInSupply Gold
+  | length (filter (== Estate) supply) < numVictoryCards = PlaceCardInSupply Estate
   | otherwise = Noop
+    where
+      numVictoryCards = if length candidates == 2 then 8 else 12
 nextCommand _ Prepared = Noop
 
 update :: Command -> GameState -> GameState
