@@ -10,13 +10,14 @@ import EvaluationParameters
 
 import Control.Applicative
 import Data.ByteString (ByteString)
+import Data.List
 import Text.Trifecta
 
 newtype ParseError = ParseError String
   deriving (Eq, Show)
 
 parseEvaluationParameters :: ByteString -> Either ParseError EvaluationParameters
-parseEvaluationParameters s = parse s >>= validatePlayerCount
+parseEvaluationParameters s = parse s >>= validatePlayerCount >>= validatePlayerIdentifiers
 
 parse :: ByteString -> Either ParseError EvaluationParameters
 parse = toEither . parseByteString parser mempty
@@ -27,6 +28,14 @@ validatePlayerCount (EvaluationParameters players) =
     x | x < 2 -> Left $ ParseError "Insufficient number of players (minimum two)"
     x | x > 4 -> Left $ ParseError "Too many players (maximum four)"
     _         -> Right $ EvaluationParameters players
+
+validatePlayerIdentifiers :: EvaluationParameters -> Either ParseError EvaluationParameters
+validatePlayerIdentifiers (EvaluationParameters players) = 
+  if containsDuplicates $ playerId <$> players
+  then Left $ ParseError "Duplicate player identifiers"
+  else Right $ EvaluationParameters players
+    where
+      containsDuplicates = liftA2 (/=) length (length . nub)
 
 parser :: Parser EvaluationParameters
 parser = whiteSpace *> evaluationParameters <* eof
