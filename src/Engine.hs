@@ -34,8 +34,9 @@ nextCommand (EvaluationParameters candidates) (New ps) = fromMaybe PlayersReady 
   where
     nextPlayer = listToMaybe $ filter (not . playerInGame) candidates
     playerInGame player = playerId player `elem` (playerId <$> ps)
-nextCommand _ (PreparingSupply _ []) = PlaceCardInSupply Copper
-nextCommand _ (PreparingSupply _ _) = Noop
+nextCommand (EvaluationParameters candidates) (PreparingSupply _ supply)
+  | length supply < 60 - length candidates * 7 = PlaceCardInSupply Copper
+  | otherwise = Noop
 nextCommand _ Prepared = Noop
 
 update :: Command -> GameState -> GameState
