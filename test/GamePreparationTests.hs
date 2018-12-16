@@ -23,8 +23,10 @@ gamePreparationTests = describe "game preparation" $ do
   it "adds all players" $ property $ \seed (params@(EvaluationParameters candidates)) ->
     (playerIds . mapMaybe playerAdded . history . prepareGame seed) params == playerIds candidates
 
-  it "places copper in supply" $ property $ 
-    elem Copper . mapMaybe cardPlacedInSupply . history . uncurry prepareGame
+  it "places treasure in supply" $ property $ 
+    (== treasure) . intersect treasure . nub . mapMaybe cardPlacedInSupply . history . uncurry prepareGame
+      where
+        treasure = [Copper, Silver, Gold]
 
 prepareGame :: Int -> EvaluationParameters -> Game
 prepareGame seed params = execUntil prepared params (Game.new seed)
