@@ -8,5 +8,6 @@ import Card
 data Event
   = Noop
   | AddPlayer Player
+  | PlayersReady
   | AddCardToSupply Card
   deriving (Eq, Show)
