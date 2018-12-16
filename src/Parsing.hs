@@ -24,9 +24,9 @@ parse = toEither . parseByteString parser mempty
 validatePlayerCount :: EvaluationParameters -> Either ParseError EvaluationParameters
 validatePlayerCount (EvaluationParameters players) =
   case length players of
-    x | x < 2             -> Left $ ParseError "Insufficient number of players (minimum two)"
-    x | 2 <= x && x <= 4  -> Right $ EvaluationParameters players
-    x | x > 4             -> Left $ ParseError "Too many players (maximum four)"
+    x | x < 2 -> Left $ ParseError "Insufficient number of players (minimum two)"
+    x | x > 4 -> Left $ ParseError "Too many players (maximum four)"
+    _         -> Right $ EvaluationParameters players
 
 parser :: Parser EvaluationParameters
 parser = whiteSpace *> evaluationParameters <* eof
