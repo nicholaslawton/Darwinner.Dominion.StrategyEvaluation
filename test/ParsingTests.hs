@@ -50,3 +50,13 @@ parsingTests = describe "parseEvaluationParameters" $ do
           }
         |] :: ByteString)
       `shouldBe` Left (ParseError "Too many players (maximum four)")
+
+  it "rejects duplicate identifiers" $
+    parseEvaluationParameters ([r|
+          { players:
+            [ { id: same, strategy: [Province, Gold, Duchy, Silver, Estate] }
+            , { id: same, strategy: [Gold, Silver, Copper] }
+            ]
+          }
+        |] :: ByteString)
+      `shouldBe` Left (ParseError "Duplicate player identifiers")
