@@ -23,10 +23,10 @@ gamePreparationTests = describe "game preparation" $ do
   it "adds all players" $ property $ \seed (params@(EvaluationParameters candidates)) ->
     (playerIds . mapMaybe playerAdded . history . prepareGame seed) params == playerIds candidates
 
-  it "places treasure in supply" $ property $ 
-    (== treasure) . intersect treasure . nub . mapMaybe cardPlacedInSupply . history . uncurry prepareGame
+  it "places treasure and victory cards in supply" $ property $ 
+    (== expected) . intersect expected . nub . mapMaybe cardPlacedInSupply . history . uncurry prepareGame
       where
-        treasure = [Copper, Silver, Gold]
+        expected = [Copper, Silver, Gold, Estate, Duchy, Province]
 
 prepareGame :: Int -> EvaluationParameters -> Game
 prepareGame seed params = execUntil prepared params (Game.new seed)
@@ -35,7 +35,7 @@ execUntil :: (Game -> Bool) -> EvaluationParameters -> Game -> Game
 execUntil predicate parameters = execState $ runReaderT (Engine.runUntil predicate) parameters
 
 prepared :: Game -> Bool
-prepared = liftA2 (||) ((== Prepared) . Game.state) ((>100) . length . Game.history)
+prepared = liftA2 (||) ((== Prepared) . Game.state) ((>200) . length . Game.history)
 
 playerIds :: [Player] -> [PlayerId]
 playerIds = sort . nub . fmap playerId
