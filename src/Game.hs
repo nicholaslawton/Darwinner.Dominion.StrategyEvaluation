@@ -8,7 +8,7 @@ module Game
   ) where
 
 import Card
-import Event
+import Command
 import Player
 
 import System.Random

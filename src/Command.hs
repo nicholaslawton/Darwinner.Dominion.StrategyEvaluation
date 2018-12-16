@@ -1,4 +1,4 @@
-module Event
+module Command
   ( Event(..)
   ) where
 

@@ -3,7 +3,7 @@ module GamePreparationTests where
 import Game
 import Player
 import Card
-import Event
+import Command
 import Engine
 import EvaluationParameters
 

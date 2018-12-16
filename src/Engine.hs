@@ -3,7 +3,7 @@ module Engine (run, runUntil) where
 import Card
 import Game
 import Player
-import Event
+import Command
 import EvaluationParameters
 
 import Data.Maybe
