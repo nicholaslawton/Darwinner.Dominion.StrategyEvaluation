@@ -1,11 +1,11 @@
 module Command
-  ( Event(..)
+  ( Command(..)
   ) where
 
 import Player
 import Card
 
-data Event
+data Command
   = Noop
   | AddPlayer Player
   | PlayersReady

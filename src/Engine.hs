@@ -23,10 +23,10 @@ runUntil predicate = do
     lift . put $ apply (nextEvent parameters (Game.state game)) game
     runUntil predicate
 
-apply :: Event -> Game -> Game
+apply :: Command -> Game -> Game
 apply event = recordEvent event . updateState (update event)
 
-nextEvent :: EvaluationParameters -> GameState -> Event
+nextEvent :: EvaluationParameters -> GameState -> Command
 nextEvent (EvaluationParameters candidates) (New ps) = fromMaybe PlayersReady $ AddPlayer <$> nextPlayer
   where
     nextPlayer = listToMaybe $ filter (not . playerInGame) candidates
@@ -35,7 +35,7 @@ nextEvent _ (PreparingSupply _ []) = PlaceCardInSupply Copper
 nextEvent _ (PreparingSupply _ _) = Noop
 nextEvent _ Prepared = Noop
 
-update :: Event -> GameState -> GameState
+update :: Command -> GameState -> GameState
 update (AddPlayer player) = addPlayer player
 update PlayersReady = beginPreparingSupply
 update (PlaceCardInSupply card) = placeCardInSupply card

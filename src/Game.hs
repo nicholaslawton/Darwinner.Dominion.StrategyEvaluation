@@ -15,7 +15,7 @@ import System.Random
 
 data Game = Game
   { state :: GameState
-  , events :: [Event]
+  , events :: [Command]
   , gen :: StdGen
   }
 
@@ -25,10 +25,10 @@ data GameState
   | Prepared
   deriving (Eq, Show)
 
-recordEvent :: Event -> Game -> Game
+recordEvent :: Command -> Game -> Game
 recordEvent event game = game { events = event : events game }
 
-history :: Game -> [Event]
+history :: Game -> [Command]
 history = reverse . events
 
 new :: Int -> Game

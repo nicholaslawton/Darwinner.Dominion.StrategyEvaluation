@@ -38,10 +38,10 @@ prepared = liftA2 (||) ((== Prepared) . Game.state) ((>100) . length . Game.hist
 playerIds :: [Player] -> [PlayerId]
 playerIds = sort . nub . fmap playerId
 
-playerAdded :: Event -> Maybe Player
+playerAdded :: Command -> Maybe Player
 playerAdded (AddPlayer player) = Just player
 playerAdded _ = Nothing
 
-cardPlacedInSupply :: Event -> Maybe Card
+cardPlacedInSupply :: Command -> Maybe Card
 cardPlacedInSupply (PlaceCardInSupply card) = Just card
 cardPlacedInSupply _ = Nothing
