@@ -35,7 +35,9 @@ nextCommand (EvaluationParameters candidates) (New ps) = fromMaybe PlayersReady 
     nextPlayer = listToMaybe $ filter (not . playerInGame) candidates
     playerInGame player = playerId player `elem` (playerId <$> ps)
 nextCommand (EvaluationParameters candidates) (PreparingSupply _ supply)
-  | length supply < 60 - length candidates * 7 = PlaceCardInSupply Copper
+  | length (filter (== Copper) supply) < 60 - length candidates * 7 = PlaceCardInSupply Copper
+  | length (filter (== Silver) supply) < 40 = PlaceCardInSupply Silver
+  | length (filter (== Gold) supply) < 30 = PlaceCardInSupply Gold
   | otherwise = Noop
 nextCommand _ Prepared = Noop
 
