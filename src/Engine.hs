@@ -2,6 +2,7 @@ module Engine (run, runUntil) where
 
 import Card
 import Game
+import Update
 import Player
 import Command
 import EvaluationParameters
@@ -24,10 +25,7 @@ runUntil predicate = do
     runUntil predicate
 
 apply :: Command -> Game -> Game
-apply command = recordCommand command . updateState (update command)
-
-updateState :: (GameState -> GameState) -> Game -> Game
-updateState f game = game { Game.state = f (Game.state game) }
+apply command = recordCommand command . update command
 
 nextCommand :: EvaluationParameters -> GameState -> Command
 nextCommand (EvaluationParameters candidates) (New ps) = fromMaybe PlayersReady $ AddPlayer <$> nextPlayer
@@ -45,21 +43,3 @@ nextCommand (EvaluationParameters candidates) (PreparingSupply _ supply)
     where
       numVictoryCards = if length candidates == 2 then 8 else 12
 nextCommand _ Prepared = Noop
-
-update :: Command -> GameState -> GameState
-update (AddPlayer player) = addPlayer player
-update PlayersReady = beginPreparingSupply
-update (PlaceCardInSupply card) = placeCardInSupply card
-update Noop = const Prepared
-
-addPlayer :: Player -> GameState -> GameState
-addPlayer player (New ps) = New $ player : ps
-addPlayer _ _ = error "A player may not be added after preparation of the game has commenced"
-
-beginPreparingSupply :: GameState -> GameState
-beginPreparingSupply (New ps) = PreparingSupply ps []
-beginPreparingSupply _ = error "Cannot prepare the supply of a game which has already begun"
-
-placeCardInSupply :: Card -> GameState -> GameState
-placeCardInSupply card (PreparingSupply ps supply) = PreparingSupply ps $ card : supply
-placeCardInSupply _ _ = error "A card may only be placed in the supply during preparation"
