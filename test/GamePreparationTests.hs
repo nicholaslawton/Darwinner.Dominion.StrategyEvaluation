@@ -1,6 +1,7 @@
 module GamePreparationTests where
 
 import Game
+import GameState
 import Player
 import Card
 import Command

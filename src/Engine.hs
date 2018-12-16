@@ -2,6 +2,7 @@ module Engine (run, runUntil) where
 
 import Card
 import Game
+import GameState
 import Update
 import Player
 import Command
@@ -25,7 +26,7 @@ runUntil predicate = do
     runUntil predicate
 
 apply :: Command -> Game -> Game
-apply command = recordCommand command . update command
+apply command = recordCommand command . Game.mapState (update command)
 
 nextCommand :: EvaluationParameters -> GameState -> Command
 nextCommand (EvaluationParameters candidates) (New ps) = fromMaybe PlayersReady $ AddPlayer <$> nextPlayer

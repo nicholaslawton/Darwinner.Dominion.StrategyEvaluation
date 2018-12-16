@@ -2,7 +2,7 @@ module UpdateTests where
 
 import Update
 import Command
-import Game
+import GameState
 
 import ArbitraryInstances()
 import Test.Hspec
@@ -13,9 +13,4 @@ updateTests = describe "update" $ do
 
   describe "add player to new game" $
     it "adds player" $ property $ \ps player ->
-      numPlayers (updateAction (AddPlayer player) (New ps)) == length ps + 1
-
-numPlayers :: GameState -> Int
-numPlayers (New ps) = length ps
-numPlayers (PreparingSupply ps _) = length ps
-numPlayers Prepared = 0
+      length (players (update (AddPlayer player) (New ps))) == length ps + 1

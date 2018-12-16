@@ -1,21 +1,15 @@
-module Update (update, updateAction) where
+module Update (update) where
 
 import Command
-import Game
+import GameState
 import Player
 import Card
 
-update :: Command -> Game -> Game
-update = updateState . updateAction
-
-updateAction :: Command -> GameState -> GameState
-updateAction (AddPlayer player) = addPlayer player
-updateAction PlayersReady = beginPreparingSupply
-updateAction (PlaceCardInSupply card) = placeCardInSupply card
-updateAction Noop = const Prepared
-
-updateState :: (GameState -> GameState) -> Game -> Game
-updateState f game = game { Game.state = f (Game.state game) }
+update :: Command -> GameState -> GameState
+update (AddPlayer player) = addPlayer player
+update PlayersReady = beginPreparingSupply
+update (PlaceCardInSupply card) = placeCardInSupply card
+update Noop = const Prepared
 
 addPlayer :: Player -> GameState -> GameState
 addPlayer player (New ps) = New $ player : ps

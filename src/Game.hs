@@ -1,13 +1,13 @@
 module Game
   ( Game(state, gen)
-  , GameState(..)
   , recordCommand
+  , mapState
   , history
   , new
-  , players
+  , Game.players
   ) where
 
-import Card
+import GameState
 import Command
 import Player
 
@@ -19,11 +19,8 @@ data Game = Game
   , gen :: StdGen
   }
 
-data GameState
-  = New [Player]
-  | PreparingSupply [Player] [Card]
-  | Prepared
-  deriving (Eq, Show)
+mapState :: (GameState -> GameState) -> Game -> Game
+mapState f game = game { Game.state = f (Game.state game) }
 
 recordCommand :: Command -> Game -> Game
 recordCommand event game = game { commands = event : commands game }
@@ -35,7 +32,4 @@ new :: Int -> Game
 new = Game (New []) [] . mkStdGen
 
 players :: Game -> [Player]
-players = getPlayers . state
-  where
-    getPlayers (New ps) = ps
-    getPlayers _ = []
+players = GameState.players . state
