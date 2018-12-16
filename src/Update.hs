@@ -1,4 +1,4 @@
-module Update (update) where
+module Update (update, updateAction) where
 
 import Command
 import Game
