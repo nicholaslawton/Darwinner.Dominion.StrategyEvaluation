@@ -39,6 +39,8 @@ nextCommand (EvaluationParameters candidates) (PreparingSupply _ supply)
   | length (filter (== Silver) supply) < 40 = PlaceCardInSupply Silver
   | length (filter (== Gold) supply) < 30 = PlaceCardInSupply Gold
   | length (filter (== Estate) supply) < numVictoryCards = PlaceCardInSupply Estate
+  | length (filter (== Duchy) supply) < numVictoryCards = PlaceCardInSupply Duchy
+  | length (filter (== Province) supply) < numVictoryCards = PlaceCardInSupply Province
   | otherwise = Noop
     where
       numVictoryCards = if length candidates == 2 then 8 else 12
