@@ -33,13 +33,13 @@ nextCommand (EvaluationParameters candidates) (New ps) = fromMaybe PlayersReady 
   where
     nextPlayer = listToMaybe $ filter (not . playerInGame) candidates
     playerInGame player = playerId player `elem` (playerId <$> ps)
-nextCommand (EvaluationParameters candidates) (PreparingSupply _ supply)
-  | length (filter (== Copper) supply) < 60 - length candidates * 7 = PlaceCardInSupply Copper
-  | length (filter (== Silver) supply) < 40 = PlaceCardInSupply Silver
-  | length (filter (== Gold) supply) < 30 = PlaceCardInSupply Gold
-  | length (filter (== Estate) supply) < numVictoryCards = PlaceCardInSupply Estate
-  | length (filter (== Duchy) supply) < numVictoryCards = PlaceCardInSupply Duchy
-  | length (filter (== Province) supply) < numVictoryCards = PlaceCardInSupply Province
+nextCommand (EvaluationParameters candidates) (PreparingSupply _ cards)
+  | length (filter (== Copper) cards) < 60 - length candidates * 7 = PlaceCardInSupply Copper
+  | length (filter (== Silver) cards) < 40 = PlaceCardInSupply Silver
+  | length (filter (== Gold) cards) < 30 = PlaceCardInSupply Gold
+  | length (filter (== Estate) cards) < numVictoryCards = PlaceCardInSupply Estate
+  | length (filter (== Duchy) cards) < numVictoryCards = PlaceCardInSupply Duchy
+  | length (filter (== Province) cards) < numVictoryCards = PlaceCardInSupply Province
   | otherwise = Noop
     where
       numVictoryCards = if length candidates == 2 then 8 else 12

@@ -19,6 +19,10 @@ updateTests = describe "update" $ do
     it "begins preparing supply" $ property $
       isPreparingSupply . update PlayersReady . New
 
+  describe "place card in supply" $
+    it "adds card" $ property $ \ps cards card ->
+      length (supply (update (PlaceCardInSupply card) (PreparingSupply ps cards))) == length cards + 1
+
 isPreparingSupply :: GameState -> Bool
 isPreparingSupply (PreparingSupply _ _) = True
 isPreparingSupply _ = False

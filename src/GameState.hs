@@ -1,6 +1,7 @@
 module GameState
   ( GameState(..)
   , players
+  , supply
   ) where
 
 import Player
@@ -16,3 +17,8 @@ players :: GameState -> [Player]
 players (New ps) = ps
 players (PreparingSupply ps _) = ps
 players Prepared = []
+
+supply :: GameState -> [Card]
+supply (New _) = []
+supply (PreparingSupply _ cards) = cards
+supply Prepared = []

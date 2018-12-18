@@ -20,5 +20,5 @@ beginPreparingSupply (New ps) = PreparingSupply ps []
 beginPreparingSupply _ = error "Cannot prepare the supply of a game which has already begun"
 
 placeCardInSupply :: Card -> GameState -> GameState
-placeCardInSupply card (PreparingSupply ps supply) = PreparingSupply ps $ card : supply
+placeCardInSupply card (PreparingSupply ps cards) = PreparingSupply ps $ card : cards
 placeCardInSupply _ _ = error "A card may only be placed in the supply during preparation"
