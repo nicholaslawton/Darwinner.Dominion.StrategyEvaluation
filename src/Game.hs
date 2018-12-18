@@ -3,7 +3,7 @@ module Game
   , recordCommand
   , mapState
   , history
-  , new
+  , Game.new
   , Game.players
   ) where
 

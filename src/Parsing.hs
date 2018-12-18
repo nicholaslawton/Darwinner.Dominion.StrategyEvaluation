@@ -46,7 +46,7 @@ evaluationParameters = braces $
 
 player :: Parser Player
 player = braces $
-  liftA2 Player (field "id" playerIdParser) (token (char ',') *> field "strategy" strategyParser)
+  liftA2 Player.new (field "id" playerIdParser) (token (char ',') *> field "strategy" strategyParser)
 
 playerIdParser :: Parser PlayerId
 playerIdParser = PlayerId <$> token (some letter)

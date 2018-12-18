@@ -9,6 +9,7 @@ update :: Command -> GameState -> GameState
 update (AddPlayer player) = addPlayer player
 update PlayersReady = beginPreparingSupply
 update (PlaceCardInSupply card) = placeCardInSupply card
+update (AddCardToDeck pid card) = addCardToDeck pid card
 update Noop = const Prepared
 
 addPlayer :: Player -> GameState -> GameState
@@ -21,4 +22,11 @@ beginPreparingSupply _ = error "Cannot prepare the supply of a game which has al
 
 placeCardInSupply :: Card -> GameState -> GameState
 placeCardInSupply card (PreparingSupply ps cards) = PreparingSupply ps $ card : cards
-placeCardInSupply _ _ = error "A card may only be placed in the supply during preparation"
+placeCardInSupply _ _ = error "A card may only be placed in the supply during game preparation"
+
+addCardToDeck :: PlayerId -> Card -> GameState -> GameState
+addCardToDeck pid card (PreparingDecks ps cards) = PreparingDecks (mapPlayer pid (mapDeck (card :)) ps) cards
+addCardToDeck _ _ _ = error "A card may only be added to a deck during game preparation"
+
+mapPlayer :: PlayerId -> (Player -> Player) -> [Player] -> [Player]
+mapPlayer pid f = fmap (\p -> if playerId p == pid then f p else id p)

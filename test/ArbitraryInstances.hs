@@ -15,7 +15,7 @@ instance Arbitrary Card where
   arbitrary = oneof [return Province, return Duchy, return Estate, return Gold, return Silver, return Copper]
 
 instance Arbitrary Player where
-  arbitrary = liftA2 Player arbitrary arbitrary
+  arbitrary = liftA3 Player arbitrary arbitrary arbitrary
 
 instance Arbitrary PlayerId where
   arbitrary = PlayerId <$> arbitrary
