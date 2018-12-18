@@ -43,4 +43,5 @@ nextCommand (EvaluationParameters candidates) (PreparingSupply _ cards)
   | otherwise = Noop
     where
       numVictoryCards = if length candidates == 2 then 8 else 12
+nextCommand _ (PreparingDecks _ _) = Noop
 nextCommand _ Prepared = Noop
