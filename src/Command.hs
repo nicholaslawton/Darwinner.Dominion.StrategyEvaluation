@@ -10,5 +10,6 @@ data Command
   | AddPlayer Player
   | PlayersReady
   | PlaceCardInSupply Card
+  | SupplyReady
   | AddCardToDeck PlayerId Card
   deriving (Eq, Show)
