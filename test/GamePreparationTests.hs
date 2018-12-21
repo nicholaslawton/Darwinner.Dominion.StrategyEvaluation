@@ -28,8 +28,8 @@ gamePreparationTests = describe "game preparation" $ do
     let expected = [Copper, Silver, Gold, Estate, Duchy, Province]
     in (==) expected . intersect expected . nub . mapMaybe cardPlacedInSupply . history . uncurry prepareGame
 
-  it "adds a card to a deck" $ property $
-    elem Copper . mapMaybe cardAddedToDeck . history . uncurry prepareGame
+  it "adds at least 7 coppers to a deck" $ property $
+    (>=7) . length . filter (== Copper) . mapMaybe cardAddedToDeck . history . uncurry prepareGame
 
 prepareGame :: Int -> EvaluationParameters -> Game
 prepareGame seed params = execUntil prepared params (Game.new seed)
