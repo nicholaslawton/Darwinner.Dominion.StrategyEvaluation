@@ -25,8 +25,8 @@ updateTests = describe "update" $ do
       length (supply (update (PlaceCardInSupply card) (PreparingSupply ps cards))) == length cards + 1
 
   describe "add card to deck of player" $
-    it "adds card to deck of player" $ property $ \(PlayersAndSelectedPlayer ps pid) ->
-      any ((== pid) . playerId) ps
+    it "adds card to deck of player" $ property $ \(PlayersAndSelectedPlayer ps pid) cards card ->
+      any ((== pid) . playerId) (players (update (AddCardToDeck pid card) (PreparingDecks ps cards)))
 
 isPreparingSupply :: GameState -> Bool
 isPreparingSupply (PreparingSupply _ _) = True
