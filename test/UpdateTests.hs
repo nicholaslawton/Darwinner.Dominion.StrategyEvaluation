@@ -28,7 +28,7 @@ updateTests = describe "update" $ do
 
   describe "add card to deck of player" $
     it "adds card to deck of player" $ property $ \(PlayersAndSelectedPlayer ps pid) cards card ->
-      fmap ((>0) . length . deck) (findPlayer pid (players (update (AddCardToDeck pid card) (PreparingDecks ps cards)))) == Just True
+      fmap (length . deck) (findPlayer pid (players (update (AddCardToDeck pid card) (PreparingDecks ps cards)))) == fmap ((+1) . length . deck) (findPlayer pid ps)
         where
           findPlayer :: PlayerId -> [Player] -> Maybe Player
           findPlayer pid = find ((==) pid . playerId)
