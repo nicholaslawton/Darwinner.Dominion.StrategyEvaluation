@@ -28,7 +28,10 @@ updateTests = describe "update" $ do
 
   describe "add card to deck of player" $
     it "adds card to deck of player" $ property $ \(PlayersAndSelectedPlayer ps pid) cards card ->
-      fmap ((>0) . length . deck) (find ((== pid) . playerId) (players (update (AddCardToDeck pid card) (PreparingDecks ps cards)))) == Just True
+      fmap ((>0) . length . deck) (findPlayer pid (players (update (AddCardToDeck pid card) (PreparingDecks ps cards)))) == Just True
+        where
+          findPlayer :: PlayerId -> [Player] -> Maybe Player
+          findPlayer pid = find ((==) pid . playerId)
 
 isPreparingSupply :: GameState -> Bool
 isPreparingSupply (PreparingSupply _ _) = True
