@@ -25,9 +25,11 @@ gamePreparationTests = describe "game preparation" $ do
     (playerIds . mapMaybe playerAdded . history . prepareGame seed) params == playerIds candidates
 
   it "places treasure and victory cards in supply" $ property $ 
-    (== expected) . intersect expected . nub . mapMaybe cardPlacedInSupply . history . uncurry prepareGame
-      where
-        expected = [Copper, Silver, Gold, Estate, Duchy, Province]
+    let expected = [Copper, Silver, Gold, Estate, Duchy, Province]
+    in (==) expected . intersect expected . nub . mapMaybe cardPlacedInSupply . history . uncurry prepareGame
+
+  it "adds a card to a deck" $ property $
+    elem Copper . mapMaybe cardAddedToDeck . history . uncurry prepareGame
 
 prepareGame :: Int -> EvaluationParameters -> Game
 prepareGame seed params = execUntil prepared params (Game.new seed)
@@ -48,3 +50,7 @@ playerAdded _ = Nothing
 cardPlacedInSupply :: Command -> Maybe Card
 cardPlacedInSupply (PlaceCardInSupply card) = Just card
 cardPlacedInSupply _ = Nothing
+
+cardAddedToDeck :: Command -> Maybe Card
+cardAddedToDeck (AddCardToDeck _ card) = Just card
+cardAddedToDeck _ = Nothing
