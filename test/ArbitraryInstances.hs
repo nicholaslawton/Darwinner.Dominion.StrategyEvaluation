@@ -58,3 +58,13 @@ validPlayers :: ValidPlayers -> [Player]
 validPlayers (TwoPlayers p1 p2) = [p1, p2]
 validPlayers (ThreePlayers p1 p2 p3) = [p1, p2, p3]
 validPlayers (FourPlayers p1 p2 p3 p4) = [p1, p2, p3, p4]
+
+data PlayersAndSelectedPlayer = PlayersAndSelectedPlayer [Player] PlayerId
+  deriving (Eq, Show)
+
+instance Arbitrary PlayersAndSelectedPlayer where
+  arbitrary = suchThat arbitrary (not . null)
+    >>= \s -> PlayersAndSelectedPlayer s <$> selectPlayer s
+    where
+      selectPlayer :: [Player] -> Gen PlayerId
+      selectPlayer = elements . fmap playerId

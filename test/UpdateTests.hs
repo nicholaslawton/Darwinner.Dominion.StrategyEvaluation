@@ -3,8 +3,9 @@ module UpdateTests where
 import Update
 import Command
 import GameState
+import Player
 
-import ArbitraryInstances()
+import ArbitraryInstances
 import Test.Hspec
 import Test.QuickCheck
 
@@ -22,6 +23,10 @@ updateTests = describe "update" $ do
   describe "place card in supply" $
     it "adds card" $ property $ \ps cards card ->
       length (supply (update (PlaceCardInSupply card) (PreparingSupply ps cards))) == length cards + 1
+
+  describe "add card to deck of player" $
+    it "adds card to deck of player" $ property $ \(PlayersAndSelectedPlayer ps pid) ->
+      any ((== pid) . playerId) ps
 
 isPreparingSupply :: GameState -> Bool
 isPreparingSupply (PreparingSupply _ _) = True
