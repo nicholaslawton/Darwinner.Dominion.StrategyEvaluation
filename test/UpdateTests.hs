@@ -5,6 +5,8 @@ import Command
 import GameState
 import Player
 
+import Data.List
+
 import ArbitraryInstances
 import Test.Hspec
 import Test.QuickCheck
@@ -26,7 +28,7 @@ updateTests = describe "update" $ do
 
   describe "add card to deck of player" $
     it "adds card to deck of player" $ property $ \(PlayersAndSelectedPlayer ps pid) cards card ->
-      any ((== pid) . playerId) (players (update (AddCardToDeck pid card) (PreparingDecks ps cards)))
+      fmap ((>0) . length . deck) (find ((== pid) . playerId) (players (update (AddCardToDeck pid card) (PreparingDecks ps cards)))) == Just True
 
 isPreparingSupply :: GameState -> Bool
 isPreparingSupply (PreparingSupply _ _) = True
