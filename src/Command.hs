@@ -7,7 +7,7 @@ import Card
 
 data Command
   = Noop
-  | AddPlayer Player
+  | AddPlayer PlayerId 
   | PlayersReady
   | PlaceCardInSupply Card
   | SupplyReady

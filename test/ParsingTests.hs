@@ -7,6 +7,7 @@ import Parsing
 import EvaluationParameters
 import Card
 import Strategy
+import Candidate
 import Player
 
 import Data.ByteString (ByteString)
@@ -25,8 +26,8 @@ parsingTests = describe "parseEvaluationParameters" $ do
           }
         |] :: ByteString)
       `shouldBe` Right (EvaluationParameters
-        [ Player.new (PlayerId "first") (Strategy [Province, Gold, Duchy, Silver, Estate])
-        , Player.new (PlayerId "second") (Strategy [Gold, Silver, Copper])
+        [ Candidate (PlayerId "first") (Strategy [Province, Gold, Duchy, Silver, Estate])
+        , Candidate (PlayerId "second") (Strategy [Gold, Silver, Copper])
         ])
   
   it "rejects a single player" $
@@ -59,4 +60,4 @@ parsingTests = describe "parseEvaluationParameters" $ do
             ]
           }
         |] :: ByteString)
-      `shouldBe` Left (ParseError "Duplicate player identifiers")
+      `shouldBe` Left (ParseError "Duplicate candidate identifiers")

@@ -1,7 +1,7 @@
 module EvaluationParameters
   (EvaluationParameters(..)) where
 
-import Player
+import Candidate
 
-data EvaluationParameters = EvaluationParameters [Player]
+data EvaluationParameters = EvaluationParameters [Candidate]
   deriving (Eq, Show)

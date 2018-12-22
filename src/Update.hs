@@ -6,15 +6,15 @@ import Player
 import Card
 
 update :: Command -> GameState -> GameState
-update (AddPlayer player) = addPlayer player
+update (AddPlayer pid) = addPlayer pid
 update PlayersReady = beginPreparingSupply
 update (PlaceCardInSupply card) = placeCardInSupply card
 update SupplyReady = beginPreparingDecks
 update (AddCardToDeck pid card) = addCardToDeck pid card
 update Noop = const Prepared
 
-addPlayer :: Player -> GameState -> GameState
-addPlayer player (New ps) = New $ player : ps
+addPlayer :: PlayerId -> GameState -> GameState
+addPlayer pid (New ps) = New $ Player.new pid : ps
 addPlayer _ _ = error "A player may not be added after preparation of the game has commenced"
 
 beginPreparingSupply :: GameState -> GameState

@@ -7,6 +7,7 @@ import Update
 import Player
 import Command
 import EvaluationParameters
+import Candidate
 
 import Data.Maybe
 import Control.Monad
@@ -31,8 +32,8 @@ apply command = recordCommand command . Game.mapState (update command)
 nextCommand :: EvaluationParameters -> GameState -> Command
 nextCommand (EvaluationParameters candidates) (New ps) = fromMaybe PlayersReady $ AddPlayer <$> nextPlayer
   where
-    nextPlayer = listToMaybe $ filter (not . playerInGame) candidates
-    playerInGame player = playerId player `elem` (playerId <$> ps)
+    nextPlayer = listToMaybe $ filter (not . inGame) $ candidateId <$> candidates
+    inGame cid = elem cid (playerId <$> ps)
 nextCommand (EvaluationParameters candidates) (PreparingSupply _ cards)
   | length (filter (== Copper) cards) < 60 - length candidates * 7 = PlaceCardInSupply Copper
   | length (filter (== Silver) cards) < 40 = PlaceCardInSupply Silver

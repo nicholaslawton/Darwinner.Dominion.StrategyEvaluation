@@ -7,6 +7,7 @@ import Card
 import Command
 import Engine
 import EvaluationParameters
+import Candidate
 
 import Data.List
 import Data.Maybe
@@ -22,7 +23,7 @@ gamePreparationTests :: SpecWith ()
 gamePreparationTests = describe "game preparation" $ do
 
   it "adds all players" $ property $ \seed (params@(EvaluationParameters candidates)) ->
-    (playerIds . mapMaybe playerAdded . history . prepareGame seed) params == playerIds candidates
+    (mapMaybe playerAdded . history . prepareGame seed) params == candidateIds candidates
 
   it "places treasure and victory cards in supply" $ property $ 
     let expected = [Copper, Silver, Gold, Estate, Duchy, Province]
@@ -40,11 +41,11 @@ execUntil predicate parameters = execState $ runReaderT (Engine.runUntil predica
 prepared :: Game -> Bool
 prepared = liftA2 (||) ((== Prepared) . Game.state) ((>200) . length . Game.history)
 
-playerIds :: [Player] -> [PlayerId]
-playerIds = sort . nub . fmap playerId
+candidateIds :: [Candidate] -> [PlayerId]
+candidateIds = sort . nub . fmap candidateId
 
-playerAdded :: Command -> Maybe Player
-playerAdded (AddPlayer player) = Just player
+playerAdded :: Command -> Maybe PlayerId
+playerAdded (AddPlayer pid) = Just pid
 playerAdded _ = Nothing
 
 cardPlacedInSupply :: Command -> Maybe Card

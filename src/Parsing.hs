@@ -6,6 +6,7 @@ module Parsing
 import Card
 import Strategy
 import Player
+import Candidate
 import EvaluationParameters
 
 import Control.Applicative
@@ -23,17 +24,17 @@ parse :: ByteString -> Either ParseError EvaluationParameters
 parse = toEither . parseByteString parser mempty
 
 validatePlayerCount :: EvaluationParameters -> Either ParseError EvaluationParameters
-validatePlayerCount (EvaluationParameters players) =
-  case length players of
+validatePlayerCount (EvaluationParameters candidates) =
+  case length candidates of
     x | x < 2 -> Left $ ParseError "Insufficient number of players (minimum two)"
     x | x > 4 -> Left $ ParseError "Too many players (maximum four)"
-    _         -> Right $ EvaluationParameters players
+    _         -> Right $ EvaluationParameters candidates
 
 validatePlayerIdentifiers :: EvaluationParameters -> Either ParseError EvaluationParameters
-validatePlayerIdentifiers (EvaluationParameters players) = 
-  if containsDuplicates $ playerId <$> players
-  then Left $ ParseError "Duplicate player identifiers"
-  else Right $ EvaluationParameters players
+validatePlayerIdentifiers (EvaluationParameters candidates) = 
+  if containsDuplicates $ candidateId <$> candidates
+  then Left $ ParseError "Duplicate candidate identifiers"
+  else Right $ EvaluationParameters candidates
     where
       containsDuplicates = liftA2 (/=) length (length . nub)
 
@@ -42,14 +43,14 @@ parser = whiteSpace *> evaluationParameters <* eof
 
 evaluationParameters :: Parser EvaluationParameters
 evaluationParameters = braces $
-  field "players" $ EvaluationParameters <$> list player
+  field "players" $ EvaluationParameters <$> list candidate
 
-player :: Parser Player
-player = braces $
-  liftA2 Player.new (field "id" playerIdParser) (token (char ',') *> field "strategy" strategyParser)
+candidate :: Parser Candidate
+candidate = braces $
+  liftA2 Candidate (field "id" idParser) (token (char ',') *> field "strategy" strategyParser)
 
-playerIdParser :: Parser PlayerId
-playerIdParser = PlayerId <$> token (some letter)
+idParser :: Parser PlayerId
+idParser = PlayerId <$> token (some letter)
 
 strategyParser :: Parser Strategy
 strategyParser = Strategy <$> list card
