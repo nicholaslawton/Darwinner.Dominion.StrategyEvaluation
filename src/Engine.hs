@@ -46,6 +46,7 @@ nextCommand (EvaluationParameters candidates) (PreparingSupply _ cards)
       numVictoryCards = if length candidates == 2 then 8 else 12
 nextCommand _ (PreparingDecks (p:_) _)
   | length (filter (== Copper) (deck p)) < 7 = AddCardToDeck (playerId p) Copper
+  | length (filter (== Estate) (deck p)) < 3 = AddCardToDeck (playerId p) Estate
   | otherwise = Noop
 nextCommand _ (PreparingDecks [] _) = error "Cannot prepare decks for game with no players"
 nextCommand _ Prepared = Noop

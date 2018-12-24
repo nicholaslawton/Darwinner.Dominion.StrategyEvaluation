@@ -29,8 +29,8 @@ gamePreparationTests = describe "game preparation" $ do
     let expected = [Copper, Silver, Gold, Estate, Duchy, Province]
     in (===) expected . intersect expected . nub . mapMaybe cardPlacedInSupply . history . uncurry prepareGame
 
-  it "adds 7 coppers to a deck" $ property $
-    (=== [(Copper, 7)]) . countEach . mapMaybe cardAddedToDeck . history . uncurry prepareGame
+  it "adds 3 estates and 7 coppers to a deck" $ property $
+    (=== [(Estate, 3), (Copper, 7)]) . counts . mapMaybe cardAddedToDeck . history . uncurry prepareGame
 
 prepareGame :: Int -> EvaluationParameters -> Game
 prepareGame seed params = execUntil prepared params (Game.new seed)
@@ -41,8 +41,8 @@ execUntil predicate parameters = execState $ runReaderT (Engine.runUntil predica
 prepared :: Game -> Bool
 prepared = liftA2 (||) ((== Prepared) . Game.state) ((>200) . length . Game.history)
 
-countEach :: Eq a => [a] -> [(a, Int)]
-countEach  = fmap (liftA2 (,) head length) . group
+counts :: Eq a => [a] -> [(a, Int)]
+counts = sortOn snd . fmap (liftA2 (,) head length) . group
 
 candidateIds :: [Candidate] -> [PlayerId]
 candidateIds = sort . nub . fmap candidateId
