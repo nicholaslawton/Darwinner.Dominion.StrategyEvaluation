@@ -23,14 +23,14 @@ gamePreparationTests :: SpecWith ()
 gamePreparationTests = describe "game preparation" $ do
 
   it "adds all players" $ property $ \seed (params@(EvaluationParameters candidates)) ->
-    (mapMaybe playerAdded . history . prepareGame seed) params == candidateIds candidates
+    (mapMaybe playerAdded . history . prepareGame seed) params === candidateIds candidates
 
   it "places treasure and victory cards in supply" $ property $ 
     let expected = [Copper, Silver, Gold, Estate, Duchy, Province]
-    in (==) expected . intersect expected . nub . mapMaybe cardPlacedInSupply . history . uncurry prepareGame
+    in (===) expected . intersect expected . nub . mapMaybe cardPlacedInSupply . history . uncurry prepareGame
 
   it "adds 7 coppers to a deck" $ property $
-    (==7) . length . filter (== Copper) . mapMaybe cardAddedToDeck . history . uncurry prepareGame
+    (=== [(Copper, 7)]) . countEach . mapMaybe cardAddedToDeck . history . uncurry prepareGame
 
 prepareGame :: Int -> EvaluationParameters -> Game
 prepareGame seed params = execUntil prepared params (Game.new seed)
@@ -40,6 +40,9 @@ execUntil predicate parameters = execState $ runReaderT (Engine.runUntil predica
 
 prepared :: Game -> Bool
 prepared = liftA2 (||) ((== Prepared) . Game.state) ((>200) . length . Game.history)
+
+countEach :: Eq a => [a] -> [(a, Int)]
+countEach  = fmap (liftA2 (,) head length) . group
 
 candidateIds :: [Candidate] -> [PlayerId]
 candidateIds = sort . nub . fmap candidateId
