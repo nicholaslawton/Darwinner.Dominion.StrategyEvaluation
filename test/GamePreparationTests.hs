@@ -8,8 +8,6 @@ import Engine
 import EvaluationParameters
 import Candidate
 
-import ListExtension
-
 import Data.List
 import Data.Map (Map, fromList, fromListWith)
 import Data.Maybe
@@ -31,17 +29,9 @@ gamePreparationTests = describe "game preparation" $ do
     let expected = [Copper, Silver, Gold, Estate, Duchy, Province]
     in (===) expected . intersect expected . nub . mapMaybe cardPlacedInSupply . history . uncurry prepareGame
 
-  it "gives 7 coppers to each player" $ property $ \seed (params@(EvaluationParameters candidates)) ->
-    fromList (flip (,) 7 <$> candidateIds candidates)
-      === (fmap length . categorise fst snd . filter ((==) Copper . snd) . mapMaybe cardAddedToDeck . history . prepareGame seed) params
+  it "gives 7 coppers to each player" $ property $ givesCardsToEachPlayer 7 Copper
 
-  it "gives 3 estates per player" $ property $ \seed (params@(EvaluationParameters candidates)) ->
-    length candidates * 3
-      === (count Estate . mapMaybe (fmap snd . cardAddedToDeck) . history . prepareGame seed) params
-
-  it "gives 10 cards to each player" $ property $ \seed (params@(EvaluationParameters candidates)) ->
-    fromList (flip (,) 10 <$> candidateIds candidates)
-      === (fmap length . categorise fst snd . mapMaybe cardAddedToDeck . history . prepareGame seed) params
+  it "gives 3 estates to each player" $ property $ givesCardsToEachPlayer 3 Estate
 
 prepareGame :: Int -> EvaluationParameters -> Game
 prepareGame seed params = execUntil prepared params (Game.new seed)
@@ -69,3 +59,15 @@ cardPlacedInSupply _ = Nothing
 cardAddedToDeck :: Command -> Maybe (CandidateId, Card)
 cardAddedToDeck (AddCardToDeck pid card) = Just (pid, card)
 cardAddedToDeck _ = Nothing
+
+givesCardsToEachPlayer :: Int -> Card -> Int -> EvaluationParameters -> Property
+givesCardsToEachPlayer n card seed (params@(EvaluationParameters candidates)) =
+  fromList (flip (,) n . candidateId <$> candidates)
+    ===
+      ( fmap length
+      . categorise fst snd
+      . filter ((==) card . snd)
+      . mapMaybe cardAddedToDeck
+      . history
+      . prepareGame seed
+      ) params
