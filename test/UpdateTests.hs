@@ -40,6 +40,11 @@ updateTests = describe "update" $ do
     it "begins drawing initial hands" $ property $ \ps cards ->
       isDrawingInitialHands $ update DecksReady $ PreparingDecks ps cards
 
+  describe "draw card" $
+    it "adds card to hand" $ property $ \(CardInDeck ps pid card) cards ->
+      fmap (length . hand) (findPlayer pid (players (update (DrawCard pid card) (DrawingInitialHands ps cards))))
+        == fmap ((+1) . length . hand) (findPlayer pid ps)
+
 findPlayer :: CandidateId -> [Player] -> Maybe Player
 findPlayer pid = find ((==) pid . playerId)
 

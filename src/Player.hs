@@ -2,6 +2,7 @@ module Player
   ( Player(..)
   , new
   , mapDeck
+  , mapHand
   ) where
 
 import Candidate
@@ -19,3 +20,6 @@ new pid = Player pid [] []
 
 mapDeck :: ([Card] -> [Card]) -> Player -> Player
 mapDeck f p = p { deck = f (deck p) }
+
+mapHand :: ([Card] -> [Card]) -> Player -> Player
+mapHand f p = p { hand = f (hand p) }

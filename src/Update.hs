@@ -13,6 +13,7 @@ update (PlaceCardInSupply card) = placeCardInSupply card
 update SupplyReady = beginPreparingDecks
 update (AddCardToDeck pid card) = addCardToDeck pid card
 update DecksReady = beginDrawingInitialHands
+update (DrawCard pid card) = drawCard pid card
 update Noop = const Prepared
 
 addPlayer :: CandidateId -> GameState -> GameState
@@ -38,6 +39,10 @@ addCardToDeck _ _ _ = error "A card may only be added to a deck during game prep
 beginDrawingInitialHands :: GameState -> GameState
 beginDrawingInitialHands (PreparingDecks ps cards) = DrawingInitialHands ps cards
 beginDrawingInitialHands _ = error "Drawing initial hands must occur after decks have been prepared"
+
+drawCard :: CandidateId -> Card -> GameState -> GameState
+drawCard pid card (DrawingInitialHands ps cards) = DrawingInitialHands (mapPlayer pid (mapHand (card :)) ps) cards
+drawCard _ _ _ = error "A card may only be drawn while players are drawing their initial hands"
 
 mapPlayer :: CandidateId -> (Player -> Player) -> [Player] -> [Player]
 mapPlayer pid f = fmap (\p -> if playerId p == pid then f p else id p)

@@ -68,7 +68,18 @@ data PlayersAndSelectedPlayer = PlayersAndSelectedPlayer [Player] CandidateId
 
 instance Arbitrary PlayersAndSelectedPlayer where
   arbitrary = suchThat arbitrary (not . null)
-    >>= \s -> PlayersAndSelectedPlayer s <$> selectPlayer s
+    >>= \ps -> PlayersAndSelectedPlayer ps <$> selectPlayer ps
     where
       selectPlayer :: [Player] -> Gen CandidateId
       selectPlayer = elements . fmap playerId
+
+data CardInDeck = CardInDeck [Player] CandidateId Card
+  deriving (Eq, Show)
+
+instance Arbitrary CardInDeck where
+  arbitrary = suchThat arbitrary (not . null . concatMap deck)
+    >>= \ps -> uncurry (CardInDeck ps) <$> selectPlayerAndCard ps
+    where
+      selectPlayerAndCard :: [Player] -> Gen (CandidateId, Card)
+      selectPlayerAndCard ps = (elements . filter (not . null . deck)) ps
+        >>= \p -> (,) (playerId p) <$> (elements . deck) p
