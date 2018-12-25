@@ -66,9 +66,7 @@ cardAddedToDeck (AddCardToDeck pid card) = Just (pid, card)
 cardAddedToDeck _ = Nothing
 
 cardPutInPlay :: Command -> Maybe Card
-cardPutInPlay (PlaceCardInSupply card) = Just card
-cardPutInPlay (AddCardToDeck _ card) = Just card
-cardPutInPlay _ = Nothing
+cardPutInPlay = liftA2 (<|>) cardPlacedInSupply (fmap snd . cardAddedToDeck)
 
 givesCardsToEachPlayer :: Int -> Card -> Int -> EvaluationParameters -> Property
 givesCardsToEachPlayer n card seed (params@(EvaluationParameters candidates)) =
