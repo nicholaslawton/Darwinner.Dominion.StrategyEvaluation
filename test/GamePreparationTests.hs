@@ -30,7 +30,15 @@ gamePreparationTests = describe "game preparation" $ do
     in (===) expected . intersect expected . nub . mapMaybe cardPlacedInSupply . history . uncurry prepareGame
 
   it "adds 3 estates and 7 coppers to a deck" $ property $
-    (=== [(Estate, 3), (Copper, 7)]) . counts . mapMaybe (fmap snd . cardAddedToDeck) . history . uncurry prepareGame
+    (=== [(Estate, 3), (Copper, 7)])
+      . counts
+      . fmap snd
+      . maximumBy (\a b -> compare (length a) (length b))
+      . groupBy (\a b -> fst a == fst b)
+      . sortOn fst
+      . mapMaybe cardAddedToDeck
+      . history
+      . uncurry prepareGame
 
   it "prepares deck of only one player" $ property $ \seed (params@(EvaluationParameters _candidates)) ->
     (length . sort . nub . mapMaybe (fmap fst . cardAddedToDeck) . history . prepareGame seed) params === 1 --candidatesIds candidates
