@@ -12,4 +12,5 @@ data Command
   | PlaceCardInSupply Card
   | SupplyReady
   | AddCardToDeck CandidateId Card
+  | DecksReady
   deriving (Eq, Show)

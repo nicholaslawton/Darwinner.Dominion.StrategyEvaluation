@@ -54,4 +54,5 @@ nextCommand _ (PreparingDecks ps _) = fromMaybe Noop $ uncurry AddCardToDeck <$>
     recipientNeedingCard :: Card -> Int -> Maybe (CandidateId, Card)
     recipientNeedingCard card target =
       flip (,) card . playerId <$> listToMaybe (filter ((< target) . count card . deck) ps)
+nextCommand _ (DrawingInitialHands _ _) = Noop
 nextCommand _ Prepared = Noop

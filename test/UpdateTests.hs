@@ -35,9 +35,13 @@ updateTests = describe "update" $ do
     it "adds card to deck of player" $ property $ \(PlayersAndSelectedPlayer ps pid) cards card ->
       fmap (length . deck) (findPlayer pid (players (update (AddCardToDeck pid card) (PreparingDecks ps cards))))
         == fmap ((+1) . length . deck) (findPlayer pid ps)
-          where
-            findPlayer :: CandidateId -> [Player] -> Maybe Player
-            findPlayer pid = find ((==) pid . playerId)
+
+  describe "decks ready" $
+    it "begins drawing initial hands" $ property $ \ps cards ->
+      isDrawingInitialHands $ update DecksReady $ PreparingDecks ps cards
+
+findPlayer :: CandidateId -> [Player] -> Maybe Player
+findPlayer pid = find ((==) pid . playerId)
 
 isPreparingSupply :: GameState -> Bool
 isPreparingSupply (PreparingSupply _ _) = True
@@ -46,3 +50,7 @@ isPreparingSupply _ = False
 isPreparingDecks :: GameState -> Bool
 isPreparingDecks (PreparingDecks _ _) = True
 isPreparingDecks _ = False
+
+isDrawingInitialHands :: GameState -> Bool
+isDrawingInitialHands (DrawingInitialHands _ _) = True
+isDrawingInitialHands _ = False
