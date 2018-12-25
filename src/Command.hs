@@ -2,7 +2,7 @@ module Command
   ( Command(..)
   ) where
 
-import Player
+import Candidate
 import Card
 
 data Command

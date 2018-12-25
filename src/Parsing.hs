@@ -5,7 +5,6 @@ module Parsing
 
 import Card
 import Strategy
-import Player
 import Candidate
 import EvaluationParameters
 

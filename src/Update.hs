@@ -1,5 +1,6 @@
 module Update (update) where
 
+import Candidate
 import Command
 import GameState
 import Player

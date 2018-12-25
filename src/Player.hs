@@ -1,10 +1,10 @@
 module Player
   ( Player(..)
-  , PlayerId(..)
   , new
   , mapDeck
   ) where
 
+import Candidate
 import Card
 
 data Player = Player
@@ -12,9 +12,6 @@ data Player = Player
   , deck :: [Card]
   }
   deriving (Eq, Show)
-
-newtype PlayerId = PlayerId String
-  deriving (Eq, Ord, Show)
 
 new :: PlayerId -> Player
 new = flip Player []

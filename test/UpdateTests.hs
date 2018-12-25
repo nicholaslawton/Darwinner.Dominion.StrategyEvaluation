@@ -1,6 +1,7 @@
 module UpdateTests where
 
 import Update
+import Candidate
 import Command
 import GameState
 import Player
