@@ -10,6 +10,7 @@ import EvaluationParameters
 import Candidate
 
 import Data.Maybe
+import Control.Applicative
 import Control.Monad
 import Control.Monad.Trans.Reader
 import Control.Monad.Trans.State
@@ -44,13 +45,10 @@ nextCommand (EvaluationParameters candidates) (PreparingSupply _ cards)
   | otherwise = SupplyReady
     where
       numVictoryCards = if length candidates == 2 then 8 else 12
-nextCommand _ (PreparingDecks (p:ps) _)
-  | count Copper (deck p) < 6 * (length ps + 1) + 1 = AddCardToDeck (playerId p) Copper
-  | count Estate (deck p) < 3 * (length ps + 1) = AddCardToDeck (playerId p) Estate
-  | otherwise = fromMaybe Noop $ flip AddCardToDeck Copper . playerId <$> playerWithEmptyDeck
+nextCommand _ (PreparingDecks ps _) = fromMaybe Noop $ uncurry AddCardToDeck <$> (recipientAndCard Copper 7 <|> recipientAndCard Estate 3)
     where
-      playerWithEmptyDeck = listToMaybe $ filter (null . deck) ps
-nextCommand _ (PreparingDecks [] _) = error "Cannot prepare decks for game with no players"
+      recipientAndCard :: Card -> Int -> Maybe (PlayerId, Card)
+      recipientAndCard card target = (flip (,) card) <$> listToMaybe (fmap playerId (filter ((< target) . count card . deck) ps))
 nextCommand _ Prepared = Noop
 
 count :: Eq a => a -> [a] -> Int

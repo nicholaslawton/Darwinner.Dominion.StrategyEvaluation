@@ -10,6 +10,7 @@ import EvaluationParameters
 import Candidate
 
 import Data.List
+import Data.Map (Map, fromList, fromListWith)
 import Data.Maybe
 import Control.Applicative
 import Control.Monad.Trans.Reader
@@ -35,8 +36,8 @@ gamePreparationTests = describe "game preparation" $ do
   it "gives 3 estates per player" $ property $ \seed (params@(EvaluationParameters candidates)) ->
     length candidates * 3 === length (filter (== Estate) (mapMaybe (fmap snd . cardAddedToDeck) (history (prepareGame seed params))))
 
-  it "prepares deck of each player" $ property $ \seed (params@(EvaluationParameters candidates)) ->
-    (sort . nub . mapMaybe (fmap fst . cardAddedToDeck) . history . prepareGame seed) params === candidateIds candidates
+  it "gives 10 cards to each player" $ property $ \seed (params@(EvaluationParameters candidates)) ->
+    (fromList (flip (,) 10 <$> candidateIds candidates)) === (length <$> categorise fst snd (mapMaybe cardAddedToDeck (history (prepareGame seed params))))
 
 prepareGame :: Int -> EvaluationParameters -> Game
 prepareGame seed params = execUntil prepared params (Game.new seed)
@@ -47,8 +48,8 @@ execUntil predicate parameters = execState $ runReaderT (Engine.runUntil predica
 prepared :: Game -> Bool
 prepared = liftA2 (||) ((== Prepared) . Game.state) ((>200) . length . Game.history)
 
-counts :: Eq a => [a] -> [(a, Int)]
-counts = sortOn snd . fmap (liftA2 (,) head length) . group
+categorise :: Ord k => (a -> k) -> (a -> v) -> [a] -> Map k [v]
+categorise key value xs = fromListWith (++) $ liftA2 (,) key ((: []) . value) <$> xs
 
 candidateIds :: [Candidate] -> [PlayerId]
 candidateIds = sort . nub . fmap candidateId

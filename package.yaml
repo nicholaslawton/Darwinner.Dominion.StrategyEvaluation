@@ -56,3 +56,4 @@ tests:
     - hspec
     - raw-strings-qq
     - QuickCheck
+    - containers
