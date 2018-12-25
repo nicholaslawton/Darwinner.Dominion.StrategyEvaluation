@@ -32,6 +32,9 @@ gamePreparationTests = describe "game preparation" $ do
   it "adds 3 estates and 7 coppers to a deck" $ property $
     (=== [(Estate, 3), (Copper, 7)]) . counts . mapMaybe (fmap snd . cardAddedToDeck) . history . uncurry prepareGame
 
+  it "prepares deck of only one player" $ property $ \seed (params@(EvaluationParameters _candidates)) ->
+    (length . sort . nub . mapMaybe (fmap fst . cardAddedToDeck) . history . prepareGame seed) params === 1 --candidatesIds candidates
+
 prepareGame :: Int -> EvaluationParameters -> Game
 prepareGame seed params = execUntil prepared params (Game.new seed)
 
