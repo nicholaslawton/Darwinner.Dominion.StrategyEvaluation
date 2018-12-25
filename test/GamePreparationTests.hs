@@ -40,8 +40,8 @@ gamePreparationTests = describe "game preparation" $ do
       . history
       . uncurry prepareGame
 
-  it "prepares deck of only one player" $ property $ \seed (params@(EvaluationParameters _candidates)) ->
-    (length . sort . nub . mapMaybe (fmap fst . cardAddedToDeck) . history . prepareGame seed) params === 1 --candidatesIds candidates
+  it "prepares deck of each player" $ property $ \seed (params@(EvaluationParameters candidates)) ->
+    (sort . nub . mapMaybe (fmap fst . cardAddedToDeck) . history . prepareGame seed) params === candidateIds candidates
 
 prepareGame :: Int -> EvaluationParameters -> Game
 prepareGame seed params = execUntil prepared params (Game.new seed)

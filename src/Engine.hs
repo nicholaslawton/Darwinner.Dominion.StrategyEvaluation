@@ -44,12 +44,12 @@ nextCommand (EvaluationParameters candidates) (PreparingSupply _ cards)
   | otherwise = SupplyReady
     where
       numVictoryCards = if length candidates == 2 then 8 else 12
-nextCommand _ (PreparingDecks (p:_) _)
+nextCommand _ (PreparingDecks (p:ps) _)
   | count Copper (deck p) < 7 = AddCardToDeck (playerId p) Copper
   | count Estate (deck p) < 3 = AddCardToDeck (playerId p) Estate
-  | otherwise = fromMaybe Noop $ flip AddCardToDeck Copper <$> playerWithEmptyDeck
+  | otherwise = fromMaybe Noop $ flip AddCardToDeck Copper . playerId <$> playerWithEmptyDeck
     where
-      playerWithEmptyDeck = Nothing --listToMaybe $ filter (null . deck) ps
+      playerWithEmptyDeck = listToMaybe $ filter (null . deck) ps
 nextCommand _ (PreparingDecks [] _) = error "Cannot prepare decks for game with no players"
 nextCommand _ Prepared = Noop
 
