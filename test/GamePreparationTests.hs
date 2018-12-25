@@ -30,7 +30,7 @@ gamePreparationTests = describe "game preparation" $ do
     in (===) expected . intersect expected . nub . mapMaybe cardPlacedInSupply . history . uncurry prepareGame
 
   it "adds 3 estates and 7 coppers to a deck" $ property $
-    (=== [(Estate, 3), (Copper, 7)]) . counts . mapMaybe cardAddedToDeck . history . uncurry prepareGame
+    (=== [(Estate, 3), (Copper, 7)]) . counts . mapMaybe (fmap snd . cardAddedToDeck) . history . uncurry prepareGame
 
 prepareGame :: Int -> EvaluationParameters -> Game
 prepareGame seed params = execUntil prepared params (Game.new seed)
@@ -55,6 +55,6 @@ cardPlacedInSupply :: Command -> Maybe Card
 cardPlacedInSupply (PlaceCardInSupply card) = Just card
 cardPlacedInSupply _ = Nothing
 
-cardAddedToDeck :: Command -> Maybe Card
-cardAddedToDeck (AddCardToDeck _ card) = Just card
+cardAddedToDeck :: Command -> Maybe (PlayerId, Card)
+cardAddedToDeck (AddCardToDeck pid card) = Just (pid, card)
 cardAddedToDeck _ = Nothing
