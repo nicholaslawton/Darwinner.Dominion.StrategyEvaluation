@@ -23,7 +23,7 @@ gamePreparationTests :: SpecWith ()
 gamePreparationTests = describe "game preparation" $ do
 
   it "adds all players" $ property $ \seed (params@(EvaluationParameters candidates)) ->
-    (mapMaybe playerAdded . history . prepareGame seed) params === candidateIds candidates
+    (sort . mapMaybe playerAdded . history . prepareGame seed) params === candidateIds candidates
 
   it "places treasure and victory cards in supply" $ property $ 
     let expected = [Copper, Silver, Gold, Estate, Duchy, Province]
