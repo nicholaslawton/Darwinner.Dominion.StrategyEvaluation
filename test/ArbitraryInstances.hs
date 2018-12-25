@@ -19,7 +19,7 @@ instance Arbitrary Candidate where
   arbitrary = liftA2 Candidate arbitrary arbitrary
 
 instance Arbitrary Player where
-  arbitrary = liftA2 Player arbitrary arbitrary
+  arbitrary = liftA3 Player arbitrary arbitrary arbitrary
 
 instance Arbitrary CandidateId where
   arbitrary = CandidateId <$> arbitrary

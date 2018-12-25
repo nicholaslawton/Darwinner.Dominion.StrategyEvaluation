@@ -10,11 +10,12 @@ import Card
 data Player = Player
   { playerId :: CandidateId
   , deck :: [Card]
+  , hand :: [Card]
   }
   deriving (Eq, Show)
 
 new :: CandidateId -> Player
-new = flip Player []
+new pid = Player pid [] []
 
 mapDeck :: ([Card] -> [Card]) -> Player -> Player
 mapDeck f p = p { deck = f (deck p) }
