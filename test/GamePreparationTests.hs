@@ -8,6 +8,8 @@ import Engine
 import EvaluationParameters
 import Candidate
 
+import ListExtension
+
 import Data.List
 import Data.Map (Map, fromList, fromListWith)
 import Data.Maybe
@@ -32,6 +34,9 @@ gamePreparationTests = describe "game preparation" $ do
   it "gives 7 coppers to each player" $ property $ givesCardsToEachPlayer 7 Copper
 
   it "gives 3 estates to each player" $ property $ givesCardsToEachPlayer 3 Estate
+
+  it "puts all coppers in play" $ property $
+    (===) 60 . count Copper . mapMaybe cardPutInPlay . history . uncurry prepareGame
 
 prepareGame :: Int -> EvaluationParameters -> Game
 prepareGame seed params = execUntil prepared params (Game.new seed)
@@ -59,6 +64,11 @@ cardPlacedInSupply _ = Nothing
 cardAddedToDeck :: Command -> Maybe (CandidateId, Card)
 cardAddedToDeck (AddCardToDeck pid card) = Just (pid, card)
 cardAddedToDeck _ = Nothing
+
+cardPutInPlay :: Command -> Maybe Card
+cardPutInPlay (PlaceCardInSupply card) = Just card
+cardPutInPlay (AddCardToDeck _ card) = Just card
+cardPutInPlay _ = Nothing
 
 givesCardsToEachPlayer :: Int -> Card -> Int -> EvaluationParameters -> Property
 givesCardsToEachPlayer n card seed (params@(EvaluationParameters candidates)) =
