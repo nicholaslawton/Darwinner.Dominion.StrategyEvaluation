@@ -45,7 +45,7 @@ nextCommand (EvaluationParameters candidates) (PreparingSupply _ cards)
     where
       numVictoryCards = if length candidates == 2 then 8 else 12
 nextCommand _ (PreparingDecks (p:ps) _)
-  | count Copper (deck p) < 7 = AddCardToDeck (playerId p) Copper
+  | count Copper (deck p) < 6 * (length ps + 1) + 1 = AddCardToDeck (playerId p) Copper
   | count Estate (deck p) < 3 * (length ps + 1) = AddCardToDeck (playerId p) Estate
   | otherwise = fromMaybe Noop $ flip AddCardToDeck Copper . playerId <$> playerWithEmptyDeck
     where

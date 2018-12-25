@@ -29,6 +29,9 @@ gamePreparationTests = describe "game preparation" $ do
     let expected = [Copper, Silver, Gold, Estate, Duchy, Province]
     in (===) expected . intersect expected . nub . mapMaybe cardPlacedInSupply . history . uncurry prepareGame
 
+  it "gives 7 coppers per player" $ property $ \seed (params@(EvaluationParameters candidates)) ->
+    length candidates * 7 === length (filter (== Copper) (mapMaybe (fmap snd . cardAddedToDeck) (history (prepareGame seed params))))
+
   it "gives 3 estates per player" $ property $ \seed (params@(EvaluationParameters candidates)) ->
     length candidates * 3 === length (filter (== Estate) (mapMaybe (fmap snd . cardAddedToDeck) (history (prepareGame seed params))))
 
