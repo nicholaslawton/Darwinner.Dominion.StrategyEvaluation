@@ -9,6 +9,8 @@ import Command
 import EvaluationParameters
 import Candidate
 
+import ListExtension
+
 import Data.Maybe
 import Control.Applicative
 import Control.Monad
@@ -45,11 +47,11 @@ nextCommand (EvaluationParameters candidates) (PreparingSupply _ cards)
   | otherwise = SupplyReady
     where
       numVictoryCards = if length candidates == 2 then 8 else 12
-nextCommand _ (PreparingDecks ps _) = fromMaybe Noop $ uncurry AddCardToDeck <$> (recipientAndCard Copper 7 <|> recipientAndCard Estate 3)
-    where
-      recipientAndCard :: Card -> Int -> Maybe (PlayerId, Card)
-      recipientAndCard card target = (flip (,) card) <$> listToMaybe (fmap playerId (filter ((< target) . count card . deck) ps))
+nextCommand _ (PreparingDecks ps _) = fromMaybe Noop $ uncurry AddCardToDeck <$> recipientAndCard
+  where
+    recipientAndCard :: Maybe (PlayerId, Card)
+    recipientAndCard = recipientNeedingCard Copper 7 <|> recipientNeedingCard Estate 3
+    recipientNeedingCard :: Card -> Int -> Maybe (PlayerId, Card)
+    recipientNeedingCard card target =
+      flip (,) card . playerId <$> listToMaybe (filter ((< target) . count card . deck) ps)
 nextCommand _ Prepared = Noop
-
-count :: Eq a => a -> [a] -> Int
-count x = length . filter (== x)

@@ -9,6 +9,8 @@ import Engine
 import EvaluationParameters
 import Candidate
 
+import ListExtension
+
 import Data.List
 import Data.Map (Map, fromList, fromListWith)
 import Data.Maybe
@@ -31,13 +33,16 @@ gamePreparationTests = describe "game preparation" $ do
     in (===) expected . intersect expected . nub . mapMaybe cardPlacedInSupply . history . uncurry prepareGame
 
   it "gives 7 coppers per player" $ property $ \seed (params@(EvaluationParameters candidates)) ->
-    length candidates * 7 === length (filter (== Copper) (mapMaybe (fmap snd . cardAddedToDeck) (history (prepareGame seed params))))
+    length candidates * 7
+      === (count Copper . mapMaybe (fmap snd . cardAddedToDeck) . history . prepareGame seed) params
 
   it "gives 3 estates per player" $ property $ \seed (params@(EvaluationParameters candidates)) ->
-    length candidates * 3 === length (filter (== Estate) (mapMaybe (fmap snd . cardAddedToDeck) (history (prepareGame seed params))))
+    length candidates * 3
+      === (count Estate . mapMaybe (fmap snd . cardAddedToDeck) . history . prepareGame seed) params
 
   it "gives 10 cards to each player" $ property $ \seed (params@(EvaluationParameters candidates)) ->
-    (fromList (flip (,) 10 <$> candidateIds candidates)) === (length <$> categorise fst snd (mapMaybe cardAddedToDeck (history (prepareGame seed params))))
+    fromList (flip (,) 10 <$> candidateIds candidates)
+      === (fmap length . categorise fst snd . mapMaybe cardAddedToDeck . history . prepareGame seed) params
 
 prepareGame :: Int -> EvaluationParameters -> Game
 prepareGame seed params = execUntil prepared params (Game.new seed)
