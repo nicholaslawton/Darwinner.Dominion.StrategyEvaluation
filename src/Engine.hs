@@ -35,18 +35,21 @@ nextCommand (EvaluationParameters candidates) (New ps) = fromMaybe PlayersReady 
     nextPlayer = listToMaybe $ filter (not . inGame) $ candidateId <$> candidates
     inGame cid = elem cid (playerId <$> ps)
 nextCommand (EvaluationParameters candidates) (PreparingSupply _ cards)
-  | length (filter (== Copper) cards) < 60 - length candidates * 7 = PlaceCardInSupply Copper
-  | length (filter (== Silver) cards) < 40 = PlaceCardInSupply Silver
-  | length (filter (== Gold) cards) < 30 = PlaceCardInSupply Gold
-  | length (filter (== Estate) cards) < numVictoryCards = PlaceCardInSupply Estate
-  | length (filter (== Duchy) cards) < numVictoryCards = PlaceCardInSupply Duchy
-  | length (filter (== Province) cards) < numVictoryCards = PlaceCardInSupply Province
+  | count Copper cards < 60 - length candidates * 7 = PlaceCardInSupply Copper
+  | count Silver cards < 40 = PlaceCardInSupply Silver
+  | count Gold cards < 30 = PlaceCardInSupply Gold
+  | count Estate cards < numVictoryCards = PlaceCardInSupply Estate
+  | count Duchy cards < numVictoryCards = PlaceCardInSupply Duchy
+  | count Province cards < numVictoryCards = PlaceCardInSupply Province
   | otherwise = SupplyReady
     where
       numVictoryCards = if length candidates == 2 then 8 else 12
 nextCommand _ (PreparingDecks (p:_) _)
-  | length (filter (== Copper) (deck p)) < 7 = AddCardToDeck (playerId p) Copper
-  | length (filter (== Estate) (deck p)) < 3 = AddCardToDeck (playerId p) Estate
+  | count Copper (deck p) < 7 = AddCardToDeck (playerId p) Copper
+  | count Estate (deck p) < 3 = AddCardToDeck (playerId p) Estate
   | otherwise = Noop
 nextCommand _ (PreparingDecks [] _) = error "Cannot prepare decks for game with no players"
 nextCommand _ Prepared = Noop
+
+count :: Eq a => a -> [a] -> Int
+count x = length . filter (== x)
