@@ -25,8 +25,8 @@ parsingTests = describe "parseEvaluationParameters" $ do
           }
         |] :: ByteString)
       `shouldBe` Right (EvaluationParameters
-        [ Candidate (PlayerId "first") (Strategy [Province, Gold, Duchy, Silver, Estate])
-        , Candidate (PlayerId "second") (Strategy [Gold, Silver, Copper])
+        [ Candidate (CandidateId "first") (Strategy [Province, Gold, Duchy, Silver, Estate])
+        , Candidate (CandidateId "second") (Strategy [Gold, Silver, Copper])
         ])
   
   it "rejects a single player" $

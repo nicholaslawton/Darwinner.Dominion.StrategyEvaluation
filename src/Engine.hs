@@ -49,9 +49,9 @@ nextCommand (EvaluationParameters candidates) (PreparingSupply _ cards)
       numVictoryCards = if length candidates == 2 then 8 else 12
 nextCommand _ (PreparingDecks ps _) = fromMaybe Noop $ uncurry AddCardToDeck <$> recipientAndCard
   where
-    recipientAndCard :: Maybe (PlayerId, Card)
+    recipientAndCard :: Maybe (CandidateId, Card)
     recipientAndCard = recipientNeedingCard Copper 7 <|> recipientNeedingCard Estate 3
-    recipientNeedingCard :: Card -> Int -> Maybe (PlayerId, Card)
+    recipientNeedingCard :: Card -> Int -> Maybe (CandidateId, Card)
     recipientNeedingCard card target =
       flip (,) card . playerId <$> listToMaybe (filter ((< target) . count card . deck) ps)
 nextCommand _ Prepared = Noop

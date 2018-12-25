@@ -55,10 +55,10 @@ prepared = liftA2 (||) ((== Prepared) . Game.state) ((>200) . length . Game.hist
 categorise :: Ord k => (a -> k) -> (a -> v) -> [a] -> Map k [v]
 categorise key value xs = fromListWith (++) $ liftA2 (,) key ((: []) . value) <$> xs
 
-candidateIds :: [Candidate] -> [PlayerId]
+candidateIds :: [Candidate] -> [CandidateId]
 candidateIds = sort . nub . fmap candidateId
 
-playerAdded :: Command -> Maybe PlayerId
+playerAdded :: Command -> Maybe CandidateId
 playerAdded (AddPlayer pid) = Just pid
 playerAdded _ = Nothing
 
@@ -66,6 +66,6 @@ cardPlacedInSupply :: Command -> Maybe Card
 cardPlacedInSupply (PlaceCardInSupply card) = Just card
 cardPlacedInSupply _ = Nothing
 
-cardAddedToDeck :: Command -> Maybe (PlayerId, Card)
+cardAddedToDeck :: Command -> Maybe (CandidateId, Card)
 cardAddedToDeck (AddCardToDeck pid card) = Just (pid, card)
 cardAddedToDeck _ = Nothing

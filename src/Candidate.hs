@@ -1,15 +1,15 @@
 module Candidate
   ( Candidate(..)
-  , PlayerId(..)
+  , CandidateId(..)
   ) where
 
 import Strategy
 
 data Candidate = Candidate
-  { candidateId :: PlayerId
+  { candidateId :: CandidateId
   , strategy :: Strategy
   }
   deriving (Eq, Show)
 
-newtype PlayerId = PlayerId String
+newtype CandidateId = CandidateId String
   deriving (Eq, Ord, Show)

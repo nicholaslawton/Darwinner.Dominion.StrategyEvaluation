@@ -21,8 +21,8 @@ instance Arbitrary Candidate where
 instance Arbitrary Player where
   arbitrary = liftA2 Player arbitrary arbitrary
 
-instance Arbitrary PlayerId where
-  arbitrary = PlayerId <$> arbitrary
+instance Arbitrary CandidateId where
+  arbitrary = CandidateId <$> arbitrary
 
 instance Arbitrary Strategy where
   arbitrary = Strategy <$> arbitrary
@@ -55,20 +55,20 @@ instance Arbitrary ValidCandidates where
       uniqueCandidate :: Char -> Candidate -> Candidate
       uniqueCandidate x c = c { candidateId = mapCandidateId ((:) x) $ candidateId c }
 
-      mapCandidateId :: (String -> String) -> PlayerId -> PlayerId
-      mapCandidateId f (PlayerId cid) = PlayerId $ f cid
+      mapCandidateId :: (String -> String) -> CandidateId -> CandidateId
+      mapCandidateId f (CandidateId cid) = CandidateId $ f cid
 
 validCandidates :: ValidCandidates -> [Candidate]
 validCandidates (TwoCandidates c1 c2) = [c1, c2]
 validCandidates (ThreeCandidates c1 c2 c3) = [c1, c2, c3]
 validCandidates (FourCandidates c1 c2 c3 c4) = [c1, c2, c3, c4]
 
-data PlayersAndSelectedPlayer = PlayersAndSelectedPlayer [Player] PlayerId
+data PlayersAndSelectedPlayer = PlayersAndSelectedPlayer [Player] CandidateId
   deriving (Eq, Show)
 
 instance Arbitrary PlayersAndSelectedPlayer where
   arbitrary = suchThat arbitrary (not . null)
     >>= \s -> PlayersAndSelectedPlayer s <$> selectPlayer s
     where
-      selectPlayer :: [Player] -> Gen PlayerId
+      selectPlayer :: [Player] -> Gen CandidateId
       selectPlayer = elements . fmap playerId

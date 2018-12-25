@@ -36,7 +36,7 @@ updateTests = describe "update" $ do
       fmap (length . deck) (findPlayer pid (players (update (AddCardToDeck pid card) (PreparingDecks ps cards))))
         == fmap ((+1) . length . deck) (findPlayer pid ps)
           where
-            findPlayer :: PlayerId -> [Player] -> Maybe Player
+            findPlayer :: CandidateId -> [Player] -> Maybe Player
             findPlayer pid = find ((==) pid . playerId)
 
 isPreparingSupply :: GameState -> Bool

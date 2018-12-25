@@ -8,12 +8,12 @@ import Candidate
 import Card
 
 data Player = Player
-  { playerId :: PlayerId
+  { playerId :: CandidateId
   , deck :: [Card]
   }
   deriving (Eq, Show)
 
-new :: PlayerId -> Player
+new :: CandidateId -> Player
 new = flip Player []
 
 mapDeck :: ([Card] -> [Card]) -> Player -> Player

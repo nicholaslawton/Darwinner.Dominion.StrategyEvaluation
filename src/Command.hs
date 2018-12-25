@@ -7,9 +7,9 @@ import Card
 
 data Command
   = Noop
-  | AddPlayer PlayerId 
+  | AddPlayer CandidateId 
   | PlayersReady
   | PlaceCardInSupply Card
   | SupplyReady
-  | AddCardToDeck PlayerId Card
+  | AddCardToDeck CandidateId Card
   deriving (Eq, Show)

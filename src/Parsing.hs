@@ -17,7 +17,7 @@ newtype ParseError = ParseError String
   deriving (Eq, Show)
 
 parseEvaluationParameters :: ByteString -> Either ParseError EvaluationParameters
-parseEvaluationParameters s = parse s >>= validatePlayerCount >>= validatePlayerIdentifiers
+parseEvaluationParameters s = parse s >>= validatePlayerCount >>= validateCandidateIdentifiers
 
 parse :: ByteString -> Either ParseError EvaluationParameters
 parse = toEither . parseByteString parser mempty
@@ -29,8 +29,8 @@ validatePlayerCount (EvaluationParameters candidates) =
     x | x > 4 -> Left $ ParseError "Too many players (maximum four)"
     _         -> Right $ EvaluationParameters candidates
 
-validatePlayerIdentifiers :: EvaluationParameters -> Either ParseError EvaluationParameters
-validatePlayerIdentifiers (EvaluationParameters candidates) = 
+validateCandidateIdentifiers :: EvaluationParameters -> Either ParseError EvaluationParameters
+validateCandidateIdentifiers (EvaluationParameters candidates) = 
   if containsDuplicates $ candidateId <$> candidates
   then Left $ ParseError "Duplicate candidate identifiers"
   else Right $ EvaluationParameters candidates
@@ -48,8 +48,8 @@ candidate :: Parser Candidate
 candidate = braces $
   liftA2 Candidate (field "id" idParser) (token (char ',') *> field "strategy" strategyParser)
 
-idParser :: Parser PlayerId
-idParser = PlayerId <$> token (some letter)
+idParser :: Parser CandidateId
+idParser = CandidateId <$> token (some letter)
 
 strategyParser :: Parser Strategy
 strategyParser = Strategy <$> list card
