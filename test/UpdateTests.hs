@@ -32,7 +32,7 @@ updateTests = describe "update" $ do
       isPreparingDecks $ update SupplyReady $ PreparingSupply ps cards
 
   describe "add card to deck of player" $
-    it "adds card to deck of player" $ property $ \(PlayersAndSelectedPlayer ps pid) cards card ->
+    it "adds card to deck of player" $ property $ \(SelectedPlayer ps pid) cards card ->
       fmap (length . deck) (findPlayer pid (players (update (AddCardToDeck pid card) (PreparingDecks ps cards))))
         == fmap ((+1) . length . deck) (findPlayer pid ps)
 

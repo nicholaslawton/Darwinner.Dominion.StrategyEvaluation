@@ -1,16 +1,16 @@
-{-# OPTIONS_GHC -fno-warn-orphans #-}
-
+{-# OPTIONS_GHC -fno-warn-orphans #-} 
 module ArbitraryInstances where
-
-import Control.Applicative
-import Control.Monad
-import Test.QuickCheck
 
 import Card
 import EvaluationParameters
 import Player
 import Candidate
 import Strategy
+
+import Control.Applicative
+import Control.Monad
+
+import Test.QuickCheck
 
 instance Arbitrary Card where
   arbitrary = oneof [return Province, return Duchy, return Estate, return Gold, return Silver, return Copper]
@@ -28,47 +28,53 @@ instance Arbitrary Strategy where
   arbitrary = Strategy <$> arbitrary
 
 instance Arbitrary EvaluationParameters where
-  arbitrary = EvaluationParameters . validCandidates <$> arbitrary
+  arbitrary = EvaluationParameters <$> validCandidates
 
-data ValidCandidates
-  = TwoCandidates Candidate Candidate
-  | ThreeCandidates Candidate Candidate Candidate
-  | FourCandidates Candidate Candidate Candidate Candidate
+data ValidCandidateIds
+  = TwoCandidateIds CandidateId CandidateId
+  | ThreeCandidateIds CandidateId CandidateId CandidateId
+  | FourCandidateIds CandidateId CandidateId CandidateId CandidateId
   deriving (Eq, Show)
 
-instance Arbitrary ValidCandidates where
+instance Arbitrary ValidCandidateIds where
   arbitrary = oneof
-    [ liftA2 TwoCandidates
-        (uniqueCandidate '1' <$> arbitrary)
-        (uniqueCandidate '2' <$> arbitrary)
-    , liftA3 ThreeCandidates
-        (uniqueCandidate '1' <$> arbitrary)
-        (uniqueCandidate '2' <$> arbitrary)
-        (uniqueCandidate '3' <$> arbitrary)
-    , liftM4 FourCandidates
-        (uniqueCandidate '1' <$> arbitrary)
-        (uniqueCandidate '2' <$> arbitrary)
-        (uniqueCandidate '3' <$> arbitrary)
-        (uniqueCandidate '4' <$> arbitrary)
+    [ liftA2 TwoCandidateIds
+        (uniqueId '1' <$> arbitrary)
+        (uniqueId '2' <$> arbitrary)
+    , liftA3 ThreeCandidateIds
+        (uniqueId '1' <$> arbitrary)
+        (uniqueId '2' <$> arbitrary)
+        (uniqueId '3' <$> arbitrary)
+    , liftM4 FourCandidateIds
+        (uniqueId '1' <$> arbitrary)
+        (uniqueId '2' <$> arbitrary)
+        (uniqueId '3' <$> arbitrary)
+        (uniqueId '4' <$> arbitrary)
     ]
     where
-      uniqueCandidate :: Char -> Candidate -> Candidate
-      uniqueCandidate x c = c { candidateId = mapCandidateId ((:) x) $ candidateId c }
+      uniqueId :: Char -> CandidateId -> CandidateId
+      uniqueId x (CandidateId cid) = CandidateId $ x : cid
 
-      mapCandidateId :: (String -> String) -> CandidateId -> CandidateId
-      mapCandidateId f (CandidateId cid) = CandidateId $ f cid
+validCandidateIds :: ValidCandidateIds -> [CandidateId]
+validCandidateIds (TwoCandidateIds id1 id2) = [id1, id2]
+validCandidateIds (ThreeCandidateIds id1 id2 id3) = [id1, id2, id3]
+validCandidateIds (FourCandidateIds id1 id2 id3 id4) = [id1, id2, id3, id4]
 
-validCandidates :: ValidCandidates -> [Candidate]
-validCandidates (TwoCandidates c1 c2) = [c1, c2]
-validCandidates (ThreeCandidates c1 c2 c3) = [c1, c2, c3]
-validCandidates (FourCandidates c1 c2 c3 c4) = [c1, c2, c3, c4]
+validCandidates :: Gen [Candidate]
+validCandidates = fmap (uncurry Candidate) <$> liftA2 zip (validCandidateIds <$> arbitrary) arbitrary
 
-data PlayersAndSelectedPlayer = PlayersAndSelectedPlayer [Player] CandidateId
+validPlayers :: Gen [Player]
+validPlayers = fmap (uncurry3 Player) <$> liftA3 zip3 (validCandidateIds <$> arbitrary) arbitrary arbitrary
+
+uncurry3 :: (a -> b -> c -> d) -> (a, b, c) -> d
+uncurry3 f (x, y, z) = f x y z
+
+data SelectedPlayer = SelectedPlayer [Player] CandidateId
   deriving (Eq, Show)
 
-instance Arbitrary PlayersAndSelectedPlayer where
-  arbitrary = suchThat arbitrary (not . null)
-    >>= \ps -> PlayersAndSelectedPlayer ps <$> selectPlayer ps
+instance Arbitrary SelectedPlayer where
+  arbitrary = suchThat validPlayers (not . null)
+    >>= \ps -> SelectedPlayer ps <$> selectPlayer ps
     where
       selectPlayer :: [Player] -> Gen CandidateId
       selectPlayer = elements . fmap playerId
@@ -77,7 +83,7 @@ data CardInDeck = CardInDeck [Player] CandidateId Card
   deriving (Eq, Show)
 
 instance Arbitrary CardInDeck where
-  arbitrary = suchThat arbitrary (not . null . concatMap deck)
+  arbitrary = suchThat validPlayers (not . null . concatMap deck)
     >>= \ps -> uncurry (CardInDeck ps) <$> selectPlayerAndCard ps
     where
       selectPlayerAndCard :: [Player] -> Gen (CandidateId, Card)
