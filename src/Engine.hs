@@ -47,12 +47,13 @@ nextCommand (EvaluationParameters candidates) (PreparingSupply _ cards)
   | otherwise = SupplyReady
     where
       numVictoryCards = if length candidates == 2 then 8 else 12
-nextCommand _ (PreparingDecks ps _) = fromMaybe Noop $ uncurry AddCardToDeck <$> recipientAndCard
+nextCommand _ (PreparingDecks ps _) = fromMaybe DecksReady $ uncurry AddCardToDeck <$> recipientAndCard
   where
     recipientAndCard :: Maybe (CandidateId, Card)
     recipientAndCard = recipientNeedingCard Copper 7 <|> recipientNeedingCard Estate 3
     recipientNeedingCard :: Card -> Int -> Maybe (CandidateId, Card)
     recipientNeedingCard card target =
       flip (,) card . playerId <$> listToMaybe (filter ((< target) . count card . deck) ps)
-nextCommand _ (DrawingInitialHands _ _) = Noop
+nextCommand _ (DrawingInitialHands (p:_) _) = DrawCard (playerId p) Copper
+nextCommand _ (DrawingInitialHands [] _) = error "Cannot draw initial hands for a game with no players"
 nextCommand _ Prepared = Noop
