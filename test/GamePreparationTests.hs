@@ -33,10 +33,6 @@ gamePreparationTests = describe "game preparation" $ do
     let expected = [Copper, Silver, Gold, Estate, Duchy, Province]
     in (===) expected . intersect expected . nub . mapMaybe cardPlacedInSupply . history . uncurry prepareGame
 
-  it "gives 7 coppers to each player" $ property $ givesCardsToEachPlayer 7 Copper
-
-  it "gives 3 estates to each player" $ property $ givesCardsToEachPlayer 3 Estate
-
   it "prepares starting deck for each player" $ property $ \seed (params@(EvaluationParameters candidates)) ->
     let startingDeck = fromList $ first arbitraryCardOrder <$> [(Copper, 7), (Estate, 3)]
     in
@@ -81,15 +77,3 @@ cardAddedToDeck _ = Nothing
 
 cardPutInPlay :: Command -> Maybe Card
 cardPutInPlay = liftA2 (<|>) cardPlacedInSupply (fmap snd . cardAddedToDeck)
-
-givesCardsToEachPlayer :: Int -> Card -> Int -> EvaluationParameters -> Property
-givesCardsToEachPlayer n card seed (params@(EvaluationParameters candidates)) =
-  fromList (flip (,) n . candidateId <$> candidates)
-    ===
-      ( fmap length
-      . categorise fst snd
-      . filter ((==) card . snd)
-      . mapMaybe cardAddedToDeck
-      . history
-      . prepareGame seed
-      ) params
