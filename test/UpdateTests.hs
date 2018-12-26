@@ -49,10 +49,16 @@ updateTests = describe "update" $ do
     it "does not alter dominion of player" $ property $ \(CardInDeck ps pid card) cards ->
       verifyPlayerUpdate dominion id ps pid (DrawCard pid card) (DrawingInitialHands ps cards)
 
-verifyPlayerUpdate :: (Eq a, Show a) => (Player -> a) -> (a -> a) -> [Player] -> CandidateId -> Command -> GameState -> Property
+verifyPlayerUpdate :: (Eq a, Show a) =>
+  (Player -> a)
+  -> (a -> a)
+  -> [Player]
+  -> CandidateId
+  -> Command
+  -> GameState
+  -> Property
 verifyPlayerUpdate prop change ps pid command gameState =
-  fmap prop (findPlayer pid (players (update command gameState)))
-    === fmap (change . prop) (findPlayer pid ps)
+  fmap prop (findPlayer pid (players (update command gameState))) === fmap (change . prop) (findPlayer pid ps)
 
 findPlayer :: CandidateId -> [Player] -> Maybe Player
 findPlayer pid = find ((==) pid . playerId)
