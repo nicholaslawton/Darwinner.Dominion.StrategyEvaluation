@@ -6,6 +6,8 @@ import GameState
 import Player
 import Card
 
+import Data.List
+
 update :: Command -> GameState -> GameState
 update (AddPlayer pid) = addPlayer pid
 update PlayersReady = beginPreparingSupply
@@ -41,7 +43,8 @@ beginDrawingInitialHands (PreparingDecks ps cards) = DrawingInitialHands ps card
 beginDrawingInitialHands _ = error "Drawing initial hands must occur after decks have been prepared"
 
 drawCard :: CandidateId -> Card -> GameState -> GameState
-drawCard pid card (DrawingInitialHands ps cards) = DrawingInitialHands (mapPlayer pid (mapHand (card :)) ps) cards
+drawCard pid card (DrawingInitialHands ps cards) =
+  DrawingInitialHands (mapPlayer pid (mapHand (card :) . mapDeck (delete card)) ps) cards
 drawCard _ _ _ = error "A card may only be drawn while players are drawing their initial hands"
 
 mapPlayer :: CandidateId -> (Player -> Player) -> [Player] -> [Player]

@@ -5,10 +5,13 @@ import Candidate
 import Command
 import GameState
 import Player
+import Card
 
 import Data.List
+import Control.Applicative
 
 import ArbitraryInstances
+import CardOrder
 import Test.Hspec
 import Test.QuickCheck
 
@@ -40,10 +43,14 @@ updateTests = describe "update" $ do
     it "begins drawing initial hands" $ property $ \ps cards ->
       isDrawingInitialHands $ update DecksReady $ PreparingDecks ps cards
 
-  describe "draw card" $
+  describe "draw card" $ do
     it "adds card to hand" $ property $ \(CardInDeck ps pid card) cards ->
       fmap (length . hand) (findPlayer pid (players (update (DrawCard pid card) (DrawingInitialHands ps cards))))
         == fmap ((+1) . length . hand) (findPlayer pid ps)
+
+    it "does not alter dominion of player" $ property $ \(CardInDeck ps pid card) cards ->
+      fmap dominion (findPlayer pid (players (update (DrawCard pid card) (DrawingInitialHands ps cards))))
+        == fmap dominion (findPlayer pid ps)
 
 findPlayer :: CandidateId -> [Player] -> Maybe Player
 findPlayer pid = find ((==) pid . playerId)
@@ -59,3 +66,6 @@ isPreparingDecks _ = False
 isDrawingInitialHands :: GameState -> Bool
 isDrawingInitialHands (DrawingInitialHands _ _) = True
 isDrawingInitialHands _ = False
+
+dominion :: Player -> [Card]
+dominion = sortOn arbitraryCardOrder . liftA2 (++) deck hand
