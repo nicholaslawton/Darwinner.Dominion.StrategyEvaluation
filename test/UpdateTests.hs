@@ -36,8 +36,7 @@ updateTests = describe "update" $ do
 
   describe "add card to deck of player" $
     it "adds card to deck of player" $ property $ \(SelectedPlayer ps pid) cards card ->
-      fmap (length . deck) (findPlayer pid (players (update (AddCardToDeck pid card) (PreparingDecks ps cards))))
-        === fmap ((+1) . length . deck) (findPlayer pid ps)
+      verifyPlayerUpdate (length . deck) (+1) ps pid (AddCardToDeck pid card) (PreparingDecks ps cards)
 
   describe "decks ready" $
     it "begins drawing initial hands" $ property $ \ps cards ->
@@ -45,14 +44,10 @@ updateTests = describe "update" $ do
 
   describe "draw card" $ do
     it "adds card to hand" $ property $ \(CardInDeck ps pid card) cards ->
-      fmap (length . hand) (findPlayer pid (players (update (DrawCard pid card) (DrawingInitialHands ps cards))))
-        === fmap ((+1) . length . hand) (findPlayer pid ps)
-    it "adds card to hand'" $ property $ \(CardInDeck ps pid card) cards ->
       verifyPlayerUpdate (length . hand) (+1) ps pid (DrawCard pid card) (DrawingInitialHands ps cards)
 
     it "does not alter dominion of player" $ property $ \(CardInDeck ps pid card) cards ->
-      fmap dominion (findPlayer pid (players (update (DrawCard pid card) (DrawingInitialHands ps cards))))
-        === fmap dominion (findPlayer pid ps)
+      verifyPlayerUpdate dominion id ps pid (DrawCard pid card) (DrawingInitialHands ps cards)
 
 verifyPlayerUpdate :: (Eq a, Show a) => (Player -> a) -> (a -> a) -> [Player] -> CandidateId -> Command -> GameState -> Property
 verifyPlayerUpdate prop change ps pid command gameState =
