@@ -61,13 +61,10 @@ validCandidateIds (ThreeCandidateIds id1 id2 id3) = [id1, id2, id3]
 validCandidateIds (FourCandidateIds id1 id2 id3 id4) = [id1, id2, id3, id4]
 
 validCandidates :: Gen [Candidate]
-validCandidates = fmap (uncurry Candidate) <$> liftA2 zip (validCandidateIds <$> arbitrary) arbitrary
+validCandidates = validCandidateIds <$> arbitrary >>= traverse (\cid -> Candidate cid <$> arbitrary)
 
 validPlayers :: Gen [Player]
-validPlayers = fmap (uncurry3 Player) <$> liftA3 zip3 (validCandidateIds <$> arbitrary) arbitrary arbitrary
-
-uncurry3 :: (a -> b -> c -> d) -> (a, b, c) -> d
-uncurry3 f (x, y, z) = f x y z
+validPlayers = validCandidateIds <$> arbitrary >>= traverse (\cid -> liftA2 (Player cid) arbitrary arbitrary)
 
 data SelectedPlayer = SelectedPlayer [Player] CandidateId
   deriving (Eq, Show)
