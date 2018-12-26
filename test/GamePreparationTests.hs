@@ -11,6 +11,7 @@ import Candidate
 import ListExtension
 
 import Data.List
+import Data.Bifunctor
 import Data.Map (Map, fromList, fromListWith)
 import Data.Maybe
 import Control.Applicative
@@ -18,6 +19,7 @@ import Control.Monad.Trans.Reader
 import Control.Monad.Trans.State
 
 import ArbitraryInstances()
+import CardOrder
 import Test.Hspec
 import Test.QuickCheck
 
@@ -34,6 +36,18 @@ gamePreparationTests = describe "game preparation" $ do
   it "gives 7 coppers to each player" $ property $ givesCardsToEachPlayer 7 Copper
 
   it "gives 3 estates to each player" $ property $ givesCardsToEachPlayer 3 Estate
+
+  it "prepares starting deck for each player" $ property $ \seed (params@(EvaluationParameters candidates)) ->
+    let startingDeck = fromList $ first arbitraryCardOrder <$> [(Copper, 7), (Estate, 3)]
+    in
+      fromList (flip (,) startingDeck . candidateId <$> candidates)
+        ===
+          ( fmap (fmap length . categorise arbitraryCardOrder id)
+          . categorise fst snd
+          . mapMaybe cardAddedToDeck
+          . history
+          . prepareGame seed
+          ) params
 
   it "puts all coppers in play" $ property $
     (===) 60 . count Copper . mapMaybe cardPutInPlay . history . uncurry prepareGame
