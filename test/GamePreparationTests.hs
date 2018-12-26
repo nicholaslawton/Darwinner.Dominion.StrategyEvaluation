@@ -27,7 +27,7 @@ gamePreparationTests :: SpecWith ()
 gamePreparationTests = describe "game preparation" $ do
 
   it "adds all players" $ property $ \seed (params@(EvaluationParameters candidates)) ->
-    (sort . mapMaybe playerAdded . history . prepareGame seed) params === candidateIds candidates
+    (sort . mapMaybe playerAdded . history . prepareGame seed) params === (sort . fmap candidateId) candidates
 
   it "places treasure and victory cards in supply" $ property $ 
     let expected = [Copper, Silver, Gold, Estate, Duchy, Province]
@@ -59,9 +59,6 @@ prepared = liftA2 (||) ((== Prepared) . Game.state) ((>200) . length . Game.hist
 
 categorise :: Ord k => (a -> k) -> (a -> v) -> [a] -> Map k [v]
 categorise key value xs = fromListWith (++) $ liftA2 (,) key ((: []) . value) <$> xs
-
-candidateIds :: [Candidate] -> [CandidateId]
-candidateIds = sort . nub . fmap candidateId
 
 playerAdded :: Command -> Maybe CandidateId
 playerAdded (AddPlayer pid) = Just pid
