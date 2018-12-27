@@ -9,8 +9,7 @@ import Command
 import EvaluationParameters
 import Candidate
 
-import ListExtension
-
+import Data.List.Unique
 import Data.Maybe
 import Control.Applicative
 import Control.Monad
@@ -38,12 +37,12 @@ nextCommand (EvaluationParameters candidates) (New ps) = fromMaybe MarkPlayersRe
     nextPlayer = listToMaybe $ filter (not . inGame) $ candidateId <$> candidates
     inGame cid = elem cid (playerId <$> ps)
 nextCommand (EvaluationParameters candidates) (PreparingSupply _ cards)
-  | count Copper cards < 60 - length candidates * 7 = PlaceCardInSupply Copper
-  | count Silver cards < 40 = PlaceCardInSupply Silver
-  | count Gold cards < 30 = PlaceCardInSupply Gold
-  | count Estate cards < numVictoryCards = PlaceCardInSupply Estate
-  | count Duchy cards < numVictoryCards = PlaceCardInSupply Duchy
-  | count Province cards < numVictoryCards = PlaceCardInSupply Province
+  | countElem Copper cards < 60 - length candidates * 7 = PlaceCardInSupply Copper
+  | countElem Silver cards < 40 = PlaceCardInSupply Silver
+  | countElem Gold cards < 30 = PlaceCardInSupply Gold
+  | countElem Estate cards < numVictoryCards = PlaceCardInSupply Estate
+  | countElem Duchy cards < numVictoryCards = PlaceCardInSupply Duchy
+  | countElem Province cards < numVictoryCards = PlaceCardInSupply Province
   | otherwise = MarkSupplyPrepared
     where
       numVictoryCards = if length candidates == 2 then 8 else 12
@@ -53,7 +52,7 @@ nextCommand _ (PreparingDecks ps _) = fromMaybe MarkDecksPrepared $ uncurry AddC
     recipientAndCard = recipientNeedingCard Copper 7 <|> recipientNeedingCard Estate 3
     recipientNeedingCard :: Card -> Int -> Maybe (CandidateId, Card)
     recipientNeedingCard card target =
-      flip (,) card . playerId <$> listToMaybe (filter ((< target) . count card . deck) ps)
+      flip (,) card . playerId <$> listToMaybe (filter ((< target) . countElem card . deck) ps)
 nextCommand _ (DrawingInitialHands (p:_) _)
   | length (hand p) < 5 = DrawCard (playerId p) Copper
   | otherwise = Noop

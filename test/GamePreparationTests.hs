@@ -8,9 +8,8 @@ import Engine
 import EvaluationParameters
 import Candidate
 
-import ListExtension
-
 import Data.List
+import Data.List.Unique
 import Data.Bifunctor
 import Data.Map (Map, fromList, fromListWith)
 import Data.Maybe
@@ -46,7 +45,7 @@ gamePreparationTests = describe "game preparation" $ do
           ) params
 
   it "puts all coppers in play" $ property $
-    (===) 60 . count Copper . mapMaybe cardPutInPlay . history . uncurry prepareGame
+    (===) 60 . countElem Copper . mapMaybe cardPutInPlay . history . uncurry prepareGame
 
   it "draws one hand" $ property $
     (==) 5 . length . filter cardDrawn . history . uncurry prepareGame

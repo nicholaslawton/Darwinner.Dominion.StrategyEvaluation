@@ -27,6 +27,7 @@ dependencies:
 - http-types
 - random
 - transformers
+- Unique
 
 library:
   source-dirs: src
