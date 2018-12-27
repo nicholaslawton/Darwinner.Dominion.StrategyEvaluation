@@ -49,6 +49,10 @@ updateTests = describe "update" $ do
     it "does not alter dominion of player" $ property $ \(CardInDeck ps pid card) cards ->
       verifyPlayerUpdate dominion id ps pid (DrawCard pid card) (DrawingInitialHands ps cards)
 
+  describe "mark initial hands drawn" $
+    it "transitions to prepared" $ property $ \ps cards ->
+      isPrepared $ update MarkInitialHandsDrawn $ DrawingInitialHands ps cards
+
 verifyPlayerUpdate :: (Eq a, Show a) =>
   (Player -> a)
   -> (a -> a)
@@ -74,6 +78,10 @@ isPreparingDecks _ = False
 isDrawingInitialHands :: GameState -> Bool
 isDrawingInitialHands (DrawingInitialHands _ _) = True
 isDrawingInitialHands _ = False
+
+isPrepared :: GameState -> Bool
+isPrepared Prepared = True
+isPrepared _ = False
 
 dominion :: Player -> [Card]
 dominion = sortOn arbitraryCardOrder . liftA2 (++) deck hand

@@ -14,4 +14,5 @@ data Command
   | AddCardToDeck CandidateId Card
   | MarkDecksPrepared
   | DrawCard CandidateId Card
+  | MarkInitialHandsDrawn
   deriving (Eq, Show)
