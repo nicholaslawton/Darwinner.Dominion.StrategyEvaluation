@@ -29,7 +29,7 @@ gamePreparationTests = describe "game preparation" $ do
     (sort . mapMaybe playerAdded . history . prepareGame seed) params === (sort . fmap candidateId) candidates
 
   it "places treasure and victory cards in supply" $ property $ 
-    let expected = [Copper, Silver, Gold, Estate, Duchy, Province]
+    let expected = [Copper, Silver, Gold, Estate, Duchy, Province, Curse]
     in (===) expected . intersect expected . nub . mapMaybe cardPlacedInSupply . history . uncurry prepareGame
 
   it "prepares starting deck for each player" $ property $ \seed (params@(EvaluationParameters candidates)) ->
