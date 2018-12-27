@@ -46,15 +46,17 @@ nextCommand (EvaluationParameters candidates) (PreparingSupply _ cards)
   | otherwise = MarkSupplyPrepared
     where
       numVictoryCards = if length candidates == 2 then 8 else 12
-nextCommand _ (PreparingDecks ps _) = fromMaybe MarkDecksPrepared $ uncurry AddCardToDeck <$> recipientAndCard
-  where
-    recipientAndCard :: Maybe (CandidateId, Card)
-    recipientAndCard = recipientNeedingCard Copper 7 <|> recipientNeedingCard Estate 3
-    recipientNeedingCard :: Card -> Int -> Maybe (CandidateId, Card)
-    recipientNeedingCard card target =
-      flip (,) card . playerId <$> listToMaybe (filter ((< target) . countElem card . deck) ps)
-nextCommand _ (DrawingInitialHands (p:_) _)
-  | length (hand p) < 5 = DrawCard (playerId p) Copper
-  | otherwise = Noop
-nextCommand _ (DrawingInitialHands [] _) = error "Cannot draw initial hands for a game with no players"
+nextCommand _ (PreparingDecks ps _) =
+  fromMaybe MarkDecksPrepared $ uncurry AddCardToDeck <$> playerNeedingCard ps
+    where
+      playerNeedingCard :: [Player] -> Maybe (CandidateId, Card)
+      playerNeedingCard = liftA2 (<|>) (playerNeeding Copper 7) (playerNeeding Estate 3)
+      playerNeeding :: Card -> Int -> [Player] -> Maybe (CandidateId, Card)
+      playerNeeding card target =
+        fmap (flip (,) card . playerId) . listToMaybe . filter ((< target) . countElem card . deck)
+nextCommand _ (DrawingInitialHands ps _) =
+  fromMaybe Noop $ flip DrawCard Copper <$> playerWithIncompleteHand ps
+    where
+      playerWithIncompleteHand :: [Player] -> Maybe CandidateId
+      playerWithIncompleteHand = fmap playerId . listToMaybe . filter ((< 5) . length . hand)
 nextCommand _ Prepared = Noop

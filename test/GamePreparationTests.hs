@@ -47,8 +47,9 @@ gamePreparationTests = describe "game preparation" $ do
   it "puts all coppers in play" $ property $
     (===) 60 . countElem Copper . mapMaybe cardPutInPlay . history . uncurry prepareGame
 
-  it "draws one hand" $ property $
-    (==) 5 . length . filter cardDrawn . history . uncurry prepareGame
+  it "draws initial hand for each player" $ property $ \seed (params@(EvaluationParameters candidates)) ->
+    fromList (flip (,) 5 . candidateId <$> candidates)
+      === (fmap length . categorise fst snd . mapMaybe cardDrawn . history . prepareGame seed) params
 
 prepareGame :: Int -> EvaluationParameters -> Game
 prepareGame seed params = execUntil prepared params (Game.new seed)
@@ -77,6 +78,6 @@ cardAddedToDeck _ = Nothing
 cardPutInPlay :: Command -> Maybe Card
 cardPutInPlay = liftA2 (<|>) cardPlacedInSupply (fmap snd . cardAddedToDeck)
 
-cardDrawn :: Command -> Bool
-cardDrawn (DrawCard _ _) = True
-cardDrawn _ = False
+cardDrawn :: Command -> Maybe (CandidateId, Card)
+cardDrawn (DrawCard pid card) = Just (pid, card)
+cardDrawn _ = Nothing
