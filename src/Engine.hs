@@ -9,6 +9,7 @@ import Command
 import EvaluationParameters
 import Candidate
 
+import Data.Bool
 import Data.List.Unique
 import Data.Maybe
 import Data.Bifunctor
@@ -47,13 +48,14 @@ nextCommand = do
       | countElem Copper cards < 60 - length candidates * 7 -> return $ PlaceCardInSupply Copper
       | countElem Silver cards < 40 -> return $ PlaceCardInSupply Silver
       | countElem Gold cards < 30 -> return $ PlaceCardInSupply Gold
-      | countElem Estate cards < numVictoryCards -> return $ PlaceCardInSupply Estate
-      | countElem Duchy cards < numVictoryCards -> return $ PlaceCardInSupply Duchy
-      | countElem Province cards < numVictoryCards -> return $ PlaceCardInSupply Province
+      | countElem Estate cards < numVictoryCards candidates -> return $ PlaceCardInSupply Estate
+      | countElem Duchy cards < numVictoryCards candidates -> return $ PlaceCardInSupply Duchy
+      | countElem Province cards < numVictoryCards candidates -> return $ PlaceCardInSupply Province
       | countElem Curse cards < 1 -> return $ PlaceCardInSupply Curse
       | otherwise -> return MarkSupplyPrepared
         where
-          numVictoryCards = if length candidates == 2 then 8 else 12
+          numVictoryCards :: [Candidate] -> Int
+          numVictoryCards = bool 8 12 . (> 2) . length
 
     PreparingDecks ps _ ->
       return $ fromMaybe MarkDecksPrepared $ uncurry AddCardToDeck <$> playerNeedingCard ps

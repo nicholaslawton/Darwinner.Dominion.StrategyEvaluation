@@ -32,6 +32,16 @@ gamePreparationTests = describe "game preparation" $ do
     let expected = [Copper, Silver, Gold, Estate, Duchy, Province, Curse]
     in (===) expected . intersect expected . nub . mapMaybe cardPlacedInSupply . history . uncurry prepareGame
 
+  it "places correct number of victory cards in supply" $ property $
+    \seed (params@(EvaluationParameters candidates)) ->
+      (countElem Province . mapMaybe cardPlacedInSupply . history . prepareGame seed) params
+        ===
+          case length candidates of
+            2 -> 8
+            3 -> 12
+            4 -> 12
+            _ -> error "Unexpected number of players"
+
   it "prepares starting deck for each player" $ property $ \seed (params@(EvaluationParameters candidates)) ->
     let startingDeck = fromList $ first arbitraryCardOrder <$> [(Copper, 7), (Estate, 3)]
     in
