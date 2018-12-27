@@ -1,10 +1,11 @@
 module Card (Card(..)) where
 
 data Card
-  = Province
-  | Duchy
-  | Estate
-  | Gold
+  = Copper
   | Silver
-  | Copper
+  | Gold
+  | Estate
+  | Duchy
+  | Province
+  | Curse
   deriving (Eq, Show)
