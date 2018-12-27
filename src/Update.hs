@@ -10,11 +10,11 @@ import Data.List
 
 update :: Command -> GameState -> GameState
 update (AddPlayer pid) = addPlayer pid
-update PlayersReady = beginPreparingSupply
+update MarkPlayersReady = beginPreparingSupply
 update (PlaceCardInSupply card) = placeCardInSupply card
-update SupplyReady = beginPreparingDecks
+update MarkSupplyPrepared = beginPreparingDecks
 update (AddCardToDeck pid card) = addCardToDeck pid card
-update DecksReady = beginDrawingInitialHands
+update MarkDecksPrepared = beginDrawingInitialHands
 update (DrawCard pid card) = drawCard pid card
 update Noop = const Prepared
 

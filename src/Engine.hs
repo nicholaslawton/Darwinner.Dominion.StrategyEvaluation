@@ -33,7 +33,7 @@ apply :: Command -> Game -> Game
 apply command = recordCommand command . Game.mapState (update command)
 
 nextCommand :: EvaluationParameters -> GameState -> Command
-nextCommand (EvaluationParameters candidates) (New ps) = fromMaybe PlayersReady $ AddPlayer <$> nextPlayer
+nextCommand (EvaluationParameters candidates) (New ps) = fromMaybe MarkPlayersReady $ AddPlayer <$> nextPlayer
   where
     nextPlayer = listToMaybe $ filter (not . inGame) $ candidateId <$> candidates
     inGame cid = elem cid (playerId <$> ps)
@@ -44,10 +44,10 @@ nextCommand (EvaluationParameters candidates) (PreparingSupply _ cards)
   | count Estate cards < numVictoryCards = PlaceCardInSupply Estate
   | count Duchy cards < numVictoryCards = PlaceCardInSupply Duchy
   | count Province cards < numVictoryCards = PlaceCardInSupply Province
-  | otherwise = SupplyReady
+  | otherwise = MarkSupplyPrepared
     where
       numVictoryCards = if length candidates == 2 then 8 else 12
-nextCommand _ (PreparingDecks ps _) = fromMaybe DecksReady $ uncurry AddCardToDeck <$> recipientAndCard
+nextCommand _ (PreparingDecks ps _) = fromMaybe MarkDecksPrepared $ uncurry AddCardToDeck <$> recipientAndCard
   where
     recipientAndCard :: Maybe (CandidateId, Card)
     recipientAndCard = recipientNeedingCard Copper 7 <|> recipientNeedingCard Estate 3

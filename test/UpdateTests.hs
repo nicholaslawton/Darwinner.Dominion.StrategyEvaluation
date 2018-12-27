@@ -22,25 +22,25 @@ updateTests = describe "update" $ do
     it "adds player" $ property $ \ps player ->
       length (players (update (AddPlayer player) (New ps))) === length ps + 1
 
-  describe "players ready" $
+  describe "mark players ready" $
     it "begins preparing supply" $ property $
-      isPreparingSupply . update PlayersReady . New
+      isPreparingSupply . update MarkPlayersReady . New
 
   describe "place card in supply" $
     it "adds card" $ property $ \ps cards card ->
       length (supply (update (PlaceCardInSupply card) (PreparingSupply ps cards))) === length cards + 1
 
-  describe "supply ready" $
+  describe "mark supply prepared" $
     it "begins preparing decks" $ property $ \ps cards ->
-      isPreparingDecks $ update SupplyReady $ PreparingSupply ps cards
+      isPreparingDecks $ update MarkSupplyPrepared $ PreparingSupply ps cards
 
   describe "add card to deck of player" $
     it "adds card to deck of player" $ property $ \(SelectedPlayer ps pid) cards card ->
       verifyPlayerUpdate (length . deck) (+1) ps pid (AddCardToDeck pid card) (PreparingDecks ps cards)
 
-  describe "decks ready" $
+  describe "mark decks prepared" $
     it "begins drawing initial hands" $ property $ \ps cards ->
-      isDrawingInitialHands $ update DecksReady $ PreparingDecks ps cards
+      isDrawingInitialHands $ update MarkDecksPrepared $ PreparingDecks ps cards
 
   describe "draw card" $ do
     it "adds card to hand" $ property $ \(CardInDeck ps pid card) cards ->
