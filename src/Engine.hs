@@ -51,11 +51,16 @@ nextCommand = do
       | countElem Estate cards < numVictoryCards candidates -> return $ PlaceCardInSupply Estate
       | countElem Duchy cards < numVictoryCards candidates -> return $ PlaceCardInSupply Duchy
       | countElem Province cards < numVictoryCards candidates -> return $ PlaceCardInSupply Province
-      | countElem Curse cards < 1 -> return $ PlaceCardInSupply Curse
+      | countElem Curse cards < numCurseCards candidates -> return $ PlaceCardInSupply Curse
       | otherwise -> return MarkSupplyPrepared
         where
           numVictoryCards :: [Candidate] -> Int
           numVictoryCards = bool 8 12 . (> 2) . length
+          numCurseCards :: [Candidate] -> Int
+          numCurseCards x = case length x of
+            2 -> 10
+            3 -> 20
+            _ -> 30
 
     PreparingDecks ps _ ->
       return $ fromMaybe MarkDecksPrepared $ uncurry AddCardToDeck <$> playerNeedingCard ps

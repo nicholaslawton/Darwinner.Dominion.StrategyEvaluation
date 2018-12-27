@@ -42,6 +42,16 @@ gamePreparationTests = describe "game preparation" $ do
             4 -> 12
             _ -> error "Unexpected number of players"
 
+  it "places correct number of curse cards in supply" $ property $
+    \seed (params@(EvaluationParameters candidates)) ->
+      (countElem Curse . mapMaybe cardPlacedInSupply . history . prepareGame seed) params
+        ===
+          case length candidates of
+            2 -> 10
+            3 -> 20
+            4 -> 30
+            _ -> error "Unexpected number of players"
+
   it "prepares starting deck for each player" $ property $ \seed (params@(EvaluationParameters candidates)) ->
     let startingDeck = fromList $ first arbitraryCardOrder <$> [(Copper, 7), (Estate, 3)]
     in
