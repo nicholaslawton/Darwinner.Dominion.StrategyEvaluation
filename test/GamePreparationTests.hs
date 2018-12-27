@@ -48,8 +48,8 @@ gamePreparationTests = describe "game preparation" $ do
   it "puts all coppers in play" $ property $
     (===) 60 . count Copper . mapMaybe cardPutInPlay . history . uncurry prepareGame
 
-  it "draws at least one card" $ property $
-    any cardDrawn . history . uncurry prepareGame
+  it "draws one hand" $ property $
+    (==) 5 . length . filter cardDrawn . history . uncurry prepareGame
 
 prepareGame :: Int -> EvaluationParameters -> Game
 prepareGame seed params = execUntil prepared params (Game.new seed)

@@ -54,6 +54,8 @@ nextCommand _ (PreparingDecks ps _) = fromMaybe MarkDecksPrepared $ uncurry AddC
     recipientNeedingCard :: Card -> Int -> Maybe (CandidateId, Card)
     recipientNeedingCard card target =
       flip (,) card . playerId <$> listToMaybe (filter ((< target) . count card . deck) ps)
-nextCommand _ (DrawingInitialHands (p:_) _) = DrawCard (playerId p) Copper
+nextCommand _ (DrawingInitialHands (p:_) _)
+  | length (hand p) < 5 = DrawCard (playerId p) Copper
+  | otherwise = Noop
 nextCommand _ (DrawingInitialHands [] _) = error "Cannot draw initial hands for a game with no players"
 nextCommand _ Prepared = Noop
