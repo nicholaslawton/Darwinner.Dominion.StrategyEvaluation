@@ -75,7 +75,8 @@ nextCommand = do
           playerWithIncompleteHand :: [Player] -> Maybe Player
           playerWithIncompleteHand = listToMaybe . filter ((< 5) . length . hand)
           drawCard :: Player -> State Game Command
-          drawCard p = maybe Noop (DrawCard (playerId p)) <$> randomElement (deck p)
+          drawCard p = maybe emptyDeckError (DrawCard (playerId p)) <$> randomElement (deck p)
+          emptyDeckError = error "unexpected empty deck when drawing card for initial hand"
 
     Prepared -> return Noop
 
