@@ -57,10 +57,7 @@ nextCommand = do
           numVictoryCards :: [Candidate] -> Int
           numVictoryCards = bool 8 12 . (> 2) . length
           numCurseCards :: [Candidate] -> Int
-          numCurseCards x = case length x of
-            2 -> 10
-            3 -> 20
-            _ -> 30
+          numCurseCards = (* 10) . subtract 1 . length
 
     PreparingDecks ps _ ->
       return $ fromMaybe MarkDecksPrepared $ uncurry AddCardToDeck <$> playerNeedingCard ps
