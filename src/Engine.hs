@@ -26,17 +26,17 @@ runUntil :: (Game -> Bool) -> ReaderT EvaluationParameters (State Game) ()
 runUntil predicate = do
   game <- lift get
   unless (predicate game) $ do
-    parameters <- ask
-    cmd <- lift $ nextCommand parameters
+    cmd <- nextCommand
     lift . put $ apply cmd game
     runUntil predicate
 
 apply :: Command -> Game -> Game
 apply command = recordCommand command . Game.mapState (update command)
 
-nextCommand :: EvaluationParameters -> State Game Command
-nextCommand (EvaluationParameters candidates) = do
-  game <- get
+nextCommand :: ReaderT EvaluationParameters (State Game) Command
+nextCommand = do
+  EvaluationParameters candidates <- ask
+  game <- lift get
   case Game.state game of
 
     New ps ->
@@ -66,7 +66,7 @@ nextCommand (EvaluationParameters candidates) = do
             fmap (flip (,) card . playerId) . listToMaybe . filter ((< target) . countElem card . deck)
 
     DrawingInitialHands ps _ ->
-      fromMaybe (return Noop) $ drawCard <$> playerWithIncompleteHand ps
+      fromMaybe (return Noop) $ lift . drawCard <$> playerWithIncompleteHand ps
         where
           playerWithIncompleteHand :: [Player] -> Maybe Player
           playerWithIncompleteHand = listToMaybe . filter ((< 5) . length . hand)
