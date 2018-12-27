@@ -40,9 +40,10 @@ nextCommand = do
   case Game.state game of
 
     New pids ->
-      return $ fromMaybe MarkPlayersReady $ AddPlayer <$> nextPlayer
+      lift $ maybe MarkPlayersReady AddPlayer <$> nextPlayer (candidateId <$> candidates)
         where
-          nextPlayer = listToMaybe $ filter (not . (`elem` pids)) $ candidateId <$> candidates
+          nextPlayer :: [CandidateId] -> State Game (Maybe CandidateId)
+          nextPlayer = randomElement . filter (not . (`elem` pids))
 
     PreparingSupply _ cards
       | countElem Copper cards < 60 - length candidates * 7 -> return $ PlaceCardInSupply Copper
@@ -74,13 +75,14 @@ nextCommand = do
           playerWithIncompleteHand :: [Player] -> Maybe Player
           playerWithIncompleteHand = listToMaybe . filter ((< 5) . length . hand)
           drawCard :: Player -> State Game Command
-          drawCard p = DrawCard (playerId p) <$> randomElement (deck p)
+          drawCard p = maybe Noop (DrawCard (playerId p)) <$> randomElement (deck p)
 
     Prepared -> return Noop
 
-randomElement :: [a] -> State Game a
+randomElement :: [a] -> State Game (Maybe a)
+randomElement [] = return Nothing
 randomElement xs = do
   game <- get
-  let (x, newGen) = first (xs !!) . randomR (0, length xs - 1) . Game.gen $ game
+  let (x, newGen) = first (Just . (xs !!)) . randomR (0, length xs - 1) . Game.gen $ game
   put $ game { gen = newGen }
   return x
