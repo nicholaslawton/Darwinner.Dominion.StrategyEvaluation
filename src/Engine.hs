@@ -24,11 +24,10 @@ run = runUntil ((== Prepared) . Game.state)
 
 runUntil :: (Game -> Bool) -> ReaderT EvaluationParameters (State Game) ()
 runUntil predicate = do
-  game <- lift get
-  unless (predicate game) $ do
-    cmd <- nextCommand
-    lift . put $ apply cmd game
-    runUntil predicate
+  cmd <- nextCommand
+  game <- lift $ apply cmd <$> get
+  lift $ put game
+  unless (predicate game) (runUntil predicate)
 
 apply :: Command -> Game -> Game
 apply command = recordCommand command . Game.mapState (update command)
@@ -78,6 +77,6 @@ nextCommand = do
 randomElement :: [a] -> State Game a
 randomElement xs = do
   game <- get
-  let (x, newGen) = first (xs !!) . randomR (0, length xs) . Game.gen $ game
+  let (x, newGen) = first (xs !!) . randomR (0, length xs - 1) . Game.gen $ game
   put $ game { gen = newGen }
   return x
