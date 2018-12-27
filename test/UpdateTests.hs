@@ -5,6 +5,7 @@ import Candidate
 import Command
 import GameState
 import Player
+import PlayerPreparingStartingDeck
 import Card
 
 import Data.List
@@ -35,8 +36,14 @@ updateTests = describe "update" $ do
       isPreparingDecks $ update MarkSupplyPrepared $ PreparingSupply ps cards
 
   describe "add card to deck of player" $
-    it "adds card to deck of player" $ property $ \(SelectedPlayer ps pid) cards card ->
-      verifyPlayerUpdate (length . deck) (+1) ps pid (AddCardToDeck pid card) (PreparingDecks ps cards)
+    it "adds card to deck of player" $ property $ \(SelectedPlayerPreparingStartingDeck ps pid) cards card ->
+      let
+        playersPreparingStartingDecks (PreparingDecks preppers _) = preppers
+        playersPreparingStartingDecks _ = []
+      in
+        fmap (length . PlayerPreparingStartingDeck.deck) (find ((==) pid . PlayerPreparingStartingDeck.playerId) (playersPreparingStartingDecks (update (AddCardToDeck pid card) (PreparingDecks ps cards))))
+          === fmap ((+1) . length . PlayerPreparingStartingDeck.deck) (find ((==) pid . PlayerPreparingStartingDeck.playerId) ps)
+      --verifyPlayerUpdate (length . deck) (+1) ps pid (AddCardToDeck pid card) (PreparingDecks ps cards)
 
   describe "mark decks prepared" $
     it "begins drawing initial hands" $ property $ \ps cards ->
@@ -65,7 +72,7 @@ verifyPlayerUpdate prop change ps pid command gameState =
   fmap prop (findPlayer pid (players (update command gameState))) === fmap (change . prop) (findPlayer pid ps)
 
 findPlayer :: CandidateId -> [Player] -> Maybe Player
-findPlayer pid = find ((==) pid . playerId)
+findPlayer pid = find ((==) pid . Player.playerId)
 
 isPreparingSupply :: GameState -> Bool
 isPreparingSupply (PreparingSupply _ _) = True
@@ -84,4 +91,4 @@ isPrepared Prepared = True
 isPrepared _ = False
 
 dominion :: Player -> [Card]
-dominion = sortOn arbitraryCardOrder . liftA2 (++) deck hand
+dominion = sortOn arbitraryCardOrder . liftA2 (++) Player.deck hand

@@ -4,9 +4,12 @@ import Candidate
 import Command
 import GameState
 import Player
+import PlayerPreparingStartingDeck
 import Card
 
+import Data.Bool
 import Data.List
+import Control.Applicative
 
 update :: Command -> GameState -> GameState
 update (AddPlayer pid) = addPlayer pid
@@ -32,15 +35,18 @@ placeCardInSupply card (PreparingSupply pids cards) = PreparingSupply pids $ car
 placeCardInSupply _ _ = error "A card may only be placed in the supply during game preparation"
 
 beginPreparingDecks :: GameState -> GameState
-beginPreparingDecks (PreparingSupply pids cards) = PreparingDecks (Player.new <$> pids) cards
+beginPreparingDecks (PreparingSupply pids cards) =
+  PreparingDecks (PlayerPreparingStartingDeck.new <$> pids) cards
 beginPreparingDecks _ = error "Deck preparation should occur after the supply has been prepared"
 
 addCardToDeck :: CandidateId -> Card -> GameState -> GameState
-addCardToDeck pid card (PreparingDecks ps cards) = PreparingDecks (mapPlayer pid (mapDeck (card :)) ps) cards
+addCardToDeck pid card (PreparingDecks ps cards) =
+  PreparingDecks (alterElem pid PlayerPreparingStartingDeck.playerId (alterDeck (card :)) ps) cards
 addCardToDeck _ _ _ = error "A card may only be added to a deck during game preparation"
 
 beginDrawingInitialHands :: GameState -> GameState
-beginDrawingInitialHands (PreparingDecks ps cards) = DrawingInitialHands ps cards
+beginDrawingInitialHands (PreparingDecks ps cards) =
+  DrawingInitialHands (Player.fromPlayerPreparingStartingDeck <$> ps) cards
 beginDrawingInitialHands _ = error "Drawing initial hands must occur after decks have been prepared"
 
 drawCard :: CandidateId -> Card -> GameState -> GameState
@@ -48,5 +54,11 @@ drawCard pid card (DrawingInitialHands ps cards) =
   DrawingInitialHands (mapPlayer pid (mapHand (card :) . mapDeck (delete card)) ps) cards
 drawCard _ _ _ = error "A card may only be drawn while players are drawing their initial hands"
 
+alterWhere :: (a -> Bool) -> (a -> a) -> [a] -> [a]
+alterWhere p f = fmap $ liftA3 bool id f p
+
+alterElem :: Eq b => b -> (a -> b) -> (a -> a) -> [a] -> [a]
+alterElem x on = alterWhere ((==) x . on)
+
 mapPlayer :: CandidateId -> (Player -> Player) -> [Player] -> [Player]
-mapPlayer pid f = fmap (\p -> if playerId p == pid then f p else id p)
+mapPlayer pid f = fmap (\p -> if Player.playerId p == pid then f p else id p)

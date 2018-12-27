@@ -4,6 +4,7 @@ module ArbitraryInstances where
 import Card
 import EvaluationParameters
 import Player
+import PlayerPreparingStartingDeck
 import Candidate
 import Strategy
 
@@ -20,6 +21,9 @@ instance Arbitrary Candidate where
 
 instance Arbitrary Player where
   arbitrary = liftA3 Player arbitrary arbitrary arbitrary
+
+instance Arbitrary PlayerPreparingStartingDeck where
+  arbitrary = liftA2 PlayerPreparingStartingDeck arbitrary arbitrary
 
 instance Arbitrary CandidateId where
   arbitrary = CandidateId <$> arbitrary
@@ -63,26 +67,31 @@ validCandidateIds (FourCandidateIds id1 id2 id3 id4) = [id1, id2, id3, id4]
 validCandidates :: Gen [Candidate]
 validCandidates = validCandidateIds <$> arbitrary >>= traverse (\cid -> Candidate cid <$> arbitrary)
 
+validPlayersPreparingStartingDecks :: Gen [PlayerPreparingStartingDeck]
+validPlayersPreparingStartingDecks =
+  validCandidateIds <$> arbitrary >>= traverse (\cid -> PlayerPreparingStartingDeck cid <$> arbitrary)
+
 validPlayers :: Gen [Player]
 validPlayers = validCandidateIds <$> arbitrary >>= traverse (\cid -> liftA2 (Player cid) arbitrary arbitrary)
 
-data SelectedPlayer = SelectedPlayer [Player] CandidateId
+data SelectedPlayerPreparingStartingDeck =
+  SelectedPlayerPreparingStartingDeck [PlayerPreparingStartingDeck] CandidateId
   deriving (Eq, Show)
 
-instance Arbitrary SelectedPlayer where
-  arbitrary = suchThat validPlayers (not . null)
-    >>= \ps -> SelectedPlayer ps <$> selectPlayer ps
+instance Arbitrary SelectedPlayerPreparingStartingDeck where
+  arbitrary = suchThat validPlayersPreparingStartingDecks (not . null)
+    >>= \ps -> SelectedPlayerPreparingStartingDeck ps <$> selectPlayer ps
     where
-      selectPlayer :: [Player] -> Gen CandidateId
-      selectPlayer = elements . fmap playerId
+      selectPlayer :: [PlayerPreparingStartingDeck] -> Gen CandidateId
+      selectPlayer = elements . fmap PlayerPreparingStartingDeck.playerId
 
 data CardInDeck = CardInDeck [Player] CandidateId Card
   deriving (Eq, Show)
 
 instance Arbitrary CardInDeck where
-  arbitrary = suchThat validPlayers (not . null . concatMap deck)
+  arbitrary = suchThat validPlayers (not . null . concatMap Player.deck)
     >>= \ps -> uncurry (CardInDeck ps) <$> selectPlayerAndCard ps
     where
       selectPlayerAndCard :: [Player] -> Gen (CandidateId, Card)
-      selectPlayerAndCard ps = (elements . filter (not . null . deck)) ps
-        >>= \p -> (,) (playerId p) <$> (elements . deck) p
+      selectPlayerAndCard ps = (elements . filter (not . null . Player.deck)) ps
+        >>= \p -> (,) (Player.playerId p) <$> (elements . Player.deck) p
