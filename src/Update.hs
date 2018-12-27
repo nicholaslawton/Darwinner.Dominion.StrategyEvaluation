@@ -24,15 +24,15 @@ addPlayer pid (New pids) = New $ pid : pids
 addPlayer _ _ = error "A player may not be added after preparation of the game has commenced"
 
 beginPreparingSupply :: GameState -> GameState
-beginPreparingSupply (New pids) = PreparingSupply (Player.new <$> pids) []
+beginPreparingSupply (New pids) = PreparingSupply pids []
 beginPreparingSupply _ = error "Cannot prepare the supply of a game which has already begun"
 
 placeCardInSupply :: Card -> GameState -> GameState
-placeCardInSupply card (PreparingSupply ps cards) = PreparingSupply ps $ card : cards
+placeCardInSupply card (PreparingSupply pids cards) = PreparingSupply pids $ card : cards
 placeCardInSupply _ _ = error "A card may only be placed in the supply during game preparation"
 
 beginPreparingDecks :: GameState -> GameState
-beginPreparingDecks (PreparingSupply ps cards) = PreparingDecks ps cards
+beginPreparingDecks (PreparingSupply pids cards) = PreparingDecks (Player.new <$> pids) cards
 beginPreparingDecks _ = error "Deck preparation should occur after the supply has been prepared"
 
 addCardToDeck :: CandidateId -> Card -> GameState -> GameState

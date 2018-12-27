@@ -10,7 +10,7 @@ import Card
 
 data GameState
   = New [CandidateId]
-  | PreparingSupply [Player] [Card]
+  | PreparingSupply [CandidateId] [Card]
   | PreparingDecks [Player] [Card]
   | DrawingInitialHands [Player] [Card]
   | Prepared
@@ -18,7 +18,7 @@ data GameState
 
 players :: GameState -> [Player]
 players (New pids) = Player.new <$> pids
-players (PreparingSupply ps _) = ps
+players (PreparingSupply pids _) = Player.new <$> pids
 players (PreparingDecks ps _) = ps
 players (DrawingInitialHands ps _) = ps
 players Prepared = []
