@@ -38,11 +38,10 @@ nextCommand = do
   game <- lift get
   case Game.state game of
 
-    New ps ->
+    New pids ->
       return $ fromMaybe MarkPlayersReady $ AddPlayer <$> nextPlayer
         where
-          nextPlayer = listToMaybe $ filter (not . inGame) $ candidateId <$> candidates
-          inGame cid = elem cid (playerId <$> ps)
+          nextPlayer = listToMaybe $ filter (not . (`elem` pids)) $ candidateId <$> candidates
 
     PreparingSupply _ cards
       | countElem Copper cards < 60 - length candidates * 7 -> return $ PlaceCardInSupply Copper

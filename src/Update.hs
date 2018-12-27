@@ -20,11 +20,11 @@ update MarkInitialHandsDrawn = const Prepared
 update Noop = id
 
 addPlayer :: CandidateId -> GameState -> GameState
-addPlayer pid (New ps) = New $ Player.new pid : ps
+addPlayer pid (New pids) = New $ pid : pids
 addPlayer _ _ = error "A player may not be added after preparation of the game has commenced"
 
 beginPreparingSupply :: GameState -> GameState
-beginPreparingSupply (New ps) = PreparingSupply ps []
+beginPreparingSupply (New pids) = PreparingSupply (Player.new <$> pids) []
 beginPreparingSupply _ = error "Cannot prepare the supply of a game which has already begun"
 
 placeCardInSupply :: Card -> GameState -> GameState

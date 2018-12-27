@@ -4,11 +4,12 @@ module GameState
   , supply
   ) where
 
+import Candidate
 import Player
 import Card
 
 data GameState
-  = New [Player]
+  = New [CandidateId]
   | PreparingSupply [Player] [Card]
   | PreparingDecks [Player] [Card]
   | DrawingInitialHands [Player] [Card]
@@ -16,7 +17,7 @@ data GameState
   deriving (Eq, Show)
 
 players :: GameState -> [Player]
-players (New ps) = ps
+players (New pids) = Player.new <$> pids
 players (PreparingSupply ps _) = ps
 players (PreparingDecks ps _) = ps
 players (DrawingInitialHands ps _) = ps

@@ -19,8 +19,8 @@ updateTests :: SpecWith ()
 updateTests = describe "update" $ do
 
   describe "add player to new game" $
-    it "adds player" $ property $ \ps player ->
-      length (players (update (AddPlayer player) (New ps))) === length ps + 1
+    it "adds player" $ property $ \pids pid ->
+      length (players (update (AddPlayer pid) (New pids))) === length pids + 1
 
   describe "mark players ready" $
     it "begins preparing supply" $ property $
