@@ -69,7 +69,7 @@ nextCommand = do
             fmap (flip (,) card . playerId) . listToMaybe . filter ((< target) . countElem card . deck)
 
     DrawingInitialHands ps _ ->
-      fromMaybe (return Noop) $ lift . drawCard <$> playerWithIncompleteHand ps
+      fromMaybe (return MarkInitialHandsDrawn) $ lift . drawCard <$> playerWithIncompleteHand ps
         where
           playerWithIncompleteHand :: [Player] -> Maybe Player
           playerWithIncompleteHand = listToMaybe . filter ((< 5) . length . hand)
