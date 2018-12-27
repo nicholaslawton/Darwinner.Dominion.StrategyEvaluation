@@ -4,10 +4,12 @@ module Main where
 
 import Control.Monad.Trans.Reader
 import Control.Monad.Trans.State
+import Control.Monad.Trans.Class
 import Data.ByteString.Lazy (toStrict)
 import Data.Text.Lazy (pack)
 import Network.HTTP.Types.Status
 import Web.Scotty
+import System.Random
 
 import Parsing
 import EvaluationParameters
@@ -18,7 +20,8 @@ import Engine
 main :: IO ()
 main = scotty 3000 $
   post "/evaluate" $
-    fmap (evaluate 0) . parseEvaluationParameters . toStrict <$> body
+    lift randomIO
+      >>= \seed -> fmap (evaluate seed) . parseEvaluationParameters . toStrict <$> body
       >>= response
 
 evaluate :: Int -> EvaluationParameters -> [Command]

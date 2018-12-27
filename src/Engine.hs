@@ -52,7 +52,7 @@ nextCommand = do
       | countElem Estate cards < numVictoryCards -> return $ PlaceCardInSupply Estate
       | countElem Duchy cards < numVictoryCards -> return $ PlaceCardInSupply Duchy
       | countElem Province cards < numVictoryCards -> return $ PlaceCardInSupply Province
-      | otherwise -> return $ MarkSupplyPrepared
+      | otherwise -> return MarkSupplyPrepared
         where
           numVictoryCards = if length candidates == 2 then 8 else 12
 
