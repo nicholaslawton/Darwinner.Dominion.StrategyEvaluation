@@ -41,9 +41,14 @@ updateTests = describe "update" $ do
         playersPreparingStartingDecks (PreparingDecks preppers _) = preppers
         playersPreparingStartingDecks _ = []
       in
-        fmap (length . PlayerPreparingStartingDeck.deck) (find ((==) pid . PlayerPreparingStartingDeck.playerId) (playersPreparingStartingDecks (update (AddCardToDeck pid card) (PreparingDecks ps cards))))
-          === fmap ((+1) . length . PlayerPreparingStartingDeck.deck) (find ((==) pid . PlayerPreparingStartingDeck.playerId) ps)
-      --verifyPlayerUpdate (length . deck) (+1) ps pid (AddCardToDeck pid card) (PreparingDecks ps cards)
+        verifyUpdate
+          (length . PlayerPreparingStartingDeck.deck)
+          (+1)
+          (find ((==) pid . PlayerPreparingStartingDeck.playerId))
+          playersPreparingStartingDecks
+          ps
+          (AddCardToDeck pid card)
+          (PreparingDecks ps cards)
 
   describe "mark decks prepared" $
     it "begins drawing initial hands" $ property $ \ps cards ->
@@ -70,6 +75,19 @@ verifyPlayerUpdate :: (Eq a, Show a) =>
   -> Property
 verifyPlayerUpdate prop change ps pid command gameState =
   fmap prop (findPlayer pid (players (update command gameState))) === fmap (change . prop) (findPlayer pid ps)
+
+verifyUpdate :: (Eq a, Show a) =>
+  (PlayerPreparingStartingDeck -> a)
+  -> (a -> a)
+  -> ([PlayerPreparingStartingDeck] -> Maybe PlayerPreparingStartingDeck)
+  -> (GameState -> [PlayerPreparingStartingDeck])
+  -> [PlayerPreparingStartingDeck]
+  -> Command
+  -> GameState
+  -> Property
+verifyUpdate prop change selector collectionSelector initialCollection command gameState =
+  fmap prop (selector (collectionSelector (update command gameState)))
+    === fmap (change . prop) (selector initialCollection)
 
 findPlayer :: CandidateId -> [Player] -> Maybe Player
 findPlayer pid = find ((==) pid . Player.playerId)
