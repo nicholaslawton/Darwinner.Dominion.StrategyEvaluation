@@ -67,4 +67,4 @@ alterElem :: Eq b => b -> (a -> b) -> (a -> a) -> [a] -> [a]
 alterElem x on = alterWhere ((==) x . on)
 
 alterPlayer :: CandidateId -> (Player -> Player) -> [Player] -> [Player]
-alterPlayer pid f = fmap (\p -> if Player.playerId p == pid then f p else id p)
+alterPlayer pid = alterElem pid Player.playerId
