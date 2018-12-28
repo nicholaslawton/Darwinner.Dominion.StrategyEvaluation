@@ -37,18 +37,16 @@ updateTests = describe "update" $ do
 
   describe "add card to deck of player" $
     it "adds card to deck of player" $ property $ \(SelectedPlayerPreparingStartingDeck ps pid) cards card ->
-      let
-        playersPreparingStartingDecks (PreparingDecks preppers _) = preppers
-        playersPreparingStartingDecks _ = []
-      in
-        verifyUpdate
-          (length . PlayerPreparingStartingDeck.deck)
-          (+1)
-          (find ((==) pid . PlayerPreparingStartingDeck.playerId))
-          playersPreparingStartingDecks
-          ps
-          (AddCardToDeck pid card)
-          (PreparingDecks ps cards)
+      verifyUpdate
+        (length . PlayerPreparingStartingDeck.deck)
+        (+1)
+        (find ((==) pid . PlayerPreparingStartingDeck.playerId))
+        (\x -> case x of
+          PreparingDecks preppers _ -> preppers
+          _ -> [])
+        ps
+        (AddCardToDeck pid card)
+        (PreparingDecks ps cards)
 
   describe "mark decks prepared" $
     it "begins drawing initial hands" $ property $ \ps cards ->
