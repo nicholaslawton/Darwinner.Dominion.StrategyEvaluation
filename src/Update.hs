@@ -41,13 +41,7 @@ beginPreparingDecks _ = error "Deck preparation should occur after the supply ha
 
 addCardToDeck :: CandidateId -> Card -> GameState -> GameState
 addCardToDeck pid card (PreparingDecks ps cards) =
-  PreparingDecks
-    (alterElem
-      PlayerPreparingStartingDeck.playerId
-      (PlayerPreparingStartingDeck.alterDeck (card :))
-      pid
-      ps)
-    cards
+  PreparingDecks (alterStartingDeck (card :) pid ps) cards
 addCardToDeck _ _ _ = error "A card may only be added to a deck during game preparation"
 
 beginDrawingInitialHands :: GameState -> GameState
@@ -68,3 +62,11 @@ alterElem on f x = alterWhere ((==) x . on) f
 
 alterPlayer :: (Player -> Player) -> CandidateId -> [Player] -> [Player]
 alterPlayer = alterElem Player.playerId
+
+alterStartingDeck ::
+  ([Card] -> [Card])
+  -> CandidateId
+  -> [PlayerPreparingStartingDeck]
+  -> [PlayerPreparingStartingDeck]
+alterStartingDeck alteration =
+  alterElem PlayerPreparingStartingDeck.playerId (PlayerPreparingStartingDeck.alterDeck alteration)
