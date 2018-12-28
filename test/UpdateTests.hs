@@ -54,10 +54,10 @@ updateTests = describe "update" $ do
 
   describe "draw card" $ do
     it "adds card to hand" $ property $ \(CardInDeck ps pid card) cards ->
-      verifyPlayerUpdate (length . hand) (+1) ps pid (DrawCard pid card) (DrawingInitialHands ps cards)
+      verifyPlayerUpdate (length . hand) (+1) pid ps (DrawCard pid card) (DrawingInitialHands ps cards)
 
     it "does not alter dominion of player" $ property $ \(CardInDeck ps pid card) cards ->
-      verifyPlayerUpdate dominion id ps pid (DrawCard pid card) (DrawingInitialHands ps cards)
+      verifyPlayerUpdate dominion id pid ps (DrawCard pid card) (DrawingInitialHands ps cards)
 
   describe "mark initial hands drawn" $
     it "transitions to prepared" $ property $ \ps cards ->
@@ -66,13 +66,12 @@ updateTests = describe "update" $ do
 verifyPlayerUpdate :: (Eq a, Show a) =>
   (Player -> a)
   -> (a -> a)
-  -> [Player]
   -> CandidateId
+  -> [Player]
   -> Command
   -> GameState
   -> Property
-verifyPlayerUpdate prop change ps pid command gameState =
-  fmap prop (findPlayer pid (players (update command gameState))) === fmap (change . prop) (findPlayer pid ps)
+verifyPlayerUpdate prop change pid = verifyUpdate prop change (findPlayer pid) players
 
 verifyUpdate :: (Eq b, Show b) =>
   (a -> b)
