@@ -37,7 +37,8 @@ updateTests = describe "update" $ do
 
   describe "add card to deck of player" $
     it "adds card to deck of player" $ property $ \(SelectedPlayerPreparingStartingDeck ps pid) cards card ->
-      verifyPlayerPreparingStartingDeckUpdate pid
+      verifyPlayerPreparingStartingDeckUpdate
+        pid
         (length . PlayerPreparingStartingDeck.deck)
         (+1)
         ps
@@ -67,7 +68,7 @@ verifyPlayerUpdate :: (Eq a, Show a) =>
   -> Command
   -> GameState
   -> Property
-verifyPlayerUpdate pid = verifyUpdate (findPlayer pid) players
+verifyPlayerUpdate pid = verifyUpdate (find ((==) pid . Player.playerId)) players
 
 verifyPlayerPreparingStartingDeckUpdate :: (Eq a, Show a) =>
   CandidateId
@@ -95,9 +96,6 @@ verifyUpdate :: (Eq b, Show b) =>
 verifyUpdate selector collectionSelector prop change initialCollection command gameState =
   fmap prop (selector (collectionSelector (update command gameState)))
     === fmap (change . prop) (selector initialCollection)
-
-findPlayer :: CandidateId -> [Player] -> Maybe Player
-findPlayer pid = find ((==) pid . Player.playerId)
 
 isPreparingSupply :: GameState -> Bool
 isPreparingSupply (PreparingSupply _ _) = True
