@@ -5,6 +5,7 @@ import Card
 import EvaluationParameters
 import Player
 import PlayerPreparingStartingDeck
+import PlayerDrawingInitialHand
 import Candidate
 import Strategy
 
@@ -24,6 +25,9 @@ instance Arbitrary Player where
 
 instance Arbitrary PlayerPreparingStartingDeck where
   arbitrary = liftA2 PlayerPreparingStartingDeck arbitrary arbitrary
+
+instance Arbitrary PlayerDrawingInitialHand where
+  arbitrary = liftA3 PlayerDrawingInitialHand arbitrary arbitrary arbitrary
 
 instance Arbitrary CandidateId where
   arbitrary = CandidateId <$> arbitrary
@@ -71,6 +75,11 @@ validPlayersPreparingStartingDecks :: Gen [PlayerPreparingStartingDeck]
 validPlayersPreparingStartingDecks =
   validCandidateIds <$> arbitrary >>= traverse (\cid -> PlayerPreparingStartingDeck cid <$> arbitrary)
 
+validPlayersDrawingInitialHands :: Gen [PlayerDrawingInitialHand]
+validPlayersDrawingInitialHands =
+  validCandidateIds <$> arbitrary
+    >>= traverse (\cid -> liftA2 (PlayerDrawingInitialHand cid) arbitrary arbitrary)
+
 validPlayers :: Gen [Player]
 validPlayers = validCandidateIds <$> arbitrary >>= traverse (\cid -> liftA2 (Player cid) arbitrary arbitrary)
 
@@ -85,13 +94,16 @@ instance Arbitrary SelectedPlayerPreparingStartingDeck where
       selectPlayer :: [PlayerPreparingStartingDeck] -> Gen CandidateId
       selectPlayer = elements . fmap PlayerPreparingStartingDeck.playerId
 
-data CardInDeck = CardInDeck [Player] CandidateId Card
+data CardInStartingDeck = CardInStartingDeck [PlayerDrawingInitialHand] CandidateId Card
   deriving (Eq, Show)
 
-instance Arbitrary CardInDeck where
-  arbitrary = suchThat validPlayers (not . null . concatMap Player.deck)
-    >>= \ps -> uncurry (CardInDeck ps) <$> selectPlayerAndCard ps
+instance Arbitrary CardInStartingDeck where
+  arbitrary = suchThat validPlayersDrawingInitialHands (not . null . concatMap PlayerDrawingInitialHand.deck)
+    >>= \ps -> uncurry (CardInStartingDeck ps) <$> selectPlayerAndCard ps
     where
-      selectPlayerAndCard :: [Player] -> Gen (CandidateId, Card)
-      selectPlayerAndCard ps = (elements . filter (not . null . Player.deck)) ps
-        >>= \p -> (,) (Player.playerId p) <$> (elements . Player.deck) p
+      selectPlayerAndCard :: [PlayerDrawingInitialHand] -> Gen (CandidateId, Card)
+      selectPlayerAndCard ps =
+        (elements . filter (not . null . PlayerDrawingInitialHand.deck)) ps >>= selectCard
+      selectCard :: PlayerDrawingInitialHand -> Gen (CandidateId, Card)
+      selectCard p =
+        (,) (PlayerDrawingInitialHand.playerId p) <$> (elements . PlayerDrawingInitialHand.deck) p

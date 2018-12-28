@@ -4,8 +4,8 @@ import Card
 import Game
 import GameState
 import Update
-import Player
 import PlayerPreparingStartingDeck
+import PlayerDrawingInitialHand
 import Command
 import EvaluationParameters
 import Candidate
@@ -75,10 +75,12 @@ nextCommand = do
     DrawingInitialHands ps _ ->
       fromMaybe (return MarkInitialHandsDrawn) $ lift . drawCard <$> playerWithIncompleteHand ps
         where
-          playerWithIncompleteHand :: [Player] -> Maybe Player
-          playerWithIncompleteHand = listToMaybe . filter ((< 5) . length . hand)
-          drawCard :: Player -> State Game Command
-          drawCard p = maybe emptyDeckError (DrawCard (Player.playerId p)) <$> randomElement (Player.deck p)
+          playerWithIncompleteHand :: [PlayerDrawingInitialHand] -> Maybe PlayerDrawingInitialHand
+          playerWithIncompleteHand = listToMaybe . filter ((< 5) . length . PlayerDrawingInitialHand.hand)
+          drawCard :: PlayerDrawingInitialHand -> State Game Command
+          drawCard p =
+            maybe emptyDeckError (DrawCard (PlayerDrawingInitialHand.playerId p))
+              <$> randomElement (PlayerDrawingInitialHand.deck p)
           emptyDeckError = error "unexpected empty deck when drawing card for initial hand"
 
     Prepared -> return Noop

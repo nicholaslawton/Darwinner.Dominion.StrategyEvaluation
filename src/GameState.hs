@@ -7,13 +7,14 @@ module GameState
 import Candidate
 import Player
 import PlayerPreparingStartingDeck
+import PlayerDrawingInitialHand
 import Card
 
 data GameState
   = New [CandidateId]
   | PreparingSupply [CandidateId] [Card]
   | PreparingDecks [PlayerPreparingStartingDeck] [Card]
-  | DrawingInitialHands [Player] [Card]
+  | DrawingInitialHands [PlayerDrawingInitialHand] [Card]
   | Prepared
   deriving (Eq, Show)
 
@@ -21,7 +22,7 @@ players :: GameState -> [Player]
 players (New pids) = Player.new <$> pids
 players (PreparingSupply pids _) = Player.new <$> pids
 players (PreparingDecks ps _) = Player.fromPlayerPreparingStartingDeck <$> ps
-players (DrawingInitialHands ps _) = ps
+players (DrawingInitialHands ps _) = Player.fromPlayerDrawingInitialHand <$> ps
 players Prepared = []
 
 supply :: GameState -> [Card]

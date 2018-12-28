@@ -3,8 +3,8 @@ module Update (update) where
 import Candidate
 import Command
 import GameState
-import Player
 import PlayerPreparingStartingDeck
+import PlayerDrawingInitialHand
 import Card
 
 import Data.Bool
@@ -45,12 +45,17 @@ addCardToDeck _ _ _ = error "A card may only be added to a deck during game prep
 
 beginDrawingInitialHands :: GameState -> GameState
 beginDrawingInitialHands (PreparingDecks ps cards) =
-  DrawingInitialHands (Player.fromPlayerPreparingStartingDeck <$> ps) cards
+  DrawingInitialHands (PlayerDrawingInitialHand.fromPlayerPreparingStartingDeck <$> ps) cards
 beginDrawingInitialHands _ = error "Drawing initial hands must occur after decks have been prepared"
 
 drawCard :: CandidateId -> Card -> GameState -> GameState
 drawCard pid card (DrawingInitialHands ps cards) =
-  DrawingInitialHands (alterPlayer (alterHand (card :) . Player.alterDeck (delete card)) pid ps) cards
+  DrawingInitialHands
+    (alterPlayerDrawingInitialHand
+      (PlayerDrawingInitialHand.alterHand (card :) . PlayerDrawingInitialHand.alterDeck (delete card))
+      pid
+      ps)
+    cards
 drawCard _ _ _ = error "A card may only be drawn while players are drawing their initial hands"
 
 alterWhere :: (a -> Bool) -> (a -> a) -> [a] -> [a]
@@ -59,9 +64,6 @@ alterWhere p f = fmap $ liftA3 bool id f p
 alterElem :: Eq b => (a -> b) -> (a -> a) -> b -> [a] -> [a]
 alterElem on f x = alterWhere ((==) x . on) f
 
-alterPlayer :: (Player -> Player) -> CandidateId -> [Player] -> [Player]
-alterPlayer = alterElem Player.playerId
-
 alterStartingDeck ::
   ([Card] -> [Card])
   -> CandidateId
@@ -69,3 +71,10 @@ alterStartingDeck ::
   -> [PlayerPreparingStartingDeck]
 alterStartingDeck alteration =
   alterElem PlayerPreparingStartingDeck.playerId (PlayerPreparingStartingDeck.alterDeck alteration)
+
+alterPlayerDrawingInitialHand ::
+  (PlayerDrawingInitialHand -> PlayerDrawingInitialHand)
+  -> CandidateId
+  -> [PlayerDrawingInitialHand]
+  -> [PlayerDrawingInitialHand]
+alterPlayerDrawingInitialHand = alterElem PlayerDrawingInitialHand.playerId

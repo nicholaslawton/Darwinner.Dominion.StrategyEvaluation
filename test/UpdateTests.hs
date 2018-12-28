@@ -6,6 +6,7 @@ import Command
 import GameState
 import Player
 import PlayerPreparingStartingDeck
+import PlayerDrawingInitialHand
 import Card
 
 import Data.List
@@ -50,11 +51,23 @@ updateTests = describe "update" $ do
       isDrawingInitialHands $ update MarkDecksPrepared $ PreparingDecks ps cards
 
   describe "draw card" $ do
-    it "adds card to hand" $ property $ \(CardInDeck ps pid card) cards ->
-      verifyPlayerUpdate pid (length . hand) (+1) ps (DrawCard pid card) (DrawingInitialHands ps cards)
+    it "adds card to hand" $ property $ \(CardInStartingDeck ps pid card) cards ->
+      verifyPlayerDrawingInitialHandUpdate
+        pid
+        (length . PlayerDrawingInitialHand.hand)
+        (+1)
+        ps
+        (DrawCard pid card)
+        (DrawingInitialHands ps cards)
 
-    it "does not alter dominion of player" $ property $ \(CardInDeck ps pid card) cards ->
-      verifyPlayerUpdate pid dominion id ps (DrawCard pid card) (DrawingInitialHands ps cards)
+    it "does not alter dominion of player" $ property $ \(CardInStartingDeck ps pid card) cards ->
+      verifyPlayerDrawingInitialHandUpdate
+        pid
+        dominion
+        id
+        ps
+        (DrawCard pid card)
+        (DrawingInitialHands ps cards)
 
   describe "mark initial hands drawn" $
     it "transitions to prepared" $ property $ \ps cards ->
@@ -70,6 +83,20 @@ verifyPlayerUpdate :: (Eq a, Show a) =>
   -> Property
 verifyPlayerUpdate pid = verifyUpdate (find ((==) pid . Player.playerId)) players
 
+verifyPlayerDrawingInitialHandUpdate :: (Eq a, Show a) =>
+  CandidateId
+  -> (PlayerDrawingInitialHand -> a)
+  -> (a -> a)
+  -> [PlayerDrawingInitialHand]
+  -> Command
+  -> GameState
+  -> Property
+verifyPlayerDrawingInitialHandUpdate pid = verifyUpdate
+  (find ((==) pid . PlayerDrawingInitialHand.playerId))
+  (\x -> case x of
+    DrawingInitialHands drawers _ -> drawers
+    _ -> [])
+
 verifyPlayerPreparingStartingDeckUpdate :: (Eq a, Show a) =>
   CandidateId
   -> (PlayerPreparingStartingDeck -> a)
@@ -79,10 +106,10 @@ verifyPlayerPreparingStartingDeckUpdate :: (Eq a, Show a) =>
   -> GameState
   -> Property
 verifyPlayerPreparingStartingDeckUpdate pid = verifyUpdate
-    (find ((==) pid . PlayerPreparingStartingDeck.playerId))
-    (\x -> case x of
-      PreparingDecks preppers _ -> preppers
-      _ -> [])
+  (find ((==) pid . PlayerPreparingStartingDeck.playerId))
+  (\x -> case x of
+    PreparingDecks preppers _ -> preppers
+    _ -> [])
 
 verifyUpdate :: (Eq b, Show b) =>
   ([a] -> Maybe a)
@@ -113,5 +140,7 @@ isPrepared :: GameState -> Bool
 isPrepared Prepared = True
 isPrepared _ = False
 
-dominion :: Player -> [Card]
-dominion = sortOn arbitraryCardOrder . liftA2 (++) Player.deck hand
+dominion :: PlayerDrawingInitialHand -> [Card]
+dominion =
+  sortOn arbitraryCardOrder
+    . liftA2 (++) PlayerDrawingInitialHand.deck PlayerDrawingInitialHand.hand
