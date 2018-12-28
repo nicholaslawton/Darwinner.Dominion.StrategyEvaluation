@@ -43,9 +43,9 @@ addCardToDeck :: CandidateId -> Card -> GameState -> GameState
 addCardToDeck pid card (PreparingDecks ps cards) =
   PreparingDecks
     (alterElem
-      pid
       PlayerPreparingStartingDeck.playerId
       (PlayerPreparingStartingDeck.alterDeck (card :))
+      pid
       ps)
     cards
 addCardToDeck _ _ _ = error "A card may only be added to a deck during game preparation"
@@ -57,14 +57,14 @@ beginDrawingInitialHands _ = error "Drawing initial hands must occur after decks
 
 drawCard :: CandidateId -> Card -> GameState -> GameState
 drawCard pid card (DrawingInitialHands ps cards) =
-  DrawingInitialHands (alterPlayer pid (alterHand (card :) . Player.alterDeck (delete card)) ps) cards
+  DrawingInitialHands (alterPlayer (alterHand (card :) . Player.alterDeck (delete card)) pid ps) cards
 drawCard _ _ _ = error "A card may only be drawn while players are drawing their initial hands"
 
 alterWhere :: (a -> Bool) -> (a -> a) -> [a] -> [a]
 alterWhere p f = fmap $ liftA3 bool id f p
 
-alterElem :: Eq b => b -> (a -> b) -> (a -> a) -> [a] -> [a]
-alterElem x on = alterWhere ((==) x . on)
+alterElem :: Eq b => (a -> b) -> (a -> a) -> b -> [a] -> [a]
+alterElem on f x = alterWhere ((==) x . on) f
 
-alterPlayer :: CandidateId -> (Player -> Player) -> [Player] -> [Player]
-alterPlayer pid = alterElem pid Player.playerId
+alterPlayer :: (Player -> Player) -> CandidateId -> [Player] -> [Player]
+alterPlayer = alterElem Player.playerId
