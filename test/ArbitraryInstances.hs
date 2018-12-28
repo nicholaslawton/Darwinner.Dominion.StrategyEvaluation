@@ -88,7 +88,7 @@ data SelectedPlayerPreparingStartingDeck =
   deriving (Eq, Show)
 
 instance Arbitrary SelectedPlayerPreparingStartingDeck where
-  arbitrary = suchThat validPlayersPreparingStartingDecks (not . null)
+  arbitrary = validPlayersPreparingStartingDecks
     >>= \ps -> SelectedPlayerPreparingStartingDeck ps <$> selectPlayer ps
     where
       selectPlayer :: [PlayerPreparingStartingDeck] -> Gen CandidateId
@@ -98,12 +98,13 @@ data CardInStartingDeck = CardInStartingDeck [PlayerDrawingInitialHand] Candidat
   deriving (Eq, Show)
 
 instance Arbitrary CardInStartingDeck where
-  arbitrary = suchThat validPlayersDrawingInitialHands (not . null . concatMap PlayerDrawingInitialHand.deck)
-    >>= \ps -> uncurry (CardInStartingDeck ps) <$> selectPlayerAndCard ps
+  arbitrary =
+    suchThat validPlayersDrawingInitialHands (not . null . concatMap PlayerDrawingInitialHand.deck)
+      >>= \ps -> uncurry (CardInStartingDeck ps) <$> selectPlayerAndCard ps
     where
       selectPlayerAndCard :: [PlayerDrawingInitialHand] -> Gen (CandidateId, Card)
-      selectPlayerAndCard ps =
-        (elements . filter (not . null . PlayerDrawingInitialHand.deck)) ps >>= selectCard
+      selectPlayerAndCard ps = (elements . filter (not . null . PlayerDrawingInitialHand.deck)) ps
+        >>= selectCard
       selectCard :: PlayerDrawingInitialHand -> Gen (CandidateId, Card)
       selectCard p =
         (,) (PlayerDrawingInitialHand.playerId p) <$> (elements . PlayerDrawingInitialHand.deck) p
