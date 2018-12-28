@@ -3,7 +3,7 @@ module Player
   , Player.new
   , fromPlayerPreparingStartingDeck
   , Player.alterDeck
-  , mapHand
+  , alterHand
   ) where
 
 import Candidate
@@ -26,5 +26,5 @@ fromPlayerPreparingStartingDeck (PlayerPreparingStartingDeck pid d) = Player pid
 alterDeck :: ([Card] -> [Card]) -> Player -> Player
 alterDeck f p = p { Player.deck = f (Player.deck p) }
 
-mapHand :: ([Card] -> [Card]) -> Player -> Player
-mapHand f p = p { hand = f (hand p) }
+alterHand :: ([Card] -> [Card]) -> Player -> Player
+alterHand f p = p { hand = f (hand p) }
