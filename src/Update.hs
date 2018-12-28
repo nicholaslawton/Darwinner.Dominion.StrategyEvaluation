@@ -41,7 +41,13 @@ beginPreparingDecks _ = error "Deck preparation should occur after the supply ha
 
 addCardToDeck :: CandidateId -> Card -> GameState -> GameState
 addCardToDeck pid card (PreparingDecks ps cards) =
-  PreparingDecks (alterElem pid PlayerPreparingStartingDeck.playerId (alterDeck (card :)) ps) cards
+  PreparingDecks
+    (alterElem
+      pid
+      PlayerPreparingStartingDeck.playerId
+      (PlayerPreparingStartingDeck.alterDeck (card :))
+      ps)
+    cards
 addCardToDeck _ _ _ = error "A card may only be added to a deck during game preparation"
 
 beginDrawingInitialHands :: GameState -> GameState
@@ -51,7 +57,7 @@ beginDrawingInitialHands _ = error "Drawing initial hands must occur after decks
 
 drawCard :: CandidateId -> Card -> GameState -> GameState
 drawCard pid card (DrawingInitialHands ps cards) =
-  DrawingInitialHands (mapPlayer pid (mapHand (card :) . mapDeck (delete card)) ps) cards
+  DrawingInitialHands (mapPlayer pid (mapHand (card :) . Player.alterDeck (delete card)) ps) cards
 drawCard _ _ _ = error "A card may only be drawn while players are drawing their initial hands"
 
 alterWhere :: (a -> Bool) -> (a -> a) -> [a] -> [a]
