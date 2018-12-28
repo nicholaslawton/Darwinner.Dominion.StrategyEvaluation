@@ -57,7 +57,7 @@ beginDrawingInitialHands _ = error "Drawing initial hands must occur after decks
 
 drawCard :: CandidateId -> Card -> GameState -> GameState
 drawCard pid card (DrawingInitialHands ps cards) =
-  DrawingInitialHands (mapPlayer pid (alterHand (card :) . Player.alterDeck (delete card)) ps) cards
+  DrawingInitialHands (alterPlayer pid (alterHand (card :) . Player.alterDeck (delete card)) ps) cards
 drawCard _ _ _ = error "A card may only be drawn while players are drawing their initial hands"
 
 alterWhere :: (a -> Bool) -> (a -> a) -> [a] -> [a]
@@ -66,5 +66,5 @@ alterWhere p f = fmap $ liftA3 bool id f p
 alterElem :: Eq b => b -> (a -> b) -> (a -> a) -> [a] -> [a]
 alterElem x on = alterWhere ((==) x . on)
 
-mapPlayer :: CandidateId -> (Player -> Player) -> [Player] -> [Player]
-mapPlayer pid f = fmap (\p -> if Player.playerId p == pid then f p else id p)
+alterPlayer :: CandidateId -> (Player -> Player) -> [Player] -> [Player]
+alterPlayer pid f = fmap (\p -> if Player.playerId p == pid then f p else id p)
