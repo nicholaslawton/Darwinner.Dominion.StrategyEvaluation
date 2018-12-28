@@ -75,11 +75,11 @@ verifyPlayerUpdate prop change ps pid command gameState =
   fmap prop (findPlayer pid (players (update command gameState))) === fmap (change . prop) (findPlayer pid ps)
 
 verifyUpdate :: (Eq b, Show b) =>
-  (PlayerPreparingStartingDeck -> b)
+  (a -> b)
   -> (b -> b)
-  -> ([PlayerPreparingStartingDeck] -> Maybe PlayerPreparingStartingDeck)
-  -> (GameState -> [PlayerPreparingStartingDeck])
-  -> [PlayerPreparingStartingDeck]
+  -> ([a] -> Maybe a)
+  -> (GameState -> [a])
+  -> [a]
   -> Command
   -> GameState
   -> Property
