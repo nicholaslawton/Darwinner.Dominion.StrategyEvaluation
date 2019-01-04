@@ -137,7 +137,7 @@ isDrawingInitialHands (DrawingInitialHands _ _) = True
 isDrawingInitialHands _ = False
 
 isPrepared :: GameState -> Bool
-isPrepared Prepared = True
+isPrepared GameOver = True
 isPrepared _ = False
 
 dominion :: PlayerDrawingInitialHand -> [Card]

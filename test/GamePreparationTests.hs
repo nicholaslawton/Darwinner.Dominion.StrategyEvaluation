@@ -78,7 +78,7 @@ execUntil :: (Game -> Bool) -> EvaluationParameters -> Game -> Game
 execUntil predicate parameters = execState $ runReaderT (Engine.runUntil predicate) parameters
 
 prepared :: Game -> Bool
-prepared = liftA2 (||) ((== Prepared) . Game.state) ((>300) . length . Game.history)
+prepared = liftA2 (||) ((== GameOver) . Game.state) ((>300) . length . Game.history)
 
 categorise :: Ord k => (a -> k) -> (a -> v) -> [a] -> Map k [v]
 categorise key value xs = fromListWith (++) $ liftA2 (,) key ((: []) . value) <$> xs

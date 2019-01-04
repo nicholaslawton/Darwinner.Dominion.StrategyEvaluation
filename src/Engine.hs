@@ -22,7 +22,7 @@ import Control.Monad.Trans.Class
 import System.Random
 
 run :: ReaderT EvaluationParameters (State Game) ()
-run = runUntil ((== Prepared) . Game.state)
+run = runUntil ((== GameOver) . Game.state)
 
 runUntil :: (Game -> Bool) -> ReaderT EvaluationParameters (State Game) ()
 runUntil predicate = do
@@ -83,7 +83,7 @@ nextCommand = do
               <$> randomElement (PlayerDrawingInitialHand.deck p)
           emptyDeckError = error "unexpected empty deck when drawing card for initial hand"
 
-    Prepared -> return Noop
+    GameOver -> return Noop
 
 randomElement :: [a] -> State Game (Maybe a)
 randomElement [] = return Nothing
