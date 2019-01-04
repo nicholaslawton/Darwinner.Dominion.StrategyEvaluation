@@ -111,7 +111,7 @@ data CardInSupply = CardInSupply [Card] Card
   deriving (Eq, Show)
 
 instance Arbitrary CardInSupply where
-  arbitrary = arbitrary >>= fmap (uncurry CardInSupply) . selectedElement
+  arbitrary = arbitrary `suchThat` (not . null) >>= fmap (uncurry CardInSupply) . selectedElement
 
 selectedElement :: [a] -> Gen ([a], a)
 selectedElement = selectFrom elements
