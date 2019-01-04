@@ -15,6 +15,7 @@ data GameState
   | PreparingSupply [CandidateId] [Card]
   | PreparingDecks [PlayerPreparingStartingDeck] [Card]
   | DrawingInitialHands [PlayerDrawingInitialHand] [Card]
+  | InProgress
   | GameOver
   deriving (Eq, Show)
 
@@ -23,6 +24,7 @@ players (New pids) = Player.new <$> pids
 players (PreparingSupply pids _) = Player.new <$> pids
 players (PreparingDecks ps _) = Player.fromPlayerPreparingStartingDeck <$> ps
 players (DrawingInitialHands ps _) = Player.fromPlayerDrawingInitialHand <$> ps
+players InProgress = []
 players GameOver = []
 
 supply :: GameState -> [Card]
@@ -30,4 +32,5 @@ supply (New _) = []
 supply (PreparingSupply _ cards) = cards
 supply (PreparingDecks _ cards) = cards
 supply (DrawingInitialHands _ cards) = cards
+supply InProgress = []
 supply GameOver = []

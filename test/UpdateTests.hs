@@ -70,8 +70,8 @@ updateTests = describe "update" $ do
         (DrawingInitialHands ps cards)
 
   describe "mark initial hands drawn" $
-    it "transitions to prepared" $ property $ \ps cards ->
-      isPrepared $ update MarkInitialHandsDrawn $ DrawingInitialHands ps cards
+    it "transitions to in progress" $ property $ \ps cards ->
+      isInProgress $ update MarkInitialHandsDrawn $ DrawingInitialHands ps cards
 
 verifyPlayerUpdate :: (Eq a, Show a) =>
   CandidateId
@@ -136,9 +136,9 @@ isDrawingInitialHands :: GameState -> Bool
 isDrawingInitialHands (DrawingInitialHands _ _) = True
 isDrawingInitialHands _ = False
 
-isPrepared :: GameState -> Bool
-isPrepared GameOver = True
-isPrepared _ = False
+isInProgress :: GameState -> Bool
+isInProgress InProgress = True
+isInProgress _ = False
 
 dominion :: PlayerDrawingInitialHand -> [Card]
 dominion =

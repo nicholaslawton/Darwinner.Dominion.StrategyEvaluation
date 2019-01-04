@@ -19,7 +19,7 @@ update MarkSupplyPrepared = beginPreparingDecks
 update (AddCardToDeck pid card) = addCardToDeck pid card
 update MarkDecksPrepared = beginDrawingInitialHands
 update (DrawCard pid card) = drawCard pid card
-update MarkInitialHandsDrawn = const GameOver
+update MarkInitialHandsDrawn = const InProgress
 update Noop = id
 
 addPlayer :: CandidateId -> GameState -> GameState
