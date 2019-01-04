@@ -20,8 +20,8 @@ data GameState
   deriving (Eq, Show)
 
 players :: GameState -> [Player]
-players (New pids) = Player.new <$> pids
-players (PreparingSupply pids _) = Player.new <$> pids
+players (New pids) = Player.fromPlayerId <$> pids
+players (PreparingSupply pids _) = Player.fromPlayerId <$> pids
 players (PreparingDecks ps _) = Player.fromPlayerPreparingStartingDeck <$> ps
 players (DrawingInitialHands ps _) = Player.fromPlayerDrawingInitialHand <$> ps
 players (InProgress ps _) = ps

@@ -21,7 +21,7 @@ instance Arbitrary Candidate where
   arbitrary = liftA2 Candidate arbitrary arbitrary
 
 instance Arbitrary Player where
-  arbitrary = liftA3 Player arbitrary arbitrary arbitrary
+  arbitrary = liftM4 Player arbitrary arbitrary arbitrary arbitrary
 
 instance Arbitrary PlayerPreparingStartingDeck where
   arbitrary = liftA2 PlayerPreparingStartingDeck arbitrary arbitrary
@@ -72,16 +72,16 @@ validCandidates :: Gen [Candidate]
 validCandidates = validCandidateIds <$> arbitrary >>= traverse (\cid -> Candidate cid <$> arbitrary)
 
 validPlayersPreparingStartingDecks :: Gen [PlayerPreparingStartingDeck]
-validPlayersPreparingStartingDecks =
-  validCandidateIds <$> arbitrary >>= traverse (\cid -> PlayerPreparingStartingDeck cid <$> arbitrary)
+validPlayersPreparingStartingDecks = validCandidateIds <$> arbitrary
+  >>= traverse (\cid -> PlayerPreparingStartingDeck cid <$> arbitrary)
 
 validPlayersDrawingInitialHands :: Gen [PlayerDrawingInitialHand]
-validPlayersDrawingInitialHands =
-  validCandidateIds <$> arbitrary
-    >>= traverse (\cid -> liftA2 (PlayerDrawingInitialHand cid) arbitrary arbitrary)
+validPlayersDrawingInitialHands = validCandidateIds <$> arbitrary
+  >>= traverse (\cid -> liftA2 (PlayerDrawingInitialHand cid) arbitrary arbitrary)
 
 validPlayers :: Gen [Player]
-validPlayers = validCandidateIds <$> arbitrary >>= traverse (\cid -> liftA2 (Player cid) arbitrary arbitrary)
+validPlayers = validCandidateIds <$> arbitrary
+  >>= traverse (\cid -> liftA3 (Player cid) arbitrary arbitrary arbitrary)
 
 data SelectedPlayerPreparingStartingDeck =
   SelectedPlayerPreparingStartingDeck [PlayerPreparingStartingDeck] CandidateId
