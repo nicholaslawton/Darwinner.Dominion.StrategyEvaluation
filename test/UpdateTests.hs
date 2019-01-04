@@ -10,7 +10,6 @@ import PlayerDrawingInitialHand
 import Card
 
 import Data.List
-import Control.Applicative
 
 import ArbitraryInstances
 import CardOrder
@@ -63,7 +62,7 @@ updateTests = describe "update" $ do
     it "does not alter dominion of player" $ property $ \(CardInStartingDeck ps pid card) cards ->
       verifyPlayerDrawingInitialHandUpdate
         pid
-        dominion
+        dominionWhileDrawingInitialHand
         id
         ps
         (DrawCard pid card)
@@ -144,7 +143,12 @@ isInProgress :: GameState -> Bool
 isInProgress (InProgress _ _) = True
 isInProgress _ = False
 
-dominion :: PlayerDrawingInitialHand -> [Card]
-dominion =
-  sortOn arbitraryCardOrder
-    . liftA2 (++) PlayerDrawingInitialHand.deck PlayerDrawingInitialHand.hand
+dominionWhileDrawingInitialHand :: PlayerDrawingInitialHand -> [Card]
+dominionWhileDrawingInitialHand p =
+  sortOn arbitraryCardOrder $ concatMap ($ p) [PlayerDrawingInitialHand.deck, PlayerDrawingInitialHand.hand]
+
+dominion :: Player -> [Card]
+dominion p = sortOn arbitraryCardOrder $ concatMap ($ p) [Player.deck, Player.hand, Player.discard]
+
+cardsInPlay :: GameState -> [Card]
+cardsInPlay gameState = concatMap dominion (players gameState) ++ supply gameState
