@@ -10,6 +10,7 @@ import PlayerDrawingInitialHand
 import Card
 
 import Data.List
+import Control.Applicative
 
 import ArbitraryInstances
 import CardOrder
@@ -41,7 +42,6 @@ updateTests = describe "update" $ do
         pid
         (length . PlayerPreparingStartingDeck.deck)
         (+1)
-        ps
         (AddCardToDeck pid card)
         (PreparingDecks ps cards)
 
@@ -55,7 +55,6 @@ updateTests = describe "update" $ do
         pid
         (length . PlayerDrawingInitialHand.hand)
         (+1)
-        ps
         (DrawCard pid card)
         (DrawingInitialHands ps cards)
 
@@ -64,7 +63,6 @@ updateTests = describe "update" $ do
         pid
         dominionWhileDrawingInitialHand
         id
-        ps
         (DrawCard pid card)
         (DrawingInitialHands ps cards)
 
@@ -74,27 +72,25 @@ updateTests = describe "update" $ do
 
   describe "gain card" $
     it "adds card to discard" $ property $ \(SelectedPlayer ps pid) (CardInSupply cards card) ->
-      verifyPlayerUpdate pid (length . Player.discard) (+1) ps (GainCard pid card) (InProgress ps cards)
+      verifyPlayerUpdate pid (length . Player.discard) (+1) (GainCard pid card) (InProgress ps cards)
 
 verifyPlayerUpdate :: (Eq a, Show a) =>
   CandidateId
   -> (Player -> a)
   -> (a -> a)
-  -> [Player]
   -> Command
   -> GameState
   -> Property
-verifyPlayerUpdate pid = verifyUpdate (find ((==) pid . Player.playerId)) players
+verifyPlayerUpdate pid = verifyElementUpdate (find ((==) pid . Player.playerId)) players
 
 verifyPlayerDrawingInitialHandUpdate :: (Eq a, Show a) =>
   CandidateId
   -> (PlayerDrawingInitialHand -> a)
   -> (a -> a)
-  -> [PlayerDrawingInitialHand]
   -> Command
   -> GameState
   -> Property
-verifyPlayerDrawingInitialHandUpdate pid = verifyUpdate
+verifyPlayerDrawingInitialHandUpdate pid = verifyElementUpdate
   (find ((==) pid . PlayerDrawingInitialHand.playerId))
   (\x -> case x of
     DrawingInitialHands drawers _ -> drawers
@@ -104,28 +100,32 @@ verifyPlayerPreparingStartingDeckUpdate :: (Eq a, Show a) =>
   CandidateId
   -> (PlayerPreparingStartingDeck -> a)
   -> (a -> a)
-  -> [PlayerPreparingStartingDeck]
   -> Command
   -> GameState
   -> Property
-verifyPlayerPreparingStartingDeckUpdate pid = verifyUpdate
+verifyPlayerPreparingStartingDeckUpdate pid = verifyElementUpdate
   (find ((==) pid . PlayerPreparingStartingDeck.playerId))
   (\x -> case x of
     PreparingDecks preppers _ -> preppers
     _ -> [])
 
-verifyUpdate :: (Eq b, Show b) =>
+verifyElementUpdate :: (Eq b, Show b) =>
   ([a] -> Maybe a)
   -> (GameState -> [a])
   -> (a -> b)
   -> (b -> b)
-  -> [a]
   -> Command
   -> GameState
   -> Property
-verifyUpdate selector collectionSelector prop change initialCollection command gameState =
-  fmap prop (selector (collectionSelector (update command gameState)))
-    === fmap (change . prop) (selector initialCollection)
+verifyElementUpdate element collection prop change = verifyUpdate (fmap prop . element . collection) (fmap change)
+
+verifyUpdate :: (Eq a, Show a) =>
+  (GameState -> a)
+  -> (a -> a)
+  -> Command
+  -> GameState
+  -> Property
+verifyUpdate prop change command = liftA2 (===) (prop . update command) (change . prop)
 
 isPreparingSupply :: GameState -> Bool
 isPreparingSupply (PreparingSupply _ _) = True
