@@ -5,6 +5,7 @@ import Command
 import GameState
 import PlayerPreparingStartingDeck
 import PlayerDrawingInitialHand
+import Player
 import Card
 
 import Data.Bool
@@ -19,7 +20,7 @@ update MarkSupplyPrepared = beginPreparingDecks
 update (AddCardToDeck pid card) = addCardToDeck pid card
 update MarkDecksPrepared = beginDrawingInitialHands
 update (DrawCard pid card) = drawCard pid card
-update MarkInitialHandsDrawn = const InProgress
+update MarkInitialHandsDrawn = beginPlay
 update Noop = id
 
 addPlayer :: CandidateId -> GameState -> GameState
@@ -57,6 +58,10 @@ drawCard pid card (DrawingInitialHands ps cards) =
       ps)
     cards
 drawCard _ _ _ = error "A card may only be drawn while players are drawing their initial hands"
+
+beginPlay :: GameState -> GameState
+beginPlay (DrawingInitialHands ps cards) = InProgress (Player.fromPlayerDrawingInitialHand <$> ps) cards
+beginPlay _ = error "Cannot begin play before the game has been fully prepared"
 
 alterWhere :: (a -> Bool) -> (a -> a) -> [a] -> [a]
 alterWhere p f = fmap $ liftA3 bool id f p

@@ -137,7 +137,7 @@ isDrawingInitialHands (DrawingInitialHands _ _) = True
 isDrawingInitialHands _ = False
 
 isInProgress :: GameState -> Bool
-isInProgress InProgress = True
+isInProgress (InProgress _ _) = True
 isInProgress _ = False
 
 dominion :: PlayerDrawingInitialHand -> [Card]
