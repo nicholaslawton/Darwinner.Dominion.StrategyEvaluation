@@ -154,4 +154,4 @@ dominion :: Player -> [Card]
 dominion p = sortOn arbitraryCardOrder $ concatMap ($ p) [Player.deck, Player.hand, Player.discard]
 
 cardsInPlay :: GameState -> [Card]
-cardsInPlay gameState = sortOn arbitraryCardOrder $ concatMap dominion (players gameState) ++ supply gameState
+cardsInPlay gameState = sortOn arbitraryCardOrder $ concatMap ($ gameState) [concatMap dominion . players, supply]
