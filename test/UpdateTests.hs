@@ -73,6 +73,10 @@ updateTests = describe "update" $ do
     it "transitions to in progress" $ property $ \ps cards ->
       isInProgress $ update MarkInitialHandsDrawn $ DrawingInitialHands ps cards
 
+  describe "gain card" $
+    it "adds card to discard" $ property $ \(SelectedPlayer ps pid) (CardInSupply cards card) ->
+      verifyPlayerUpdate pid (length . Player.discard) (+1) ps (GainCard pid card) (InProgress ps cards)
+
 verifyPlayerUpdate :: (Eq a, Show a) =>
   CandidateId
   -> (Player -> a)

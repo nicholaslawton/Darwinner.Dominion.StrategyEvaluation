@@ -21,6 +21,7 @@ update (AddCardToDeck pid card) = addCardToDeck pid card
 update MarkDecksPrepared = beginDrawingInitialHands
 update (DrawCard pid card) = drawCard pid card
 update MarkInitialHandsDrawn = beginPlay
+update (GainCard pid card) = gainCard pid card
 update Noop = id
 
 addPlayer :: CandidateId -> GameState -> GameState
@@ -63,6 +64,10 @@ beginPlay :: GameState -> GameState
 beginPlay (DrawingInitialHands ps cards) = InProgress (Player.fromPlayerDrawingInitialHand <$> ps) cards
 beginPlay _ = error "Cannot begin play before the game has been fully prepared"
 
+gainCard :: CandidateId -> Card -> GameState -> GameState
+gainCard pid card (InProgress ps cards) = InProgress (alterPlayer (alterDiscard (card :)) pid ps) cards
+gainCard _ _ _ = error "Cannot gain card when game is not in progress"
+
 alterWhere :: (a -> Bool) -> (a -> a) -> [a] -> [a]
 alterWhere p f = fmap $ liftA3 bool id f p
 
@@ -83,3 +88,6 @@ alterPlayerDrawingInitialHand ::
   -> [PlayerDrawingInitialHand]
   -> [PlayerDrawingInitialHand]
 alterPlayerDrawingInitialHand = alterElem PlayerDrawingInitialHand.playerId
+
+alterPlayer :: (Player -> Player) -> CandidateId -> [Player] -> [Player]
+alterPlayer = alterElem Player.playerId

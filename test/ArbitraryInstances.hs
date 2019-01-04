@@ -9,6 +9,7 @@ import PlayerDrawingInitialHand
 import Candidate
 import Strategy
 
+import Data.Bifunctor
 import Control.Applicative
 import Control.Monad
 
@@ -88,11 +89,14 @@ data SelectedPlayerPreparingStartingDeck =
   deriving (Eq, Show)
 
 instance Arbitrary SelectedPlayerPreparingStartingDeck where
-  arbitrary = validPlayersPreparingStartingDecks
-    >>= \ps -> SelectedPlayerPreparingStartingDeck ps <$> selectPlayer ps
-    where
-      selectPlayer :: [PlayerPreparingStartingDeck] -> Gen CandidateId
-      selectPlayer = elements . fmap PlayerPreparingStartingDeck.playerId
+  arbitrary = uncurry SelectedPlayerPreparingStartingDeck . second PlayerPreparingStartingDeck.playerId
+    <$> (validPlayersPreparingStartingDecks >>= elementIn)
+
+data SelectedPlayer = SelectedPlayer [Player] CandidateId
+  deriving (Eq, Show)
+
+instance Arbitrary SelectedPlayer where
+  arbitrary = uncurry SelectedPlayer . second Player.playerId <$> (validPlayers >>= elementIn)
 
 data CardInStartingDeck = CardInStartingDeck [PlayerDrawingInitialHand] CandidateId Card
   deriving (Eq, Show)
@@ -108,3 +112,12 @@ instance Arbitrary CardInStartingDeck where
       selectCard :: PlayerDrawingInitialHand -> Gen (CandidateId, Card)
       selectCard p =
         (,) (PlayerDrawingInitialHand.playerId p) <$> (elements . PlayerDrawingInitialHand.deck) p
+
+data CardInSupply = CardInSupply [Card] Card
+  deriving (Eq, Show)
+
+instance Arbitrary CardInSupply where
+  arbitrary = uncurry CardInSupply <$> (arbitrary >>= elementIn)
+
+elementIn :: [a] -> Gen ([a], a)
+elementIn xs = (,) xs <$> elements xs

@@ -5,6 +5,7 @@ module Player
   , fromPlayerDrawingInitialHand
   , Player.alterDeck
   , Player.alterHand
+  , alterDiscard
   ) where
 
 import Candidate
@@ -34,3 +35,6 @@ alterDeck f p = p { Player.deck = f (Player.deck p) }
 
 alterHand :: ([Card] -> [Card]) -> Player -> Player
 alterHand f p = p { Player.hand = f (Player.hand p) }
+
+alterDiscard :: ([Card] -> [Card]) -> Player -> Player
+alterDiscard f p = p { discard = f (discard p) }
