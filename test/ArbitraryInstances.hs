@@ -89,35 +89,35 @@ data SelectedPlayerPreparingStartingDeck =
   deriving (Eq, Show)
 
 instance Arbitrary SelectedPlayerPreparingStartingDeck where
-  arbitrary = uncurry SelectedPlayerPreparingStartingDeck . second PlayerPreparingStartingDeck.playerId
-    <$> (validPlayersPreparingStartingDecks >>= elementIn)
+  arbitrary = validPlayersPreparingStartingDecks
+    >>= fmap (uncurry SelectedPlayerPreparingStartingDeck . second PlayerPreparingStartingDeck.playerId)
+      . selectedElement
 
 data SelectedPlayer = SelectedPlayer [Player] CandidateId
   deriving (Eq, Show)
 
 instance Arbitrary SelectedPlayer where
-  arbitrary = uncurry SelectedPlayer . second Player.playerId <$> (validPlayers >>= elementIn)
+  arbitrary = validPlayers >>= fmap (uncurry SelectedPlayer . second Player.playerId) . selectedElement
 
 data CardInStartingDeck = CardInStartingDeck [PlayerDrawingInitialHand] CandidateId Card
   deriving (Eq, Show)
 
 instance Arbitrary CardInStartingDeck where
-  arbitrary =
-    suchThat validPlayersDrawingInitialHands (not . null . concatMap PlayerDrawingInitialHand.deck)
-      >>= \ps -> uncurry (CardInStartingDeck ps) <$> selectPlayerAndCard ps
-    where
-      selectPlayerAndCard :: [PlayerDrawingInitialHand] -> Gen (CandidateId, Card)
-      selectPlayerAndCard ps = (elements . filter (not . null . PlayerDrawingInitialHand.deck)) ps
-        >>= selectCard
-      selectCard :: PlayerDrawingInitialHand -> Gen (CandidateId, Card)
-      selectCard p =
-        (,) (PlayerDrawingInitialHand.playerId p) <$> (elements . PlayerDrawingInitialHand.deck) p
+  arbitrary = validPlayersDrawingInitialHands `suchThat` (not . null . concatMap PlayerDrawingInitialHand.deck)
+    >>= selectedElementMatching (not . null . PlayerDrawingInitialHand.deck)
+    >>= \(ps, p) -> CardInStartingDeck ps (PlayerDrawingInitialHand.playerId p) <$> elements (PlayerDrawingInitialHand.deck p)
 
 data CardInSupply = CardInSupply [Card] Card
   deriving (Eq, Show)
 
 instance Arbitrary CardInSupply where
-  arbitrary = uncurry CardInSupply <$> (arbitrary >>= elementIn)
+  arbitrary = arbitrary >>= fmap (uncurry CardInSupply) . selectedElement
 
-elementIn :: [a] -> Gen ([a], a)
-elementIn xs = (,) xs <$> elements xs
+selectedElement :: [a] -> Gen ([a], a)
+selectedElement = selectFrom elements
+
+selectedElementMatching :: (a -> Bool) -> [a] -> Gen ([a], a)
+selectedElementMatching predicate = selectedElement . filter predicate
+
+selectFrom :: (a -> Gen b) -> a -> Gen (a, b)
+selectFrom f x = (,) x <$> f x 
