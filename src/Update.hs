@@ -52,14 +52,16 @@ beginDrawingInitialHands _ = error "Drawing initial hands must occur after decks
 
 drawCard :: CandidateId -> Card -> GameState -> GameState
 drawCard pid card (DrawingInitialHands ps cards)
-  | (elem card . PlayerDrawingInitialHand.deck <$> find ((==) pid . PlayerDrawingInitialHand.playerId) ps) == Just True =
+  | all ((/=) pid . PlayerDrawingInitialHand.playerId) ps = error "Invalid card draw: player not in game"
+  | (notElem card . PlayerDrawingInitialHand.deck <$> find ((==) pid . PlayerDrawingInitialHand.playerId) ps)
+      == Just True = error "Invalid card draw: card not in deck of player"
+  | otherwise =
     DrawingInitialHands
       (alterPlayerDrawingInitialHand
         (PlayerDrawingInitialHand.alterHand (card :) . PlayerDrawingInitialHand.alterDeck (delete card))
         pid
         ps)
       cards
-  | otherwise = error "Invalid card draw: card not in deck of player"
 drawCard _ _ _ = error "A card may only be drawn while players are drawing their initial hands"
 
 beginPlay :: GameState -> GameState
@@ -68,11 +70,12 @@ beginPlay _ = error "Cannot begin play before the game has been fully prepared"
 
 gainCard :: CandidateId -> Card -> GameState -> GameState
 gainCard pid card (InProgress ps cards)
-  | elem card cards && playerExists pid ps =
+  | not $ playerExists pid ps = error "Invalid card gain: player not in game"
+  | notElem card cards = error "Invalid card gain: card not in supply"
+  | otherwise = 
     InProgress
       (alterPlayer (alterDiscard (card :)) pid ps)
       (delete card cards)
-  | otherwise = error "Invalid card gain: card not in supply"
 gainCard _ _ _ = error "Cannot gain card when game is not in progress"
 
 alterWhere :: (a -> Bool) -> (a -> a) -> [a] -> [a]
