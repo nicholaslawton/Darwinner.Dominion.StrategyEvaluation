@@ -3,6 +3,7 @@ module Main where
 import ParsingTests
 import UpdateTests
 import GamePreparationTests
+import BuyPhaseTests
 
 import Test.Hspec
 
@@ -11,3 +12,4 @@ main = hspec $ do
   parsingTests
   updateTests
   gamePreparationTests
+  buyPhaseTests
