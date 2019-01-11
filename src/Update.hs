@@ -68,7 +68,7 @@ beginPlay _ = error "Cannot begin play before the game has been fully prepared"
 
 gainCard :: CandidateId -> Card -> GameState -> GameState
 gainCard pid card (InProgress ps cards)
-  | elem card cards =
+  | elem card cards && playerExists pid ps =
     InProgress
       (alterPlayer (alterDiscard (card :)) pid ps)
       (delete card cards)
@@ -97,3 +97,6 @@ alterPlayerDrawingInitialHand = alterElem PlayerDrawingInitialHand.playerId
 
 alterPlayer :: (Player -> Player) -> CandidateId -> [Player] -> [Player]
 alterPlayer = alterElem Player.playerId
+
+playerExists :: CandidateId -> [Player] -> Bool
+playerExists pid = any ((==) pid . Player.playerId)

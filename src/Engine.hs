@@ -6,6 +6,7 @@ import GameState
 import Update
 import PlayerPreparingStartingDeck
 import PlayerDrawingInitialHand
+import Player
 import Command
 import EvaluationParameters
 import Candidate
@@ -83,7 +84,9 @@ nextCommand = do
               <$> randomElement (PlayerDrawingInitialHand.deck p)
           emptyDeckError = error "unexpected empty deck when drawing card for initial hand"
 
-    InProgress _ (card:_) -> return $ GainCard (CandidateId "") card
+    InProgress (p:_) (card:_) -> return $ GainCard (Player.playerId p) card
+
+    InProgress [] _ -> error "Unexpected game in progress with no players"
 
     InProgress _ [] -> return Noop -- error "Unexpected empty supply while game in progress"
 
