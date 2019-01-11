@@ -42,7 +42,9 @@ beginPreparingDecks (PreparingSupply pids cards) =
 beginPreparingDecks _ = error "Deck preparation should occur after the supply has been prepared"
 
 addCardToDeck :: CandidateId -> Card -> GameState -> GameState
-addCardToDeck pid card (PreparingDecks ps cards) = PreparingDecks (alterStartingDeck (card :) pid ps) cards
+addCardToDeck pid card (PreparingDecks ps cards)
+  | all ((/=) pid . PlayerPreparingStartingDeck.playerId) ps = error "Invalid deck preparation: player not in game"
+  | otherwise = PreparingDecks (alterStartingDeck (card :) pid ps) cards
 addCardToDeck _ _ _ = error "A card may only be added to a deck during game preparation"
 
 beginDrawingInitialHands :: GameState -> GameState
