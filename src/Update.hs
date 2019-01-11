@@ -51,14 +51,15 @@ beginDrawingInitialHands (PreparingDecks ps cards) =
 beginDrawingInitialHands _ = error "Drawing initial hands must occur after decks have been prepared"
 
 drawCard :: CandidateId -> Card -> GameState -> GameState
-drawCard pid card (DrawingInitialHands ps cards) =
-  DrawingInitialHands
-    (alterPlayerDrawingInitialHand
-      (PlayerDrawingInitialHand.alterHand (card :) . PlayerDrawingInitialHand.alterDeck (delete card))
-      pid
-      ps)
-    cards
-drawCard _ _ _ = error "A card may only be drawn while players are drawing their initial hands"
+drawCard pid card (DrawingInitialHands ps cards)
+  | (elem card . PlayerDrawingInitialHand.deck <$> find ((==) pid . PlayerDrawingInitialHand.playerId) ps) == Just True =
+    DrawingInitialHands
+      (alterPlayerDrawingInitialHand
+        (PlayerDrawingInitialHand.alterHand (card :) . PlayerDrawingInitialHand.alterDeck (delete card))
+        pid
+        ps)
+      cards
+drawCard _ _ _ = error "Invalid card draw"
 
 beginPlay :: GameState -> GameState
 beginPlay (DrawingInitialHands ps cards) = InProgress (Player.fromPlayerDrawingInitialHand <$> ps) cards
@@ -82,8 +83,7 @@ alterStartingDeck ::
   -> CandidateId
   -> [PlayerPreparingStartingDeck]
   -> [PlayerPreparingStartingDeck]
-alterStartingDeck alteration =
-  alterElem PlayerPreparingStartingDeck.playerId (PlayerPreparingStartingDeck.alterDeck alteration)
+alterStartingDeck = alterElem PlayerPreparingStartingDeck.playerId . PlayerPreparingStartingDeck.alterDeck
 
 alterPlayerDrawingInitialHand ::
   (PlayerDrawingInitialHand -> PlayerDrawingInitialHand)
