@@ -83,7 +83,7 @@ nextCommand = do
               <$> randomElement (PlayerDrawingInitialHand.deck p)
           emptyDeckError = error "unexpected empty deck when drawing card for initial hand"
 
-    InProgress _ (_:_) -> return $ GainCard (CandidateId "") Province
+    InProgress _ (card:_) -> return $ GainCard (CandidateId "") card
 
     InProgress _ [] -> return Noop -- error "Unexpected empty supply while game in progress"
 

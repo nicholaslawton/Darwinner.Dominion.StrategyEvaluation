@@ -67,10 +67,12 @@ beginPlay (DrawingInitialHands ps cards) = InProgress (Player.fromPlayerDrawingI
 beginPlay _ = error "Cannot begin play before the game has been fully prepared"
 
 gainCard :: CandidateId -> Card -> GameState -> GameState
-gainCard pid card (InProgress ps cards) =
-  InProgress
-    (alterPlayer (alterDiscard (card :)) pid ps)
-    (delete card cards)
+gainCard pid card (InProgress ps cards)
+  | elem card cards =
+    InProgress
+      (alterPlayer (alterDiscard (card :)) pid ps)
+      (delete card cards)
+  | otherwise = error "Invalid card gain: card not in supply"
 gainCard _ _ _ = error "Cannot gain card when game is not in progress"
 
 alterWhere :: (a -> Bool) -> (a -> a) -> [a] -> [a]
