@@ -59,7 +59,8 @@ drawCard pid card (DrawingInitialHands ps cards)
         pid
         ps)
       cards
-drawCard _ _ _ = error "Invalid card draw"
+  | otherwise = error "Invalid card draw: card not in deck of player"
+drawCard _ _ _ = error "A card may only be drawn while players are drawing their initial hands"
 
 beginPlay :: GameState -> GameState
 beginPlay (DrawingInitialHands ps cards) = InProgress (Player.fromPlayerDrawingInitialHand <$> ps) cards
