@@ -18,7 +18,7 @@ buyPhaseTests :: SpecWith ()
 buyPhaseTests = describe "buy phase" $ do
 
   it "gains a card" $ property $ \seed (NonEmpty ps) (NonEmpty cards) ->
-    any gainCard $ history $ performBuyPhase (EvaluationParameters []) (Game.mapState (const (InProgress ps cards)) (Game.new seed))
+    any gainCard $ history $ performBuyPhase (EvaluationParameters []) (Game.mapState (const (BuyPhase ps cards)) (Game.new seed))
 
 performBuyPhase :: EvaluationParameters -> Game -> Game
 performBuyPhase = execUntil buyPhaseOver

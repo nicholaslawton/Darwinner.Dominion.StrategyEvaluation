@@ -69,15 +69,15 @@ drawCard pid card (DrawingInitialHands ps cards)
 drawCard _ _ _ = error "A card may only be drawn while players are drawing their initial hands"
 
 beginPlay :: GameState -> GameState
-beginPlay (DrawingInitialHands ps cards) = InProgress (Player.fromPlayerDrawingInitialHand <$> ps) cards
+beginPlay (DrawingInitialHands ps cards) = BuyPhase (Player.fromPlayerDrawingInitialHand <$> ps) cards
 beginPlay _ = error "Cannot begin play before the game has been fully prepared"
 
 gainCard :: CandidateId -> Card -> GameState -> GameState
-gainCard pid card (InProgress ps cards)
+gainCard pid card (BuyPhase ps cards)
   | not $ playerExists pid ps = error "Invalid card gain: player not in game"
   | notElem card cards = error "Invalid card gain: card not in supply"
   | otherwise = 
-    InProgress
+    BuyPhase
       (alterPlayer (alterDiscard (card :)) pid ps)
       (delete card cards)
 gainCard _ _ _ = error "Cannot gain card when game is not in progress"
