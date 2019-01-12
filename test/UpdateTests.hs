@@ -78,6 +78,10 @@ updateTests = describe "update" $ do
     it "does not alter cards in play" $ property $ \(SelectedPlayer ps pid) (CardInSupply cards card) ->
       verifyUpdate cardsInPlay id (GainCard pid card) (BuyPhase ps cards)
 
+  describe "buy phase completion" $
+    it "transitions to clean up phase" $ property $ \ps cards ->
+      isInCleanUpPhase $ update BuyPhaseComplete $ BuyPhase ps cards
+
 verifyPlayerUpdate :: (Eq a, Show a) =>
   CandidateId
   -> (Player -> a)
@@ -146,6 +150,10 @@ isDrawingInitialHands _ = False
 isInBuyPhase :: GameState -> Bool
 isInBuyPhase (BuyPhase _ _) = True
 isInBuyPhase _ = False
+
+isInCleanUpPhase :: GameState -> Bool
+isInCleanUpPhase (CleanUpPhase _ _) = True
+isInCleanUpPhase _ = False
 
 dominionWhileDrawingInitialHand :: PlayerDrawingInitialHand -> [Card]
 dominionWhileDrawingInitialHand p =

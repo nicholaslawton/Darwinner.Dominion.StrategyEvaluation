@@ -22,6 +22,7 @@ update MarkDecksPrepared = beginDrawingInitialHands
 update (DrawCard pid card) = drawCard pid card
 update MarkInitialHandsDrawn = beginPlay
 update (GainCard pid card) = gainCard pid card
+update BuyPhaseComplete = beginCleanUpPhase
 update Noop = id
 
 addPlayer :: CandidateId -> GameState -> GameState
@@ -81,6 +82,10 @@ gainCard pid card (BuyPhase ps cards)
       (alterPlayer (alterDiscard (card :)) pid ps)
       (delete card cards)
 gainCard _ _ _ = error "Cannot gain card when game is not in progress"
+
+beginCleanUpPhase :: GameState -> GameState
+beginCleanUpPhase (BuyPhase ps cards) = CleanUpPhase ps cards
+beginCleanUpPhase _ = error "Clean up phase must follow buy phase"
 
 alterWhere :: (a -> Bool) -> (a -> a) -> [a] -> [a]
 alterWhere p f = fmap $ liftA3 bool id f p

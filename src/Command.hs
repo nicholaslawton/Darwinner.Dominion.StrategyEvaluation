@@ -16,4 +16,5 @@ data Command
   | DrawCard CandidateId Card
   | MarkInitialHandsDrawn
   | GainCard CandidateId Card
+  | BuyPhaseComplete
   deriving (Eq, Show)
