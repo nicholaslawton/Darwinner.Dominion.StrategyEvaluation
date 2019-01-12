@@ -25,7 +25,9 @@ update (GainCard pid card) = gainCard pid card
 update Noop = id
 
 addPlayer :: CandidateId -> GameState -> GameState
-addPlayer pid (New pids) = New $ pid : pids
+addPlayer pid (New pids)
+  | elem pid pids = error "Invalid player join: player already in game"
+  | otherwise = New $ pid : pids
 addPlayer _ _ = error "A player may not be added after preparation of the game has commenced"
 
 beginPreparingSupply :: GameState -> GameState
