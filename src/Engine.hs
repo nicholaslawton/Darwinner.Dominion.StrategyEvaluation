@@ -90,6 +90,8 @@ nextCommand = do
 
     BuyPhase _ [] -> return Noop -- error "Unexpected empty supply while game in progress"
 
+    CleanUpPhase _ _ -> return Noop
+
     GameOver -> return Noop
 
 randomElement :: [a] -> State Game (Maybe a)
