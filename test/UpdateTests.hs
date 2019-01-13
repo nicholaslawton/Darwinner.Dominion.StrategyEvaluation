@@ -12,6 +12,7 @@ import Card
 import Data.List
 import Control.Applicative
 
+import GameStateValidation
 import ArbitraryInstances
 import CardOrder
 import Test.Hspec
@@ -27,7 +28,7 @@ updateTests = describe "update" $ do
 
   describe "mark players ready" $
     it "begins preparing supply" $ property $
-      isPreparingSupply . update MarkPlayersReady . New
+      preparingSupply . update MarkPlayersReady . New
 
   describe "place card in supply" $
     it "adds card" $ property $ \ps cards card ->
@@ -35,7 +36,7 @@ updateTests = describe "update" $ do
 
   describe "mark supply prepared" $
     it "begins preparing decks" $ property $ \ps cards ->
-      isPreparingDecks $ update MarkSupplyPrepared $ PreparingSupply ps cards
+      preparingDecks $ update MarkSupplyPrepared $ PreparingSupply ps cards
 
   describe "add card to deck of player" $
     it "adds card to deck of player" $ property $ \(SelectedPlayerPreparingStartingDeck ps pid) cards card ->
@@ -48,7 +49,7 @@ updateTests = describe "update" $ do
 
   describe "mark decks prepared" $
     it "begins drawing initial hands" $ property $ \ps cards ->
-      isDrawingInitialHands $ update MarkDecksPrepared $ PreparingDecks ps cards
+      drawingInitialHands $ update MarkDecksPrepared $ PreparingDecks ps cards
 
   describe "draw card" $ do
     it "adds card to hand" $ property $ \(CardInStartingDeck ps pid card) cards ->
@@ -69,7 +70,7 @@ updateTests = describe "update" $ do
 
   describe "mark initial hands drawn" $
     it "transitions to buy phase" $ property $ \ps cards ->
-      isInBuyPhase $ update MarkInitialHandsDrawn $ DrawingInitialHands ps cards
+      inBuyPhase $ update MarkInitialHandsDrawn $ DrawingInitialHands ps cards
 
   describe "gain card" $ do
     it "adds card to discard" $ property $ \(SelectedPlayer ps pid) (CardInSupply cards card) (Positive buys) ->
@@ -83,7 +84,7 @@ updateTests = describe "update" $ do
 
   describe "buy phase completion" $
     it "transitions to clean up phase" $ property $ \ps cards ->
-      isInCleanUpPhase $ update BuyPhaseComplete $ BuyPhase (BuyAllowance 0) ps cards
+      inCleanUpPhase $ update BuyPhaseComplete $ BuyPhase (BuyAllowance 0) ps cards
 
 verifyPlayerUpdate :: (Eq a, Show a) =>
   CandidateId
@@ -137,26 +138,6 @@ verifyUpdate :: (Eq a, Show a) =>
   -> GameState
   -> Property
 verifyUpdate prop change command = liftA2 (===) (prop . update command) (change . prop)
-
-isPreparingSupply :: GameState -> Bool
-isPreparingSupply (PreparingSupply _ _) = True
-isPreparingSupply _ = False
-
-isPreparingDecks :: GameState -> Bool
-isPreparingDecks (PreparingDecks _ _) = True
-isPreparingDecks _ = False
-
-isDrawingInitialHands :: GameState -> Bool
-isDrawingInitialHands (DrawingInitialHands _ _) = True
-isDrawingInitialHands _ = False
-
-isInBuyPhase :: GameState -> Bool
-isInBuyPhase (BuyPhase _ _ _) = True
-isInBuyPhase _ = False
-
-isInCleanUpPhase :: GameState -> Bool
-isInCleanUpPhase (CleanUpPhase _ _) = True
-isInCleanUpPhase _ = False
 
 dominionWhileDrawingInitialHand :: PlayerDrawingInitialHand -> [Card]
 dominionWhileDrawingInitialHand p =

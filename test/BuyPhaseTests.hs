@@ -12,6 +12,7 @@ import Control.Applicative
 import Control.Monad.Trans.Reader
 import Control.Monad.Trans.State
 
+import GameStateValidation
 import ArbitraryInstances()
 import Test.Hspec
 import Test.QuickCheck
@@ -40,7 +41,3 @@ buyPhaseOver limit = liftA2 (||) (not . inBuyPhase . Game.state) ((> limit) . le
 gainCard :: Command -> Bool
 gainCard (GainCard _ _) = True
 gainCard _ = False
-
-inBuyPhase :: GameState -> Bool
-inBuyPhase (BuyPhase _ _ _) = True
-inBuyPhase _ = False
