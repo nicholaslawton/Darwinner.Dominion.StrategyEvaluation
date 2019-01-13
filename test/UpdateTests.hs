@@ -8,6 +8,7 @@ import Player
 import PlayerPreparingStartingDeck
 import PlayerDrawingInitialHand
 import Card
+import BuyAllowance
 
 import Data.List
 import Control.Applicative

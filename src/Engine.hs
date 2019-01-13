@@ -10,6 +10,7 @@ import Player
 import Command
 import EvaluationParameters
 import Candidate
+import BuyAllowance
 
 import Data.Bool
 import Data.List.Unique

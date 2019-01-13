@@ -7,6 +7,7 @@ import PlayerPreparingStartingDeck
 import PlayerDrawingInitialHand
 import Player
 import Card
+import BuyAllowance
 
 import Data.Bool
 import Data.List
@@ -70,7 +71,8 @@ drawCard pid card (DrawingInitialHands ps cards)
 drawCard _ _ _ = error "A card may only be drawn while players are drawing their initial hands"
 
 beginPlay :: GameState -> GameState
-beginPlay (DrawingInitialHands ps cards) = BuyPhase (BuyAllowance 1) (Player.fromPlayerDrawingInitialHand <$> ps) cards
+beginPlay (DrawingInitialHands ps cards) =
+  BuyPhase BuyAllowance.initial (Player.fromPlayerDrawingInitialHand <$> ps) cards
 beginPlay _ = error "Cannot begin play before the game has been fully prepared"
 
 gainCard :: CandidateId -> Card -> GameState -> GameState
@@ -83,7 +85,7 @@ gainCard pid card (BuyPhase (BuyAllowance buys) ps cards)
       (BuyAllowance (buys - 1))
       (alterPlayer (alterDiscard (card :)) pid ps)
       (delete card cards)
-gainCard _ _ _ = error "Cannot gain card when game is not in progress"
+gainCard _ _ _ = error "A card may only be gained during the buy phase"
 
 beginCleanUpPhase :: GameState -> GameState
 beginCleanUpPhase (BuyPhase _ ps cards) = CleanUpPhase ps cards

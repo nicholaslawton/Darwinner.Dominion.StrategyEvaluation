@@ -1,6 +1,5 @@
 module GameState
   ( GameState(..)
-  , BuyAllowance(..)
   , players
   , supply
   ) where
@@ -10,9 +9,7 @@ import Player
 import PlayerPreparingStartingDeck
 import PlayerDrawingInitialHand
 import Card
-
-newtype BuyAllowance = BuyAllowance Int
-  deriving (Eq, Show)
+import BuyAllowance
 
 data GameState
   = New [CandidateId]

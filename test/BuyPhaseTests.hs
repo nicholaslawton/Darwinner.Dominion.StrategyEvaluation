@@ -6,6 +6,7 @@ import GameState
 import EvaluationParameters
 import Player
 import Card
+import BuyAllowance
 
 import Control.Applicative
 
