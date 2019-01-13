@@ -77,6 +77,7 @@ gainCard :: CandidateId -> Card -> GameState -> GameState
 gainCard pid card (BuyPhase (BuyAllowance buys) ps cards)
   | not $ playerExists pid ps = error "Invalid card gain: player not in game"
   | notElem card cards = error "Invalid card gain: card not in supply"
+  | buys <= 0 = error "Invalid card gain: buy allowance exhausted"
   | otherwise = 
     BuyPhase
       (BuyAllowance (buys - 1))
