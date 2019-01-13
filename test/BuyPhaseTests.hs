@@ -20,8 +20,8 @@ buyPhaseTests = describe "buy phase" $ do
   it "gains a card" $ property $ \seed (Positive buys) (NonEmpty ps) (NonEmpty cards) ->
     any gainCard $ history $ performBuyPhase 10 (EvaluationParameters []) (Game.mapState (const (BuyPhase (BuyAllowance buys) ps cards)) (Game.new seed))
 
-  it "completes" $ property $ \seed params (NonEmpty ps) cards ->
-    (===) BuyPhaseComplete $ last $ history $ performBuyPhase (min 3 (length cards) + 10) params (Game.mapState (const (BuyPhase (BuyAllowance 3) ps cards)) (Game.new seed))
+  it "completes" $ property $ \seed params (Positive buys) (NonEmpty ps) cards ->
+    (===) BuyPhaseComplete $ last $ history $ performBuyPhase (min buys (length cards) + 10) params (Game.mapState (const (BuyPhase (BuyAllowance buys) ps cards)) (Game.new seed))
 
 performBuyPhase :: Int -> EvaluationParameters -> Game -> Game
 performBuyPhase limit = execUntil (buyPhaseOver limit)
