@@ -3,16 +3,14 @@ module BuyPhaseTests where
 import Command
 import Game
 import GameState
-import Engine
 import EvaluationParameters
 import Player
 import Card
 
 import Control.Applicative
-import Control.Monad.Trans.Reader
-import Control.Monad.Trans.State
 
 import GameStateValidation
+import EngineValidation
 import ArbitraryInstances()
 import Test.Hspec
 import Test.QuickCheck
@@ -31,9 +29,6 @@ gameInBuyPhase buys ps cards = Game.mapState (const (BuyPhase (BuyAllowance buys
 
 performBuyPhase :: Int -> EvaluationParameters -> Game -> Game
 performBuyPhase = execUntil . buyPhaseOver
-
-execUntil :: (Game -> Bool) -> EvaluationParameters -> Game -> Game
-execUntil predicate parameters = execState $ runReaderT (Engine.runUntil predicate) parameters
 
 buyPhaseOver :: Int -> Game -> Bool
 buyPhaseOver limit = liftA2 (||) (not . inBuyPhase . Game.state) ((> limit) . length . Game.history)

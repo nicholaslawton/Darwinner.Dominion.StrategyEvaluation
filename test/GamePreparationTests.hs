@@ -4,7 +4,6 @@ import Game
 import GameState
 import Card
 import Command
-import Engine
 import EvaluationParameters
 import Candidate
 
@@ -14,9 +13,8 @@ import Data.Bifunctor
 import Data.Map (Map, fromList, fromListWith)
 import Data.Maybe
 import Control.Applicative
-import Control.Monad.Trans.Reader
-import Control.Monad.Trans.State
 
+import EngineValidation
 import ArbitraryInstances()
 import CardOrder
 import Test.Hspec
@@ -73,9 +71,6 @@ gamePreparationTests = describe "game preparation" $ do
 
 prepareGame :: Int -> EvaluationParameters -> Game
 prepareGame seed params = execUntil prepared params (Game.new seed)
-
-execUntil :: (Game -> Bool) -> EvaluationParameters -> Game -> Game
-execUntil predicate parameters = execState $ runReaderT (Engine.runUntil predicate) parameters
 
 prepared :: Game -> Bool
 prepared = liftA2 (||) ((== GameOver) . Game.state) ((>300) . length . Game.history)
