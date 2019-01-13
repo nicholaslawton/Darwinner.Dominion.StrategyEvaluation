@@ -72,15 +72,18 @@ updateTests = describe "update" $ do
       isInBuyPhase $ update MarkInitialHandsDrawn $ DrawingInitialHands ps cards
 
   describe "gain card" $ do
-    it "adds card to discard" $ property $ \(SelectedPlayer ps pid) (CardInSupply cards card) ->
-      verifyPlayerUpdate pid (length . Player.discard) (+1) (GainCard pid card) (BuyPhase ps cards)
+    it "adds card to discard" $ property $ \(SelectedPlayer ps pid) (CardInSupply cards card) (Positive buys) ->
+      verifyPlayerUpdate pid (length . Player.discard) (+1) (GainCard pid card) (BuyPhase (BuyAllowance buys) ps cards)
 
-    it "does not alter cards in play" $ property $ \(SelectedPlayer ps pid) (CardInSupply cards card) ->
-      verifyUpdate cardsInPlay id (GainCard pid card) (BuyPhase ps cards)
+    it "does not alter cards in play" $ property $ \(SelectedPlayer ps pid) (CardInSupply cards card) (Positive buys) ->
+      verifyUpdate cardsInPlay id (GainCard pid card) (BuyPhase (BuyAllowance buys) ps cards)
+
+    it "decrements buy allowance" $ property $ \(SelectedPlayer ps pid) (CardInSupply cards card) (Positive buys) ->
+      verifyUpdate buyAllowance (subtract 1) (GainCard pid card) (BuyPhase (BuyAllowance buys) ps cards)
 
   describe "buy phase completion" $
     it "transitions to clean up phase" $ property $ \ps cards ->
-      isInCleanUpPhase $ update BuyPhaseComplete $ BuyPhase ps cards
+      isInCleanUpPhase $ update BuyPhaseComplete $ BuyPhase (BuyAllowance 0) ps cards
 
 verifyPlayerUpdate :: (Eq a, Show a) =>
   CandidateId
@@ -148,7 +151,7 @@ isDrawingInitialHands (DrawingInitialHands _ _) = True
 isDrawingInitialHands _ = False
 
 isInBuyPhase :: GameState -> Bool
-isInBuyPhase (BuyPhase _ _) = True
+isInBuyPhase (BuyPhase _ _ _) = True
 isInBuyPhase _ = False
 
 isInCleanUpPhase :: GameState -> Bool
@@ -164,3 +167,7 @@ dominion p = sortOn arbitraryCardOrder $ concatMap ($ p) [Player.deck, Player.ha
 
 cardsInPlay :: GameState -> [Card]
 cardsInPlay gameState = sortOn arbitraryCardOrder $ concatMap ($ gameState) [concatMap dominion . players, supply]
+
+buyAllowance :: GameState -> Int
+buyAllowance (BuyPhase (BuyAllowance buys) _ _) = buys
+buyAllowance _ = 0
