@@ -24,7 +24,7 @@ update (DrawCard pid card) = drawCard pid card
 update MarkInitialHandsDrawn = beginPlay
 update (GainCard pid card) = gainCard pid card
 update BuyPhaseComplete = beginCleanUpPhase
-update Noop = id
+update EndGame = const GameOver
 
 addPlayer :: CandidateId -> GameState -> GameState
 addPlayer pid (New pids)

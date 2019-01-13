@@ -6,8 +6,7 @@ import Candidate
 import Card
 
 data Command
-  = Noop
-  | AddPlayer CandidateId 
+  = AddPlayer CandidateId 
   | MarkPlayersReady
   | PlaceCardInSupply Card
   | MarkSupplyPrepared
@@ -17,4 +16,5 @@ data Command
   | MarkInitialHandsDrawn
   | GainCard CandidateId Card
   | BuyPhaseComplete
+  | EndGame
   deriving (Eq, Show)
