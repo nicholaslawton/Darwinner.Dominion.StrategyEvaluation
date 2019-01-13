@@ -18,19 +18,19 @@ buyPhaseTests :: SpecWith ()
 buyPhaseTests = describe "buy phase" $ do
 
   it "gains a card" $ property $ \seed (Positive buys) (NonEmpty ps) (NonEmpty cards) ->
-    any gainCard $ history $ performBuyPhase (EvaluationParameters []) (Game.mapState (const (BuyPhase (BuyAllowance buys) ps cards)) (Game.new seed))
+    any gainCard $ history $ performBuyPhase 10 (EvaluationParameters []) (Game.mapState (const (BuyPhase (BuyAllowance buys) ps cards)) (Game.new seed))
 
-  it "completes" $ property $ \seed params (NonEmpty ps) (NonEmpty cards) ->
-    (===) BuyPhaseComplete $ last $ history $ performBuyPhase params (Game.mapState (const (BuyPhase (BuyAllowance 3) ps cards)) (Game.new seed))
+  it "completes" $ property $ \seed params (NonEmpty ps) cards ->
+    (===) BuyPhaseComplete $ last $ history $ performBuyPhase (min 3 (length cards) + 10) params (Game.mapState (const (BuyPhase (BuyAllowance 3) ps cards)) (Game.new seed))
 
-performBuyPhase :: EvaluationParameters -> Game -> Game
-performBuyPhase = execUntil buyPhaseOver
+performBuyPhase :: Int -> EvaluationParameters -> Game -> Game
+performBuyPhase limit = execUntil (buyPhaseOver limit)
 
 execUntil :: (Game -> Bool) -> EvaluationParameters -> Game -> Game
 execUntil predicate parameters = execState $ runReaderT (Engine.runUntil predicate) parameters
 
-buyPhaseOver :: Game -> Bool
-buyPhaseOver = liftA2 (||) (not . inBuyPhase . Game.state) ((>10) . length . Game.history)
+buyPhaseOver :: Int -> Game -> Bool
+buyPhaseOver limit = liftA2 (||) (not . inBuyPhase . Game.state) ((> limit) . length . Game.history)
 
 gainCard :: Command -> Bool
 gainCard (GainCard _ _) = True
