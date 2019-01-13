@@ -27,8 +27,12 @@ execUntil :: (Game -> Bool) -> EvaluationParameters -> Game -> Game
 execUntil predicate parameters = execState $ runReaderT (Engine.runUntil predicate) parameters
 
 buyPhaseOver :: Game -> Bool
-buyPhaseOver = liftA2 (||) ((== GameOver) . Game.state) ((>10) . length . Game.history)
+buyPhaseOver = liftA2 (||) (not . inBuyPhase . Game.state) ((>10) . length . Game.history)
 
 gainCard :: Command -> Bool
 gainCard (GainCard _ _) = True
 gainCard _ = False
+
+inBuyPhase :: GameState -> Bool
+inBuyPhase (BuyPhase _ _ _) = True
+inBuyPhase _ = False
