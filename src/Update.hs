@@ -23,6 +23,7 @@ update MarkDecksPrepared = beginDrawingInitialHands
 update (DrawCard pid card) = drawCard pid card
 update MarkInitialHandsDrawn = beginPlay
 update (GainCard pid card) = gainCard pid card
+update (DiscardCard pid card) = discardCard pid card
 update BuyPhaseComplete = beginCleanUpPhase
 update EndGame = const GameOver
 
@@ -86,6 +87,10 @@ gainCard pid card (BuyPhase (BuyAllowance buys) ps cards)
       (alterPlayer (alterDiscard (card :)) pid ps)
       (delete card cards)
 gainCard _ _ _ = error "A card may only be gained during the buy phase"
+
+discardCard :: CandidateId -> Card -> GameState -> GameState
+discardCard pid _ (CleanUpPhase ps cards) = CleanUpPhase (alterPlayer (alterDiscard (Copper :)) pid ps) cards
+discardCard _ _ _ = error "A card may only be discarded during the clean up phase"
 
 beginCleanUpPhase :: GameState -> GameState
 beginCleanUpPhase (BuyPhase _ ps cards) = CleanUpPhase ps cards

@@ -87,6 +87,10 @@ updateTests = describe "update" $ do
     it "transitions to clean up phase" $ property $ \ps cards ->
       inCleanUpPhase $ update BuyPhaseComplete $ BuyPhase (BuyAllowance 0) ps cards
 
+  describe "discard card" $ do
+    it "adds card to discard" $ property $ \(SelectedPlayer ps pid) card cards ->
+      verifyPlayerUpdate pid (length . Player.discard) (+1) (DiscardCard pid card) (CleanUpPhase ps cards)
+
 verifyPlayerUpdate :: (Eq a, Show a) =>
   CandidateId
   -> (Player -> a)
