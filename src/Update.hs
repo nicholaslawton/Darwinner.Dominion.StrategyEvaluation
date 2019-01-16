@@ -60,15 +60,15 @@ beginDrawingInitialHands _ = error "Drawing initial hands must occur after decks
 drawCard :: CandidateId -> Card -> GameState -> GameState
 drawCard pid card (DrawingInitialHands ps cards)
   | all ((/=) pid . PlayerDrawingInitialHand.playerId) ps = error "Invalid card draw: player not in game"
-  | (notElem card . PlayerDrawingInitialHand.deck <$> find ((==) pid . PlayerDrawingInitialHand.playerId) ps)
-      == Just True = error "Invalid card draw: card not in deck of player"
+  | not $ cardBelongsToPlayer PlayerDrawingInitialHand.deck PlayerDrawingInitialHand.playerId card pid ps =
+      error "Invalid card draw: card not in deck of player"
   | otherwise =
-    DrawingInitialHands
-      (alterPlayerDrawingInitialHand
-        (PlayerDrawingInitialHand.alterHand (card :) . PlayerDrawingInitialHand.alterDeck (delete card))
-        pid
-        ps)
-      cards
+      DrawingInitialHands
+        (alterPlayerDrawingInitialHand
+          (PlayerDrawingInitialHand.alterHand (card :) . PlayerDrawingInitialHand.alterDeck (delete card))
+          pid
+          ps)
+        cards
 drawCard _ _ _ = error "A card may only be drawn while players are drawing their initial hands"
 
 beginPlay :: GameState -> GameState
@@ -82,15 +82,18 @@ gainCard pid card (BuyPhase (BuyAllowance buys) ps cards)
   | notElem card cards = error "Invalid card gain: card not in supply"
   | buys <= 0 = error "Invalid card gain: buy allowance exhausted"
   | otherwise = 
-    BuyPhase
-      (BuyAllowance (buys - 1))
-      (alterPlayer (alterDiscard (card :)) pid ps)
-      (delete card cards)
+      BuyPhase
+        (BuyAllowance (buys - 1))
+        (alterPlayer (alterDiscard (card :)) pid ps)
+        (delete card cards)
 gainCard _ _ _ = error "A card may only be gained during the buy phase"
 
 discardCard :: CandidateId -> Card -> GameState -> GameState
-discardCard pid card (CleanUpPhase ps cards) =
-  CleanUpPhase (alterPlayer (alterDiscard (card :) . Player.alterHand (delete card)) pid ps) cards
+discardCard pid card (CleanUpPhase ps cards)
+  | not $ playerExists pid ps = error "Invalid discard: player not in game"
+  | not $ cardBelongsToPlayer Player.hand Player.playerId card pid ps =
+      error "Invalid discard: card not in hand of player"
+  | otherwise = CleanUpPhase (alterPlayer (alterDiscard (card :) . Player.alterHand (delete card)) pid ps) cards
 discardCard _ _ _ = error "A card may only be discarded during the clean up phase"
 
 beginCleanUpPhase :: GameState -> GameState
@@ -122,3 +125,6 @@ alterPlayer = alterElem Player.playerId
 
 playerExists :: CandidateId -> [Player] -> Bool
 playerExists pid = any ((==) pid . Player.playerId)
+
+cardBelongsToPlayer :: (a -> [Card]) -> (a -> CandidateId) -> Card -> CandidateId -> [a] -> Bool
+cardBelongsToPlayer area ppid card pid ps = (elem card . area <$> find ((==) pid . ppid) ps) == Just True
