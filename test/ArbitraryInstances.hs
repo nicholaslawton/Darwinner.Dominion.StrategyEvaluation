@@ -103,9 +103,12 @@ data CardInStartingDeck = CardInStartingDeck [PlayerDrawingInitialHand] Candidat
   deriving (Eq, Show)
 
 instance Arbitrary CardInStartingDeck where
-  arbitrary = validPlayersDrawingInitialHands `suchThat` (not . null . concatMap PlayerDrawingInitialHand.deck)
-    >>= selectedElementMatching (not . null . PlayerDrawingInitialHand.deck)
-    >>= \(ps, p) -> CardInStartingDeck ps (PlayerDrawingInitialHand.playerId p) <$> elements (PlayerDrawingInitialHand.deck p)
+  arbitrary =
+    selectedCardInArea
+      CardInStartingDeck
+      PlayerDrawingInitialHand.deck
+      PlayerDrawingInitialHand.playerId
+      validPlayersDrawingInitialHands
 
 data CardInSupply = CardInSupply [Card] Card
   deriving (Eq, Show)
@@ -117,9 +120,7 @@ data CardInHand = CardInHand [Player] CandidateId Card
   deriving (Eq, Show)
 
 instance Arbitrary CardInHand where
-  arbitrary = validPlayers `suchThat` (not . null . concatMap Player.hand)
-    >>= selectedElementMatching (not . null . Player.hand)
-    >>= \(ps, p) -> CardInHand ps (Player.playerId p) <$> elements (Player.hand p)
+  arbitrary = selectedCardInArea CardInHand Player.hand Player.playerId validPlayers
 
 selectedElement :: [a] -> Gen ([a], a)
 selectedElement = selectFrom elements
@@ -129,3 +130,8 @@ selectedElementMatching predicate = selectedElement . filter predicate
 
 selectFrom :: (a -> Gen b) -> a -> Gen (a, b)
 selectFrom f x = (,) x <$> f x 
+
+selectedCardInArea :: ([a] -> CandidateId -> Card -> b) -> (a -> [Card]) -> (a -> CandidateId) -> Gen [a] -> Gen b
+selectedCardInArea c area ppid validPs = validPs `suchThat` (not . null . concatMap area)
+  >>= selectedElementMatching (not . null . area)
+  >>= \(ps, p) -> c ps (ppid p) <$> elements (area p)
