@@ -113,6 +113,14 @@ data CardInSupply = CardInSupply [Card] Card
 instance Arbitrary CardInSupply where
   arbitrary = arbitrary `suchThat` (not . null) >>= fmap (uncurry CardInSupply) . selectedElement
 
+data CardInHand = CardInHand [Player] CandidateId Card
+  deriving (Eq, Show)
+
+instance Arbitrary CardInHand where
+  arbitrary = validPlayers `suchThat` (not . null . concatMap Player.hand)
+    >>= selectedElementMatching (not . null . Player.hand)
+    >>= \(ps, p) -> CardInHand ps (Player.playerId p) <$> elements (Player.hand p)
+
 selectedElement :: [a] -> Gen ([a], a)
 selectedElement = selectFrom elements
 

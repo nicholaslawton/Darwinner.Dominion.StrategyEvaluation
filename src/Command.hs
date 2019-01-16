@@ -1,6 +1,4 @@
-module Command
-  ( Command(..)
-  ) where
+module Command (Command(..)) where
 
 import Candidate
 import Card

@@ -88,7 +88,10 @@ updateTests = describe "update" $ do
       inCleanUpPhase $ update BuyPhaseComplete $ BuyPhase (BuyAllowance 0) ps cards
 
   describe "discard card" $ do
-    it "adds card to discard" $ property $ \(SelectedPlayer ps pid) card cards ->
+    it "removes card from hand" $ property $ \(CardInHand ps pid card) cards ->
+      verifyPlayerUpdate pid (length . Player.hand) (subtract 1) (DiscardCard pid card) (CleanUpPhase ps cards)
+
+    it "adds card to discard" $ property $ \(CardInHand ps pid card) cards ->
       verifyPlayerUpdate pid (length . Player.discard) (+1) (DiscardCard pid card) (CleanUpPhase ps cards)
 
 verifyPlayerUpdate :: (Eq a, Show a) =>

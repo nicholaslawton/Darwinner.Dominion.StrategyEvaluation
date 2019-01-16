@@ -89,7 +89,8 @@ gainCard pid card (BuyPhase (BuyAllowance buys) ps cards)
 gainCard _ _ _ = error "A card may only be gained during the buy phase"
 
 discardCard :: CandidateId -> Card -> GameState -> GameState
-discardCard pid _ (CleanUpPhase ps cards) = CleanUpPhase (alterPlayer (alterDiscard (Copper :)) pid ps) cards
+discardCard pid card (CleanUpPhase ps cards) =
+  CleanUpPhase (alterPlayer (alterDiscard (card :) . Player.alterHand (delete card)) pid ps) cards
 discardCard _ _ _ = error "A card may only be discarded during the clean up phase"
 
 beginCleanUpPhase :: GameState -> GameState
