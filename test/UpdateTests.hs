@@ -94,6 +94,9 @@ updateTests = describe "update" $ do
     it "adds card to discard" $ property $ \(CardInHand ps pid card) cards ->
       verifyPlayerUpdate pid (length . Player.discard) (+1) (DiscardCard pid card) (CleanUpPhase ps cards)
 
+    it "does not alter dominion of player" $ property $ \(CardInHand ps pid card) cards ->
+      verifyPlayerUpdate pid dominion id (DiscardCard pid card) (CleanUpPhase ps cards)
+
 verifyPlayerUpdate :: (Eq a, Show a) =>
   CandidateId
   -> (Player -> a)
