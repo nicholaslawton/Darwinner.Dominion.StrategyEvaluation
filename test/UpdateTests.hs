@@ -91,7 +91,7 @@ updateTests = describe "update" $ do
 
   describe "discard card" $ do
     it "removes card from hand" $ property $ \(CardInHand ps pid card) cards ->
-      verifyPlayerUpdate pid (length . Player.hand) (subtract 1) (DiscardCard pid card) (CleanUpPhase ps cards)
+      verifyPlayerUpdate pid (length . GenericPlayer.hand) (subtract 1) (DiscardCard pid card) (CleanUpPhase ps cards)
 
     it "adds card to discard" $ property $ \(CardInHand ps pid card) cards ->
       verifyPlayerUpdate pid (length . Player.discard) (+1) (DiscardCard pid card) (CleanUpPhase ps cards)
@@ -157,7 +157,7 @@ dominionWhileDrawingInitialHand p =
   sortOn arbitraryCardOrder $ concatMap ($ p) [PlayerDrawingInitialHand.deck, PlayerDrawingInitialHand.hand]
 
 dominion :: Player -> [Card]
-dominion p = sortOn arbitraryCardOrder $ concatMap ($ p) [GenericPlayer.deck, Player.hand, Player.discard]
+dominion p = sortOn arbitraryCardOrder $ concatMap ($ p) [GenericPlayer.deck, GenericPlayer.hand, Player.discard]
 
 cardsInPlay :: GameState -> [Card]
 cardsInPlay gameState = sortOn arbitraryCardOrder $ concatMap ($ gameState) [concatMap dominion . players, supply]

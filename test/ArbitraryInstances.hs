@@ -125,7 +125,7 @@ data CardInHand = CardInHand [Player] CandidateId Card
   deriving (Eq, Show)
 
 instance Arbitrary CardInHand where
-  arbitrary = selectedCardInArea CardInHand Player.hand GenericPlayer.playerId validPlayers
+  arbitrary = selectedCardInArea CardInHand GenericPlayer.hand GenericPlayer.playerId validPlayers
 
 selectedElement :: [a] -> Gen ([a], a)
 selectedElement = selectFrom elements

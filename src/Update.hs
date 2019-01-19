@@ -93,7 +93,7 @@ gainCard _ _ _ = error "A card may only be gained during the buy phase"
 discardCard :: CandidateId -> Card -> GameState -> GameState
 discardCard pid card (CleanUpPhase ps cards)
   | not $ playerExists pid ps = error "Invalid discard: player not in game"
-  | not $ cardBelongsToPlayer Player.hand GenericPlayer.playerId card pid ps =
+  | not $ cardBelongsToPlayer GenericPlayer.hand GenericPlayer.playerId card pid ps =
       error "Invalid discard: card not in hand of player"
   | otherwise = CleanUpPhase (alterPlayer (alterDiscard (card :) . Player.alterHand (delete card)) pid ps) cards
 discardCard _ _ _ = error "A card may only be discarded during the clean up phase"

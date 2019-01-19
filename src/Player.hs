@@ -1,5 +1,5 @@
 module Player
-  ( Player(hand, discard)
+  ( Player(discard)
   , Player.new
   , fromPlayerId
   , Player.fromPlayerPreparingStartingDeck
