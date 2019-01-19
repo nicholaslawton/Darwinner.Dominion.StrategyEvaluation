@@ -3,7 +3,9 @@ module ArbitraryInstances where
 
 import Card
 import EvaluationParameters
+import GenericPlayer
 import Player
+import PlayerWithoutDominion
 import PlayerPreparingStartingDeck
 import PlayerDrawingInitialHand
 import Candidate
@@ -23,6 +25,9 @@ instance Arbitrary Candidate where
 
 instance Arbitrary Player where
   arbitrary = liftM4 Player arbitrary arbitrary arbitrary arbitrary
+
+instance Arbitrary PlayerWithoutDominion where
+  arbitrary = PlayerWithoutDominion <$> arbitrary
 
 instance Arbitrary PlayerPreparingStartingDeck where
   arbitrary = liftA2 PlayerPreparingStartingDeck arbitrary arbitrary
@@ -90,14 +95,14 @@ data SelectedPlayerPreparingStartingDeck =
 
 instance Arbitrary SelectedPlayerPreparingStartingDeck where
   arbitrary = validPlayersPreparingStartingDecks
-    >>= fmap (uncurry SelectedPlayerPreparingStartingDeck . second PlayerPreparingStartingDeck.playerId)
+    >>= fmap (uncurry SelectedPlayerPreparingStartingDeck . second GenericPlayer.playerId)
       . selectedElement
 
 data SelectedPlayer = SelectedPlayer [Player] CandidateId
   deriving (Eq, Show)
 
 instance Arbitrary SelectedPlayer where
-  arbitrary = validPlayers >>= fmap (uncurry SelectedPlayer . second Player.playerId) . selectedElement
+  arbitrary = validPlayers >>= fmap (uncurry SelectedPlayer . second GenericPlayer.playerId) . selectedElement
 
 data CardInStartingDeck = CardInStartingDeck [PlayerDrawingInitialHand] CandidateId Card
   deriving (Eq, Show)
@@ -107,7 +112,7 @@ instance Arbitrary CardInStartingDeck where
     selectedCardInArea
       CardInStartingDeck
       PlayerDrawingInitialHand.deck
-      PlayerDrawingInitialHand.playerId
+      GenericPlayer.playerId
       validPlayersDrawingInitialHands
 
 data CardInSupply = CardInSupply [Card] Card
@@ -120,7 +125,7 @@ data CardInHand = CardInHand [Player] CandidateId Card
   deriving (Eq, Show)
 
 instance Arbitrary CardInHand where
-  arbitrary = selectedCardInArea CardInHand Player.hand Player.playerId validPlayers
+  arbitrary = selectedCardInArea CardInHand Player.hand GenericPlayer.playerId validPlayers
 
 selectedElement :: [a] -> Gen ([a], a)
 selectedElement = selectFrom elements

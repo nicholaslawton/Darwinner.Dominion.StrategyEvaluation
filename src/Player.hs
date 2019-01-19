@@ -8,6 +8,7 @@ module Player
   , alterDiscard
   ) where
 
+import GenericPlayer
 import Candidate
 import Card
 import PlayerPreparingStartingDeck
@@ -21,8 +22,11 @@ data Player = Player
   }
   deriving (Eq, Show)
 
-fromPlayerId :: CandidateId -> Player
-fromPlayerId pid = Player pid [] [] []
+instance GenericPlayer Player where
+  playerId = Player.playerId
+
+fromPlayerId :: (GenericPlayer p) => p -> Player
+fromPlayerId p = Player (GenericPlayer.playerId p) [] [] []
 
 fromPlayerPreparingStartingDeck :: PlayerPreparingStartingDeck -> Player
 fromPlayerPreparingStartingDeck (PlayerPreparingStartingDeck pid d) = Player pid d [] []

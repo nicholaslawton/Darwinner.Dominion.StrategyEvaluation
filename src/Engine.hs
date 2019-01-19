@@ -4,9 +4,9 @@ import Card
 import Game
 import GameState
 import Update
+import GenericPlayer
 import PlayerPreparingStartingDeck
 import PlayerDrawingInitialHand
-import Player
 import Command
 import EvaluationParameters
 import Candidate
@@ -46,7 +46,7 @@ nextCommand = do
       lift $ maybe MarkPlayersReady AddPlayer <$> nextPlayer (candidateId <$> candidates)
         where
           nextPlayer :: [CandidateId] -> State Game (Maybe CandidateId)
-          nextPlayer = randomElement . filter (not . (`elem` pids))
+          nextPlayer = randomElement . filter (\cid -> all ((/=) cid . GenericPlayer.playerId) pids)
 
     PreparingSupply _ cards
       | countElem Copper cards < 60 - length candidates * 7 -> return $ PlaceCardInSupply Copper
@@ -70,7 +70,7 @@ nextCommand = do
           playerNeedingCard = liftA2 (<|>) (playerNeeding Copper 7) (playerNeeding Estate 3)
           playerNeeding :: Card -> Int -> [PlayerPreparingStartingDeck] -> Maybe (CandidateId, Card)
           playerNeeding card target =
-            fmap (flip (,) card . PlayerPreparingStartingDeck.playerId)
+            fmap (flip (,) card . GenericPlayer.playerId)
               . listToMaybe
               . filter ((< target) . countElem card . PlayerPreparingStartingDeck.deck)
 
@@ -81,13 +81,13 @@ nextCommand = do
           playerWithIncompleteHand = listToMaybe . filter ((< 5) . length . PlayerDrawingInitialHand.hand)
           drawCard :: PlayerDrawingInitialHand -> State Game Command
           drawCard p =
-            maybe emptyDeckError (DrawCard (PlayerDrawingInitialHand.playerId p))
+            maybe emptyDeckError (DrawCard (GenericPlayer.playerId p))
               <$> randomElement (PlayerDrawingInitialHand.deck p)
           emptyDeckError = error "unexpected empty deck when drawing card for initial hand"
 
     BuyPhase (BuyAllowance buys) _ _ | buys <= 0 -> return BuyPhaseComplete
 
-    BuyPhase _ (p:_) (card:_) -> return $ GainCard (Player.playerId p) card
+    BuyPhase _ (p:_) (card:_) -> return $ GainCard (GenericPlayer.playerId p) card
 
     BuyPhase _ [] _ -> error "Unexpected game in progress with no players"
 

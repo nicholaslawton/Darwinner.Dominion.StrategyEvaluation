@@ -4,7 +4,9 @@ import Update
 import Candidate
 import Command
 import GameState
+import GenericPlayer
 import Player
+import PlayerWithoutDominion
 import PlayerPreparingStartingDeck
 import PlayerDrawingInitialHand
 import Card
@@ -25,7 +27,7 @@ updateTests = describe "update" $ do
   describe "add player to new game" $
     it "adds player" $ property $ \cids ->
       let (pid : pids) = validCandidateIds cids
-      in length (players (update (AddPlayer pid) (New pids))) === length pids + 1
+      in length (players (update (AddPlayer pid) (New (PlayerWithoutDominion <$> pids)))) === length pids + 1
 
   describe "mark players ready" $
     it "begins preparing supply" $ property $
@@ -104,7 +106,7 @@ verifyPlayerUpdate :: (Eq a, Show a) =>
   -> Command
   -> GameState
   -> Property
-verifyPlayerUpdate pid = verifyElementUpdate (find ((==) pid . Player.playerId)) players
+verifyPlayerUpdate pid = verifyElementUpdate (find ((==) pid . GenericPlayer.playerId)) players
 
 verifyPlayerDrawingInitialHandUpdate :: (Eq a, Show a) =>
   CandidateId
@@ -114,7 +116,7 @@ verifyPlayerDrawingInitialHandUpdate :: (Eq a, Show a) =>
   -> GameState
   -> Property
 verifyPlayerDrawingInitialHandUpdate pid = verifyElementUpdate
-  (find ((==) pid . PlayerDrawingInitialHand.playerId))
+  (find ((==) pid . GenericPlayer.playerId))
   (\x -> case x of
     DrawingInitialHands drawers _ -> drawers
     _ -> [])
@@ -127,7 +129,7 @@ verifyPlayerPreparingStartingDeckUpdate :: (Eq a, Show a) =>
   -> GameState
   -> Property
 verifyPlayerPreparingStartingDeckUpdate pid = verifyElementUpdate
-  (find ((==) pid . PlayerPreparingStartingDeck.playerId))
+  (find ((==) pid . GenericPlayer.playerId))
   (\x -> case x of
     PreparingDecks preppers _ -> preppers
     _ -> [])

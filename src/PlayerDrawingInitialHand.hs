@@ -5,6 +5,7 @@ module PlayerDrawingInitialHand
   , alterHand
   ) where
 
+import GenericPlayer
 import Candidate
 import Card
 import PlayerPreparingStartingDeck
@@ -15,6 +16,9 @@ data PlayerDrawingInitialHand = PlayerDrawingInitialHand
   , hand :: [Card]
   }
   deriving (Eq, Show)
+
+instance GenericPlayer PlayerDrawingInitialHand where
+  playerId = PlayerDrawingInitialHand.playerId
 
 fromPlayerPreparingStartingDeck :: PlayerPreparingStartingDeck -> PlayerDrawingInitialHand
 fromPlayerPreparingStartingDeck (PlayerPreparingStartingDeck pid d) = PlayerDrawingInitialHand pid d []

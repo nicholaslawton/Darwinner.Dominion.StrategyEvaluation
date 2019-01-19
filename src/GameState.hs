@@ -4,16 +4,16 @@ module GameState
   , supply
   ) where
 
-import Candidate
 import Player
+import PlayerWithoutDominion
 import PlayerPreparingStartingDeck
 import PlayerDrawingInitialHand
 import Card
 import BuyAllowance
 
 data GameState
-  = New [CandidateId]
-  | PreparingSupply [CandidateId] [Card]
+  = New [PlayerWithoutDominion]
+  | PreparingSupply [PlayerWithoutDominion] [Card]
   | PreparingDecks [PlayerPreparingStartingDeck] [Card]
   | DrawingInitialHands [PlayerDrawingInitialHand] [Card]
   | BuyPhase BuyAllowance [Player] [Card]

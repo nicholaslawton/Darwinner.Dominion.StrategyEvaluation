@@ -4,6 +4,8 @@ module PlayerPreparingStartingDeck
   , alterDeck
   ) where
 
+import GenericPlayer
+import PlayerWithoutDominion
 import Candidate
 import Card
 
@@ -13,8 +15,11 @@ data PlayerPreparingStartingDeck = PlayerPreparingStartingDeck
   }
   deriving (Eq, Show)
 
-new :: CandidateId -> PlayerPreparingStartingDeck
-new pid = PlayerPreparingStartingDeck pid []
+instance GenericPlayer PlayerPreparingStartingDeck where
+  playerId = PlayerPreparingStartingDeck.playerId
+
+new :: PlayerWithoutDominion -> PlayerPreparingStartingDeck
+new p = PlayerPreparingStartingDeck (GenericPlayer.playerId p) []
 
 alterDeck :: ([Card] -> [Card]) -> PlayerPreparingStartingDeck -> PlayerPreparingStartingDeck
 alterDeck f p = p { deck = f (deck p) }
