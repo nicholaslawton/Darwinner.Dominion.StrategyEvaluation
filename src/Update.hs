@@ -31,7 +31,7 @@ update EndGame = const GameOver
 
 addPlayer :: CandidateId -> GameState -> GameState
 addPlayer pid (New ps)
-  | any ((==) pid . GenericPlayer.playerId) ps = error "Invalid player join: player already in game"
+  | any ((==) pid . playerId) ps = error "Invalid player join: player already in game"
   | otherwise = New $ PlayerWithoutDominion pid : ps
 addPlayer _ _ = error "A player may not be added after preparation of the game has commenced"
 
@@ -50,7 +50,7 @@ beginPreparingDecks _ = error "Deck preparation should occur after the supply ha
 
 addCardToDeck :: CandidateId -> Card -> GameState -> GameState
 addCardToDeck pid card (PreparingDecks ps cards)
-  | all ((/=) pid . GenericPlayer.playerId) ps = error "Invalid deck preparation: player not in game"
+  | all ((/=) pid . playerId) ps = error "Invalid deck preparation: player not in game"
   | otherwise = PreparingDecks (alterStartingDeck (card :) pid ps) cards
 addCardToDeck _ _ _ = error "A card may only be added to a deck during game preparation"
 
@@ -61,8 +61,8 @@ beginDrawingInitialHands _ = error "Drawing initial hands must occur after decks
 
 drawCard :: CandidateId -> Card -> GameState -> GameState
 drawCard pid card (DrawingInitialHands ps cards)
-  | all ((/=) pid . GenericPlayer.playerId) ps = error "Invalid card draw: player not in game"
-  | not $ cardBelongsToPlayer GenericPlayer.deck GenericPlayer.playerId card pid ps =
+  | all ((/=) pid . playerId) ps = error "Invalid card draw: player not in game"
+  | not $ cardBelongsToPlayer deck playerId card pid ps =
       error "Invalid card draw: card not in deck of player"
   | otherwise =
       DrawingInitialHands
@@ -93,7 +93,7 @@ gainCard _ _ _ = error "A card may only be gained during the buy phase"
 discardCard :: CandidateId -> Card -> GameState -> GameState
 discardCard pid card (CleanUpPhase ps cards)
   | not $ playerExists pid ps = error "Invalid discard: player not in game"
-  | not $ cardBelongsToPlayer GenericPlayer.hand GenericPlayer.playerId card pid ps =
+  | not $ cardBelongsToPlayer hand playerId card pid ps =
       error "Invalid discard: card not in hand of player"
   | otherwise = CleanUpPhase (alterPlayer (alterDiscard (card :) . Player.alterHand (delete card)) pid ps) cards
 discardCard _ _ _ = error "A card may only be discarded during the clean up phase"
@@ -113,20 +113,20 @@ alterStartingDeck ::
   -> CandidateId
   -> [PlayerPreparingStartingDeck]
   -> [PlayerPreparingStartingDeck]
-alterStartingDeck = alterElem GenericPlayer.playerId . PlayerPreparingStartingDeck.alterDeck
+alterStartingDeck = alterElem playerId . PlayerPreparingStartingDeck.alterDeck
 
 alterPlayerDrawingInitialHand ::
   (PlayerDrawingInitialHand -> PlayerDrawingInitialHand)
   -> CandidateId
   -> [PlayerDrawingInitialHand]
   -> [PlayerDrawingInitialHand]
-alterPlayerDrawingInitialHand = alterElem GenericPlayer.playerId
+alterPlayerDrawingInitialHand = alterElem playerId
 
 alterPlayer :: (Player -> Player) -> CandidateId -> [Player] -> [Player]
-alterPlayer = alterElem GenericPlayer.playerId
+alterPlayer = alterElem playerId
 
 playerExists :: CandidateId -> [Player] -> Bool
-playerExists pid = any ((==) pid . GenericPlayer.playerId)
+playerExists pid = any ((==) pid . playerId)
 
 cardBelongsToPlayer :: (a -> [Card]) -> (a -> CandidateId) -> Card -> CandidateId -> [a] -> Bool
 cardBelongsToPlayer area ppid card pid ps = (elem card . area <$> find ((==) pid . ppid) ps) == Just True

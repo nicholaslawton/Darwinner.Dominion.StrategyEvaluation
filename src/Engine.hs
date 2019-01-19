@@ -46,7 +46,7 @@ nextCommand = do
       lift $ maybe MarkPlayersReady AddPlayer <$> nextPlayer (candidateId <$> candidates)
         where
           nextPlayer :: [CandidateId] -> State Game (Maybe CandidateId)
-          nextPlayer = randomElement . filter (\cid -> all ((/=) cid . GenericPlayer.playerId) pids)
+          nextPlayer = randomElement . filter (\cid -> all ((/=) cid . playerId) pids)
 
     PreparingSupply _ cards
       | countElem Copper cards < 60 - length candidates * 7 -> return $ PlaceCardInSupply Copper
@@ -70,24 +70,24 @@ nextCommand = do
           playerNeedingCard = liftA2 (<|>) (playerNeeding Copper 7) (playerNeeding Estate 3)
           playerNeeding :: Card -> Int -> [PlayerPreparingStartingDeck] -> Maybe (CandidateId, Card)
           playerNeeding card target =
-            fmap (flip (,) card . GenericPlayer.playerId)
+            fmap (flip (,) card . playerId)
               . listToMaybe
-              . filter ((< target) . countElem card . GenericPlayer.deck)
+              . filter ((< target) . countElem card . deck)
 
     DrawingInitialHands ps _ ->
       fromMaybe (return MarkInitialHandsDrawn) $ lift . drawCard <$> playerWithIncompleteHand ps
         where
           playerWithIncompleteHand :: [PlayerDrawingInitialHand] -> Maybe PlayerDrawingInitialHand
-          playerWithIncompleteHand = listToMaybe . filter ((< 5) . length . GenericPlayer.hand)
+          playerWithIncompleteHand = listToMaybe . filter ((< 5) . length . hand)
           drawCard :: PlayerDrawingInitialHand -> State Game Command
           drawCard p =
-            maybe emptyDeckError (DrawCard (GenericPlayer.playerId p))
-              <$> randomElement (GenericPlayer.deck p)
+            maybe emptyDeckError (DrawCard (playerId p))
+              <$> randomElement (deck p)
           emptyDeckError = error "unexpected empty deck when drawing card for initial hand"
 
     BuyPhase (BuyAllowance buys) _ _ | buys <= 0 -> return BuyPhaseComplete
 
-    BuyPhase _ (p:_) (card:_) -> return $ GainCard (GenericPlayer.playerId p) card
+    BuyPhase _ (p:_) (card:_) -> return $ GainCard (playerId p) card
 
     BuyPhase _ [] _ -> error "Unexpected game in progress with no players"
 

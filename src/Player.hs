@@ -1,7 +1,7 @@
 module Player
   ( Player
   , Player.new
-  , fromPlayerId
+  , Player.fromPlayerWithoutDominion
   , Player.fromPlayerPreparingStartingDeck
   , fromPlayerDrawingInitialHand
   , Player.alterDeck
@@ -12,6 +12,7 @@ module Player
 import GenericPlayer
 import Candidate
 import Card
+import PlayerWithoutDominion
 import PlayerPreparingStartingDeck
 import PlayerDrawingInitialHand
 
@@ -32,8 +33,8 @@ instance GenericPlayer Player where
 new :: CandidateId -> [Card] -> [Card] -> [Card] -> Player
 new = Player 
 
-fromPlayerId :: (GenericPlayer p) => p -> Player
-fromPlayerId p = Player (GenericPlayer.playerId p) [] [] []
+fromPlayerWithoutDominion :: PlayerWithoutDominion -> Player
+fromPlayerWithoutDominion p = Player (GenericPlayer.playerId p) [] [] []
 
 fromPlayerPreparingStartingDeck :: PlayerPreparingStartingDeck -> Player
 fromPlayerPreparingStartingDeck p = Player (GenericPlayer.playerId p) (GenericPlayer.deck p) [] []

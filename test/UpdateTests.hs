@@ -19,7 +19,7 @@ import GameStateValidation
 import ArbitraryInstances
 import CardOrder
 import Test.Hspec
-import Test.QuickCheck
+import Test.QuickCheck hiding (discard)
 
 updateTests :: SpecWith ()
 updateTests = describe "update" $ do
@@ -45,7 +45,7 @@ updateTests = describe "update" $ do
     it "adds card to deck of player" $ property $ \(SelectedPlayerPreparingStartingDeck ps pid) cards card ->
       verifyPlayerPreparingStartingDeckUpdate
         pid
-        (length . GenericPlayer.deck)
+        (length . deck)
         (+1)
         (AddCardToDeck pid card)
         (PreparingDecks ps cards)
@@ -58,7 +58,7 @@ updateTests = describe "update" $ do
     it "adds card to hand" $ property $ \(CardInStartingDeck ps pid card) cards ->
       verifyPlayerDrawingInitialHandUpdate
         pid
-        (length . GenericPlayer.hand)
+        (length . hand)
         (+1)
         (DrawCard pid card)
         (DrawingInitialHands ps cards)
@@ -77,7 +77,7 @@ updateTests = describe "update" $ do
 
   describe "gain card" $ do
     it "adds card to discard" $ property $ \(SelectedPlayer ps pid) (CardInSupply cards card) (Positive buys) ->
-      verifyPlayerUpdate pid (length . GenericPlayer.discard) (+1) (GainCard pid card) (BuyPhase (BuyAllowance buys) ps cards)
+      verifyPlayerUpdate pid (length . discard) (+1) (GainCard pid card) (BuyPhase (BuyAllowance buys) ps cards)
 
     it "does not alter cards in play" $ property $ \(SelectedPlayer ps pid) (CardInSupply cards card) (Positive buys) ->
       verifyUpdate cardsInPlay id (GainCard pid card) (BuyPhase (BuyAllowance buys) ps cards)
@@ -91,10 +91,10 @@ updateTests = describe "update" $ do
 
   describe "discard card" $ do
     it "removes card from hand" $ property $ \(CardInHand ps pid card) cards ->
-      verifyPlayerUpdate pid (length . GenericPlayer.hand) (subtract 1) (DiscardCard pid card) (CleanUpPhase ps cards)
+      verifyPlayerUpdate pid (length . hand) (subtract 1) (DiscardCard pid card) (CleanUpPhase ps cards)
 
     it "adds card to discard" $ property $ \(CardInHand ps pid card) cards ->
-      verifyPlayerUpdate pid (length . GenericPlayer.discard) (+1) (DiscardCard pid card) (CleanUpPhase ps cards)
+      verifyPlayerUpdate pid (length . discard) (+1) (DiscardCard pid card) (CleanUpPhase ps cards)
 
     it "does not alter dominion of player" $ property $ \(CardInHand ps pid card) cards ->
       verifyPlayerUpdate pid dominion id (DiscardCard pid card) (CleanUpPhase ps cards)
@@ -106,7 +106,7 @@ verifyPlayerUpdate :: (Eq a, Show a) =>
   -> Command
   -> GameState
   -> Property
-verifyPlayerUpdate pid = verifyElementUpdate (find ((==) pid . GenericPlayer.playerId)) players
+verifyPlayerUpdate pid = verifyElementUpdate (find ((==) pid . playerId)) players
 
 verifyPlayerDrawingInitialHandUpdate :: (Eq a, Show a) =>
   CandidateId
@@ -116,7 +116,7 @@ verifyPlayerDrawingInitialHandUpdate :: (Eq a, Show a) =>
   -> GameState
   -> Property
 verifyPlayerDrawingInitialHandUpdate pid = verifyElementUpdate
-  (find ((==) pid . GenericPlayer.playerId))
+  (find ((==) pid . playerId))
   (\x -> case x of
     DrawingInitialHands drawers _ -> drawers
     _ -> [])
@@ -129,7 +129,7 @@ verifyPlayerPreparingStartingDeckUpdate :: (Eq a, Show a) =>
   -> GameState
   -> Property
 verifyPlayerPreparingStartingDeckUpdate pid = verifyElementUpdate
-  (find ((==) pid . GenericPlayer.playerId))
+  (find ((==) pid . playerId))
   (\x -> case x of
     PreparingDecks preppers _ -> preppers
     _ -> [])
@@ -154,10 +154,10 @@ verifyUpdate prop change command = liftA2 (===) (prop . update command) (change 
 
 dominionWhileDrawingInitialHand :: PlayerDrawingInitialHand -> [Card]
 dominionWhileDrawingInitialHand p =
-  sortOn arbitraryCardOrder $ concatMap ($ p) [GenericPlayer.deck, GenericPlayer.hand]
+  sortOn arbitraryCardOrder $ concatMap ($ p) [deck, hand]
 
 dominion :: Player -> [Card]
-dominion p = sortOn arbitraryCardOrder $ concatMap ($ p) [GenericPlayer.deck, GenericPlayer.hand, GenericPlayer.discard]
+dominion p = sortOn arbitraryCardOrder $ concatMap ($ p) [deck, hand, discard]
 
 cardsInPlay :: GameState -> [Card]
 cardsInPlay gameState = sortOn arbitraryCardOrder $ concatMap ($ gameState) [concatMap dominion . players, supply]

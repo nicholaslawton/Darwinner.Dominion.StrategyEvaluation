@@ -22,8 +22,8 @@ data GameState
   deriving (Eq, Show)
 
 players :: GameState -> [Player]
-players (New pids) = Player.fromPlayerId <$> pids
-players (PreparingSupply pids _) = Player.fromPlayerId <$> pids
+players (New pids) = Player.fromPlayerWithoutDominion <$> pids
+players (PreparingSupply pids _) = Player.fromPlayerWithoutDominion <$> pids
 players (PreparingDecks ps _) = Player.fromPlayerPreparingStartingDeck <$> ps
 players (DrawingInitialHands ps _) = Player.fromPlayerDrawingInitialHand <$> ps
 players (BuyPhase _ ps _) = ps

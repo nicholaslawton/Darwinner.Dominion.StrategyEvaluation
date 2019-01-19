@@ -95,14 +95,14 @@ data SelectedPlayerPreparingStartingDeck =
 
 instance Arbitrary SelectedPlayerPreparingStartingDeck where
   arbitrary = validPlayersPreparingStartingDecks
-    >>= fmap (uncurry SelectedPlayerPreparingStartingDeck . second GenericPlayer.playerId)
+    >>= fmap (uncurry SelectedPlayerPreparingStartingDeck . second playerId)
       . selectedElement
 
 data SelectedPlayer = SelectedPlayer [Player] CandidateId
   deriving (Eq, Show)
 
 instance Arbitrary SelectedPlayer where
-  arbitrary = validPlayers >>= fmap (uncurry SelectedPlayer . second GenericPlayer.playerId) . selectedElement
+  arbitrary = validPlayers >>= fmap (uncurry SelectedPlayer . second playerId) . selectedElement
 
 data CardInStartingDeck = CardInStartingDeck [PlayerDrawingInitialHand] CandidateId Card
   deriving (Eq, Show)
@@ -111,8 +111,8 @@ instance Arbitrary CardInStartingDeck where
   arbitrary =
     selectedCardInArea
       CardInStartingDeck
-      GenericPlayer.deck
-      GenericPlayer.playerId
+      deck
+      playerId
       validPlayersDrawingInitialHands
 
 data CardInSupply = CardInSupply [Card] Card
@@ -125,7 +125,7 @@ data CardInHand = CardInHand [Player] CandidateId Card
   deriving (Eq, Show)
 
 instance Arbitrary CardInHand where
-  arbitrary = selectedCardInArea CardInHand GenericPlayer.hand GenericPlayer.playerId validPlayers
+  arbitrary = selectedCardInArea CardInHand hand playerId validPlayers
 
 selectedElement :: [a] -> Gen ([a], a)
 selectedElement = selectFrom elements
