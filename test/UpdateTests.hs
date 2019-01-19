@@ -27,7 +27,7 @@ updateTests = describe "update" $ do
   describe "add player to new game" $
     it "adds player" $ property $ \cids ->
       let (pid : pids) = validCandidateIds cids
-      in length (players (update (AddPlayer pid) (New (PlayerWithoutDominion <$> pids)))) === length pids + 1
+      in length (players (update (AddPlayer pid) (New (PlayerWithoutDominion.new <$> pids)))) === length pids + 1
 
   describe "mark players ready" $
     it "begins preparing supply" $ property $

@@ -1,4 +1,7 @@
-module PlayerWithoutDominion (PlayerWithoutDominion(..)) where
+module PlayerWithoutDominion
+  ( PlayerWithoutDominion
+  , new
+  ) where
 
 import GenericPlayer
 import Candidate
@@ -11,3 +14,6 @@ instance GenericPlayer PlayerWithoutDominion where
   deck = const []
   hand = const []
   discard = const []
+
+new :: CandidateId -> PlayerWithoutDominion
+new = PlayerWithoutDominion

@@ -32,7 +32,7 @@ update EndGame = const GameOver
 addPlayer :: CandidateId -> GameState -> GameState
 addPlayer pid (New ps)
   | any ((==) pid . playerId) ps = error "Invalid player join: player already in game"
-  | otherwise = New $ PlayerWithoutDominion pid : ps
+  | otherwise = New $ PlayerWithoutDominion.new pid : ps
 addPlayer _ _ = error "A player may not be added after preparation of the game has commenced"
 
 beginPreparingSupply :: GameState -> GameState

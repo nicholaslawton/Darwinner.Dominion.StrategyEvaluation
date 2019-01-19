@@ -27,7 +27,7 @@ instance Arbitrary Player where
   arbitrary = liftM4 Player.new arbitrary arbitrary arbitrary arbitrary
 
 instance Arbitrary PlayerWithoutDominion where
-  arbitrary = PlayerWithoutDominion <$> arbitrary
+  arbitrary = PlayerWithoutDominion.new <$> arbitrary
 
 instance Arbitrary PlayerPreparingStartingDeck where
   arbitrary = liftA2 PlayerPreparingStartingDeck.new arbitrary arbitrary

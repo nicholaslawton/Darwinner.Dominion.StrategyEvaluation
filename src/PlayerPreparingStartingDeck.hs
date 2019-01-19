@@ -1,6 +1,6 @@
 module PlayerPreparingStartingDeck
   ( PlayerPreparingStartingDeck
-  , new
+  , PlayerPreparingStartingDeck.new
   , fromPlayerWithoutDominion
   , alterDeck
   ) where
