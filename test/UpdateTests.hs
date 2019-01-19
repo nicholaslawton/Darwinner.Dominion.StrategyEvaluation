@@ -58,7 +58,7 @@ updateTests = describe "update" $ do
     it "adds card to hand" $ property $ \(CardInStartingDeck ps pid card) cards ->
       verifyPlayerDrawingInitialHandUpdate
         pid
-        (length . PlayerDrawingInitialHand.hand)
+        (length . GenericPlayer.hand)
         (+1)
         (DrawCard pid card)
         (DrawingInitialHands ps cards)
@@ -154,7 +154,7 @@ verifyUpdate prop change command = liftA2 (===) (prop . update command) (change 
 
 dominionWhileDrawingInitialHand :: PlayerDrawingInitialHand -> [Card]
 dominionWhileDrawingInitialHand p =
-  sortOn arbitraryCardOrder $ concatMap ($ p) [PlayerDrawingInitialHand.deck, PlayerDrawingInitialHand.hand]
+  sortOn arbitraryCardOrder $ concatMap ($ p) [GenericPlayer.deck, GenericPlayer.hand]
 
 dominion :: Player -> [Card]
 dominion p = sortOn arbitraryCardOrder $ concatMap ($ p) [GenericPlayer.deck, GenericPlayer.hand, GenericPlayer.discard]

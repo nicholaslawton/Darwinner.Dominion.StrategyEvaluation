@@ -78,11 +78,11 @@ nextCommand = do
       fromMaybe (return MarkInitialHandsDrawn) $ lift . drawCard <$> playerWithIncompleteHand ps
         where
           playerWithIncompleteHand :: [PlayerDrawingInitialHand] -> Maybe PlayerDrawingInitialHand
-          playerWithIncompleteHand = listToMaybe . filter ((< 5) . length . PlayerDrawingInitialHand.hand)
+          playerWithIncompleteHand = listToMaybe . filter ((< 5) . length . GenericPlayer.hand)
           drawCard :: PlayerDrawingInitialHand -> State Game Command
           drawCard p =
             maybe emptyDeckError (DrawCard (GenericPlayer.playerId p))
-              <$> randomElement (PlayerDrawingInitialHand.deck p)
+              <$> randomElement (GenericPlayer.deck p)
           emptyDeckError = error "unexpected empty deck when drawing card for initial hand"
 
     BuyPhase (BuyAllowance buys) _ _ | buys <= 0 -> return BuyPhaseComplete

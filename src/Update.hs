@@ -62,7 +62,7 @@ beginDrawingInitialHands _ = error "Drawing initial hands must occur after decks
 drawCard :: CandidateId -> Card -> GameState -> GameState
 drawCard pid card (DrawingInitialHands ps cards)
   | all ((/=) pid . GenericPlayer.playerId) ps = error "Invalid card draw: player not in game"
-  | not $ cardBelongsToPlayer PlayerDrawingInitialHand.deck GenericPlayer.playerId card pid ps =
+  | not $ cardBelongsToPlayer GenericPlayer.deck GenericPlayer.playerId card pid ps =
       error "Invalid card draw: card not in deck of player"
   | otherwise =
       DrawingInitialHands

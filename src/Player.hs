@@ -39,7 +39,7 @@ fromPlayerPreparingStartingDeck :: PlayerPreparingStartingDeck -> Player
 fromPlayerPreparingStartingDeck p = Player (GenericPlayer.playerId p) (GenericPlayer.deck p) [] []
 
 fromPlayerDrawingInitialHand :: PlayerDrawingInitialHand -> Player
-fromPlayerDrawingInitialHand (PlayerDrawingInitialHand pid d h) = Player pid d h []
+fromPlayerDrawingInitialHand p = Player (GenericPlayer.playerId p) (GenericPlayer.deck p) (GenericPlayer.hand p) []
 
 alterDeck :: ([Card] -> [Card]) -> Player -> Player
 alterDeck f p = p { Player.deck = f (Player.deck p) }
