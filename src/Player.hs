@@ -24,6 +24,9 @@ data Player = Player
 
 instance GenericPlayer Player where
   playerId = Player.playerId
+  deck = Player.deck
+  hand = Player.hand
+  discard = Player.discard
 
 fromPlayerId :: (GenericPlayer p) => p -> Player
 fromPlayerId p = Player (GenericPlayer.playerId p) [] [] []
@@ -41,4 +44,4 @@ alterHand :: ([Card] -> [Card]) -> Player -> Player
 alterHand f p = p { Player.hand = f (Player.hand p) }
 
 alterDiscard :: ([Card] -> [Card]) -> Player -> Player
-alterDiscard f p = p { discard = f (discard p) }
+alterDiscard f p = p { Player.discard = f (Player.discard p) }

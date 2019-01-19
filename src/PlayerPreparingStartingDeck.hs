@@ -17,9 +17,12 @@ data PlayerPreparingStartingDeck = PlayerPreparingStartingDeck
 
 instance GenericPlayer PlayerPreparingStartingDeck where
   playerId = PlayerPreparingStartingDeck.playerId
+  deck = PlayerPreparingStartingDeck.deck
+  hand = const []
+  discard = const []
 
 new :: PlayerWithoutDominion -> PlayerPreparingStartingDeck
 new p = PlayerPreparingStartingDeck (GenericPlayer.playerId p) []
 
 alterDeck :: ([Card] -> [Card]) -> PlayerPreparingStartingDeck -> PlayerPreparingStartingDeck
-alterDeck f p = p { deck = f (deck p) }
+alterDeck f p = p { PlayerPreparingStartingDeck.deck = f (PlayerPreparingStartingDeck.deck p) }

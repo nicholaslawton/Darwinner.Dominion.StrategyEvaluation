@@ -8,3 +8,6 @@ data PlayerWithoutDominion = PlayerWithoutDominion CandidateId
 
 instance GenericPlayer PlayerWithoutDominion where
   playerId (PlayerWithoutDominion pid) = pid
+  deck = const []
+  hand = const []
+  discard = const []

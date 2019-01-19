@@ -19,6 +19,9 @@ data PlayerDrawingInitialHand = PlayerDrawingInitialHand
 
 instance GenericPlayer PlayerDrawingInitialHand where
   playerId = PlayerDrawingInitialHand.playerId
+  deck = PlayerDrawingInitialHand.deck
+  hand = PlayerDrawingInitialHand.hand
+  discard = const []
 
 fromPlayerPreparingStartingDeck :: PlayerPreparingStartingDeck -> PlayerDrawingInitialHand
 fromPlayerPreparingStartingDeck (PlayerPreparingStartingDeck pid d) = PlayerDrawingInitialHand pid d []
@@ -27,4 +30,4 @@ alterDeck :: ([Card] -> [Card]) -> PlayerDrawingInitialHand -> PlayerDrawingInit
 alterDeck f p = p { PlayerDrawingInitialHand.deck = f (PlayerDrawingInitialHand.deck p) }
 
 alterHand :: ([Card] -> [Card]) -> PlayerDrawingInitialHand -> PlayerDrawingInitialHand
-alterHand f p = p { hand = f (hand p) }
+alterHand f p = p { PlayerDrawingInitialHand.hand = f (PlayerDrawingInitialHand.hand p) }
