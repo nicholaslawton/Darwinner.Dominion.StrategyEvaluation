@@ -1,5 +1,5 @@
 module Player
-  ( Player(discard)
+  ( Player
   , Player.new
   , fromPlayerId
   , Player.fromPlayerPreparingStartingDeck

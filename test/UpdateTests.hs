@@ -77,7 +77,7 @@ updateTests = describe "update" $ do
 
   describe "gain card" $ do
     it "adds card to discard" $ property $ \(SelectedPlayer ps pid) (CardInSupply cards card) (Positive buys) ->
-      verifyPlayerUpdate pid (length . Player.discard) (+1) (GainCard pid card) (BuyPhase (BuyAllowance buys) ps cards)
+      verifyPlayerUpdate pid (length . GenericPlayer.discard) (+1) (GainCard pid card) (BuyPhase (BuyAllowance buys) ps cards)
 
     it "does not alter cards in play" $ property $ \(SelectedPlayer ps pid) (CardInSupply cards card) (Positive buys) ->
       verifyUpdate cardsInPlay id (GainCard pid card) (BuyPhase (BuyAllowance buys) ps cards)
@@ -94,7 +94,7 @@ updateTests = describe "update" $ do
       verifyPlayerUpdate pid (length . GenericPlayer.hand) (subtract 1) (DiscardCard pid card) (CleanUpPhase ps cards)
 
     it "adds card to discard" $ property $ \(CardInHand ps pid card) cards ->
-      verifyPlayerUpdate pid (length . Player.discard) (+1) (DiscardCard pid card) (CleanUpPhase ps cards)
+      verifyPlayerUpdate pid (length . GenericPlayer.discard) (+1) (DiscardCard pid card) (CleanUpPhase ps cards)
 
     it "does not alter dominion of player" $ property $ \(CardInHand ps pid card) cards ->
       verifyPlayerUpdate pid dominion id (DiscardCard pid card) (CleanUpPhase ps cards)
@@ -157,7 +157,7 @@ dominionWhileDrawingInitialHand p =
   sortOn arbitraryCardOrder $ concatMap ($ p) [PlayerDrawingInitialHand.deck, PlayerDrawingInitialHand.hand]
 
 dominion :: Player -> [Card]
-dominion p = sortOn arbitraryCardOrder $ concatMap ($ p) [GenericPlayer.deck, GenericPlayer.hand, Player.discard]
+dominion p = sortOn arbitraryCardOrder $ concatMap ($ p) [GenericPlayer.deck, GenericPlayer.hand, GenericPlayer.discard]
 
 cardsInPlay :: GameState -> [Card]
 cardsInPlay gameState = sortOn arbitraryCardOrder $ concatMap ($ gameState) [concatMap dominion . players, supply]
