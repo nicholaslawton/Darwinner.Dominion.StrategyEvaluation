@@ -157,7 +157,7 @@ dominionWhileDrawingInitialHand p =
   sortOn arbitraryCardOrder $ concatMap ($ p) [PlayerDrawingInitialHand.deck, PlayerDrawingInitialHand.hand]
 
 dominion :: Player -> [Card]
-dominion p = sortOn arbitraryCardOrder $ concatMap ($ p) [Player.deck, Player.hand, Player.discard]
+dominion p = sortOn arbitraryCardOrder $ concatMap ($ p) [GenericPlayer.deck, Player.hand, Player.discard]
 
 cardsInPlay :: GameState -> [Card]
 cardsInPlay gameState = sortOn arbitraryCardOrder $ concatMap ($ gameState) [concatMap dominion . players, supply]
