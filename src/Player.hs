@@ -1,5 +1,6 @@
 module Player
-  ( Player(..)
+  ( Player(deck, hand, discard)
+  , Player.new
   , fromPlayerId
   , Player.fromPlayerPreparingStartingDeck
   , fromPlayerDrawingInitialHand
@@ -27,6 +28,9 @@ instance GenericPlayer Player where
   deck = Player.deck
   hand = Player.hand
   discard = Player.discard
+
+new :: CandidateId -> [Card] -> [Card] -> [Card] -> Player
+new = Player 
 
 fromPlayerId :: (GenericPlayer p) => p -> Player
 fromPlayerId p = Player (GenericPlayer.playerId p) [] [] []

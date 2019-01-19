@@ -24,7 +24,7 @@ instance Arbitrary Candidate where
   arbitrary = liftA2 Candidate arbitrary arbitrary
 
 instance Arbitrary Player where
-  arbitrary = liftM4 Player arbitrary arbitrary arbitrary arbitrary
+  arbitrary = liftM4 Player.new arbitrary arbitrary arbitrary arbitrary
 
 instance Arbitrary PlayerWithoutDominion where
   arbitrary = PlayerWithoutDominion <$> arbitrary
@@ -87,7 +87,7 @@ validPlayersDrawingInitialHands = validCandidateIds <$> arbitrary
 
 validPlayers :: Gen [Player]
 validPlayers = validCandidateIds <$> arbitrary
-  >>= traverse (\cid -> liftA3 (Player cid) arbitrary arbitrary arbitrary)
+  >>= traverse (\cid -> liftA3 (Player.new cid) arbitrary arbitrary arbitrary)
 
 data SelectedPlayerPreparingStartingDeck =
   SelectedPlayerPreparingStartingDeck [PlayerPreparingStartingDeck] CandidateId
