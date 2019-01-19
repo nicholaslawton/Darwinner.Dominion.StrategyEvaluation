@@ -45,7 +45,7 @@ updateTests = describe "update" $ do
     it "adds card to deck of player" $ property $ \(SelectedPlayerPreparingStartingDeck ps pid) cards card ->
       verifyPlayerPreparingStartingDeckUpdate
         pid
-        (length . PlayerPreparingStartingDeck.deck)
+        (length . GenericPlayer.deck)
         (+1)
         (AddCardToDeck pid card)
         (PreparingDecks ps cards)

@@ -24,7 +24,7 @@ instance GenericPlayer PlayerDrawingInitialHand where
   discard = const []
 
 fromPlayerPreparingStartingDeck :: PlayerPreparingStartingDeck -> PlayerDrawingInitialHand
-fromPlayerPreparingStartingDeck (PlayerPreparingStartingDeck pid d) = PlayerDrawingInitialHand pid d []
+fromPlayerPreparingStartingDeck p = PlayerDrawingInitialHand (GenericPlayer.playerId p) (GenericPlayer.deck p) []
 
 alterDeck :: ([Card] -> [Card]) -> PlayerDrawingInitialHand -> PlayerDrawingInitialHand
 alterDeck f p = p { PlayerDrawingInitialHand.deck = f (PlayerDrawingInitialHand.deck p) }

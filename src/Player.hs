@@ -36,7 +36,7 @@ fromPlayerId :: (GenericPlayer p) => p -> Player
 fromPlayerId p = Player (GenericPlayer.playerId p) [] [] []
 
 fromPlayerPreparingStartingDeck :: PlayerPreparingStartingDeck -> Player
-fromPlayerPreparingStartingDeck (PlayerPreparingStartingDeck pid d) = Player pid d [] []
+fromPlayerPreparingStartingDeck p = Player (GenericPlayer.playerId p) (GenericPlayer.deck p) [] []
 
 fromPlayerDrawingInitialHand :: PlayerDrawingInitialHand -> Player
 fromPlayerDrawingInitialHand (PlayerDrawingInitialHand pid d h) = Player pid d h []

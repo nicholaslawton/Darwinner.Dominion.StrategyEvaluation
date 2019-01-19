@@ -30,7 +30,7 @@ instance Arbitrary PlayerWithoutDominion where
   arbitrary = PlayerWithoutDominion <$> arbitrary
 
 instance Arbitrary PlayerPreparingStartingDeck where
-  arbitrary = liftA2 PlayerPreparingStartingDeck arbitrary arbitrary
+  arbitrary = liftA2 PlayerPreparingStartingDeck.new arbitrary arbitrary
 
 instance Arbitrary PlayerDrawingInitialHand where
   arbitrary = liftA3 PlayerDrawingInitialHand arbitrary arbitrary arbitrary
@@ -79,7 +79,7 @@ validCandidates = validCandidateIds <$> arbitrary >>= traverse (\cid -> Candidat
 
 validPlayersPreparingStartingDecks :: Gen [PlayerPreparingStartingDeck]
 validPlayersPreparingStartingDecks = validCandidateIds <$> arbitrary
-  >>= traverse (\cid -> PlayerPreparingStartingDeck cid <$> arbitrary)
+  >>= traverse (\cid -> PlayerPreparingStartingDeck.new cid <$> arbitrary)
 
 validPlayersDrawingInitialHands :: Gen [PlayerDrawingInitialHand]
 validPlayersDrawingInitialHands = validCandidateIds <$> arbitrary

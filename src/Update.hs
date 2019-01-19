@@ -45,7 +45,7 @@ placeCardInSupply _ _ = error "A card may only be placed in the supply during ga
 
 beginPreparingDecks :: GameState -> GameState
 beginPreparingDecks (PreparingSupply pids cards) =
-  PreparingDecks (PlayerPreparingStartingDeck.new <$> pids) cards
+  PreparingDecks (PlayerPreparingStartingDeck.fromPlayerWithoutDominion <$> pids) cards
 beginPreparingDecks _ = error "Deck preparation should occur after the supply has been prepared"
 
 addCardToDeck :: CandidateId -> Card -> GameState -> GameState

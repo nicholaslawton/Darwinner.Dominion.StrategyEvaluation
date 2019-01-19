@@ -72,7 +72,7 @@ nextCommand = do
           playerNeeding card target =
             fmap (flip (,) card . GenericPlayer.playerId)
               . listToMaybe
-              . filter ((< target) . countElem card . PlayerPreparingStartingDeck.deck)
+              . filter ((< target) . countElem card . GenericPlayer.deck)
 
     DrawingInitialHands ps _ ->
       fromMaybe (return MarkInitialHandsDrawn) $ lift . drawCard <$> playerWithIncompleteHand ps
