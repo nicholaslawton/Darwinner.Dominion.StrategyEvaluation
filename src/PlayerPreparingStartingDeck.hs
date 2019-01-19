@@ -2,7 +2,6 @@ module PlayerPreparingStartingDeck
   ( PlayerPreparingStartingDeck
   , PlayerPreparingStartingDeck.new
   , fromPlayerWithoutDominion
-  , alterDeck
   ) where
 
 import GenericPlayer
@@ -22,11 +21,10 @@ instance GenericPlayer PlayerPreparingStartingDeck where
   hand = const []
   discard = const []
 
+  alterDeck f p = p { deck' = f (deck p) }
+
 new :: CandidateId -> [Card] -> PlayerPreparingStartingDeck
 new = PlayerPreparingStartingDeck
 
 fromPlayerWithoutDominion :: PlayerWithoutDominion -> PlayerPreparingStartingDeck
 fromPlayerWithoutDominion p = PlayerPreparingStartingDeck (playerId p) []
-
-alterDeck :: ([Card] -> [Card]) -> PlayerPreparingStartingDeck -> PlayerPreparingStartingDeck
-alterDeck f p = p { deck' = f (deck' p) }

@@ -7,8 +7,6 @@ import GameState
 import GenericPlayer
 import Player
 import PlayerWithoutDominion
-import PlayerPreparingStartingDeck
-import PlayerDrawingInitialHand
 import Card
 import BuyAllowance
 
@@ -43,12 +41,7 @@ updateTests = describe "update" $ do
 
   describe "add card to deck of player" $
     it "adds card to deck of player" $ property $ \(SelectedPlayerPreparingStartingDeck ps pid) cards card ->
-      verifyPlayerPreparingStartingDeckUpdate
-        pid
-        (length . deck)
-        (+1)
-        (AddCardToDeck pid card)
-        (PreparingDecks ps cards)
+      verifyPlayerUpdate pid (length . deck) (+1) (AddCardToDeck pid card) (PreparingDecks ps cards)
 
   describe "mark decks prepared" $
     it "begins drawing initial hands" $ property $ \ps cards ->
@@ -56,20 +49,10 @@ updateTests = describe "update" $ do
 
   describe "draw card" $ do
     it "adds card to hand" $ property $ \(CardInStartingDeck ps pid card) cards ->
-      verifyPlayerDrawingInitialHandUpdate
-        pid
-        (length . hand)
-        (+1)
-        (DrawCard pid card)
-        (DrawingInitialHands ps cards)
+      verifyPlayerUpdate pid (length . hand) (+1) (DrawCard pid card) (DrawingInitialHands ps cards)
 
     it "does not alter dominion of player" $ property $ \(CardInStartingDeck ps pid card) cards ->
-      verifyPlayerDrawingInitialHandUpdate
-        pid
-        dominionWhileDrawingInitialHand
-        id
-        (DrawCard pid card)
-        (DrawingInitialHands ps cards)
+      verifyPlayerUpdate pid dominion id (DrawCard pid card) (DrawingInitialHands ps cards)
 
   describe "mark initial hands drawn" $
     it "transitions to buy phase" $ property $ \ps cards ->
@@ -106,43 +89,8 @@ verifyPlayerUpdate :: (Eq a, Show a) =>
   -> Command
   -> GameState
   -> Property
-verifyPlayerUpdate pid = verifyElementUpdate (find ((==) pid . playerId)) players
-
-verifyPlayerDrawingInitialHandUpdate :: (Eq a, Show a) =>
-  CandidateId
-  -> (PlayerDrawingInitialHand -> a)
-  -> (a -> a)
-  -> Command
-  -> GameState
-  -> Property
-verifyPlayerDrawingInitialHandUpdate pid = verifyElementUpdate
-  (find ((==) pid . playerId))
-  (\x -> case x of
-    DrawingInitialHands drawers _ -> drawers
-    _ -> [])
-
-verifyPlayerPreparingStartingDeckUpdate :: (Eq a, Show a) =>
-  CandidateId
-  -> (PlayerPreparingStartingDeck -> a)
-  -> (a -> a)
-  -> Command
-  -> GameState
-  -> Property
-verifyPlayerPreparingStartingDeckUpdate pid = verifyElementUpdate
-  (find ((==) pid . playerId))
-  (\x -> case x of
-    PreparingDecks preppers _ -> preppers
-    _ -> [])
-
-verifyElementUpdate :: (Eq b, Show b) =>
-  ([a] -> Maybe a)
-  -> (GameState -> [a])
-  -> (a -> b)
-  -> (b -> b)
-  -> Command
-  -> GameState
-  -> Property
-verifyElementUpdate element collection prop change = verifyUpdate (fmap prop . element . collection) (fmap change)
+verifyPlayerUpdate pid prop change =
+  verifyUpdate (fmap prop . find ((==) pid . playerId) . players) (fmap change)
 
 verifyUpdate :: (Eq a, Show a) =>
   (GameState -> a)
@@ -151,10 +99,6 @@ verifyUpdate :: (Eq a, Show a) =>
   -> GameState
   -> Property
 verifyUpdate prop change command = liftA2 (===) (prop . update command) (change . prop)
-
-dominionWhileDrawingInitialHand :: PlayerDrawingInitialHand -> [Card]
-dominionWhileDrawingInitialHand p =
-  sortOn arbitraryCardOrder $ concatMap ($ p) [deck, hand]
 
 dominion :: Player -> [Card]
 dominion p = sortOn arbitraryCardOrder $ concatMap ($ p) [deck, hand, discard]

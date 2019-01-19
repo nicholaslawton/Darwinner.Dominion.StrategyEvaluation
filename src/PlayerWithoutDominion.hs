@@ -15,5 +15,7 @@ instance GenericPlayer PlayerWithoutDominion where
   hand = const []
   discard = const []
 
+  alterDeck = flip const
+
 new :: CandidateId -> PlayerWithoutDominion
 new = PlayerWithoutDominion

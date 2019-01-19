@@ -8,3 +8,5 @@ class GenericPlayer a where
   deck :: a -> [Card]
   hand :: a -> [Card]
   discard :: a -> [Card]
+
+  alterDeck :: ([Card] -> [Card]) -> a -> a

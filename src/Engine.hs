@@ -5,7 +5,6 @@ import Game
 import GameState
 import Update
 import GenericPlayer
-import PlayerPreparingStartingDeck
 import PlayerDrawingInitialHand
 import Command
 import EvaluationParameters
@@ -66,13 +65,11 @@ nextCommand = do
     PreparingDecks ps _ ->
       return $ fromMaybe MarkDecksPrepared $ uncurry AddCardToDeck <$> playerNeedingCard ps
         where
-          playerNeedingCard :: [PlayerPreparingStartingDeck] -> Maybe (CandidateId, Card)
+          playerNeedingCard :: GenericPlayer p => [p] -> Maybe (CandidateId, Card)
           playerNeedingCard = liftA2 (<|>) (playerNeeding Copper 7) (playerNeeding Estate 3)
-          playerNeeding :: Card -> Int -> [PlayerPreparingStartingDeck] -> Maybe (CandidateId, Card)
+          playerNeeding :: GenericPlayer p => Card -> Int -> [p] -> Maybe (CandidateId, Card)
           playerNeeding card target =
-            fmap (flip (,) card . playerId)
-              . listToMaybe
-              . filter ((< target) . countElem card . deck)
+            fmap (flip (,) card . playerId) . listToMaybe . filter ((< target) . countElem card . deck)
 
     DrawingInitialHands ps _ ->
       fromMaybe (return MarkInitialHandsDrawn) $ lift . drawCard <$> playerWithIncompleteHand ps

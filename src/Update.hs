@@ -51,7 +51,7 @@ beginPreparingDecks _ = error "Deck preparation should occur after the supply ha
 addCardToDeck :: CandidateId -> Card -> GameState -> GameState
 addCardToDeck pid card (PreparingDecks ps cards)
   | all ((/=) pid . playerId) ps = error "Invalid deck preparation: player not in game"
-  | otherwise = PreparingDecks (alterStartingDeck (card :) pid ps) cards
+  | otherwise = PreparingDecks (alterPlayer (alterDeck (card :)) pid ps) cards
 addCardToDeck _ _ _ = error "A card may only be added to a deck during game preparation"
 
 beginDrawingInitialHands :: GameState -> GameState
@@ -66,8 +66,8 @@ drawCard pid card (DrawingInitialHands ps cards)
       error "Invalid card draw: card not in deck of player"
   | otherwise =
       DrawingInitialHands
-        (alterPlayerDrawingInitialHand
-          (PlayerDrawingInitialHand.alterHand (card :) . PlayerDrawingInitialHand.alterDeck (delete card))
+        (alterPlayer
+          (PlayerDrawingInitialHand.alterHand (card :) . alterDeck (delete card))
           pid
           ps)
         cards
@@ -108,21 +108,7 @@ alterWhere p f = fmap $ liftA3 bool id f p
 alterElem :: Eq b => (a -> b) -> (a -> a) -> b -> [a] -> [a]
 alterElem on f x = alterWhere ((==) x . on) f
 
-alterStartingDeck ::
-  ([Card] -> [Card])
-  -> CandidateId
-  -> [PlayerPreparingStartingDeck]
-  -> [PlayerPreparingStartingDeck]
-alterStartingDeck = alterElem playerId . PlayerPreparingStartingDeck.alterDeck
-
-alterPlayerDrawingInitialHand ::
-  (PlayerDrawingInitialHand -> PlayerDrawingInitialHand)
-  -> CandidateId
-  -> [PlayerDrawingInitialHand]
-  -> [PlayerDrawingInitialHand]
-alterPlayerDrawingInitialHand = alterElem playerId
-
-alterPlayer :: (Player -> Player) -> CandidateId -> [Player] -> [Player]
+alterPlayer :: GenericPlayer p => (p -> p) -> CandidateId -> [p] -> [p]
 alterPlayer = alterElem playerId
 
 playerExists :: CandidateId -> [Player] -> Bool
