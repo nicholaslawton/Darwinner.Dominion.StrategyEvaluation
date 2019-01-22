@@ -62,7 +62,7 @@ beginDrawingInitialHands _ = error "Drawing initial hands must occur after decks
 drawCard :: CandidateId -> Card -> GameState -> GameState
 drawCard pid card (DrawingInitialHands ps cards)
   | all ((/=) pid . playerId) ps = error "Invalid card draw: player not in game"
-  | not $ cardBelongsToPlayer deck playerId card pid ps = error "Invalid card draw: card not in deck of player"
+  | not $ cardBelongsToPlayer deck card pid ps = error "Invalid card draw: card not in deck of player"
   | otherwise = DrawingInitialHands (alterPlayer (alterHand (card :) . alterDeck (delete card)) pid ps) cards
 drawCard _ _ _ = error "A card may only be drawn while players are drawing their initial hands"
 
@@ -86,7 +86,7 @@ gainCard _ _ _ = error "A card may only be gained during the buy phase"
 discardCard :: CandidateId -> Card -> GameState -> GameState
 discardCard pid card (CleanUpPhase ps cards)
   | not $ playerExists pid ps = error "Invalid discard: player not in game"
-  | not $ cardBelongsToPlayer hand playerId card pid ps = error "Invalid discard: card not in hand of player"
+  | not $ cardBelongsToPlayer hand card pid ps = error "Invalid discard: card not in hand of player"
   | otherwise = CleanUpPhase (alterPlayer (alterDiscard (card :) . alterHand (delete card)) pid ps) cards
 discardCard _ _ _ = error "A card may only be discarded during the clean up phase"
 
@@ -103,8 +103,8 @@ alterElem on f x = alterWhere ((==) x . on) f
 alterPlayer :: GenericPlayer p => (p -> p) -> CandidateId -> [p] -> [p]
 alterPlayer = alterElem playerId
 
-playerExists :: CandidateId -> [Player] -> Bool
+playerExists :: GenericPlayer p => CandidateId -> [p] -> Bool
 playerExists pid = any ((==) pid . playerId)
 
-cardBelongsToPlayer :: (a -> [Card]) -> (a -> CandidateId) -> Card -> CandidateId -> [a] -> Bool
-cardBelongsToPlayer area ppid card pid ps = (elem card . area <$> find ((==) pid . ppid) ps) == Just True
+cardBelongsToPlayer :: GenericPlayer p => (p -> [Card]) -> Card -> CandidateId -> [p] -> Bool
+cardBelongsToPlayer area card pid ps = (elem card . area <$> find ((==) pid . playerId) ps) == Just True

@@ -24,6 +24,7 @@ instance GenericPlayer PlayerDrawingInitialHand where
 
   alterDeck f p = p { deck' = f (deck p) }
   alterHand f p = p { hand' = f (hand p) }
+  alterDiscard = const $ error "Cannot alter the discard of a player who is still drawing their initial hand"
 
 new :: CandidateId -> [Card] -> [Card] -> PlayerDrawingInitialHand
 new = PlayerDrawingInitialHand

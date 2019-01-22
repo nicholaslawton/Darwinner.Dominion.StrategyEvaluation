@@ -4,7 +4,6 @@ module Player
   , Player.fromPlayerWithoutDominion
   , Player.fromPlayerPreparingStartingDeck
   , fromPlayerDrawingInitialHand
-  , alterDiscard
   ) where
 
 import GenericPlayer
@@ -30,6 +29,7 @@ instance GenericPlayer Player where
 
   alterDeck f p = p { deck' = f (deck p) }
   alterHand f p = p { hand' = f (hand p) }
+  alterDiscard f p = p { discard' = f (discard p) }
 
 new :: CandidateId -> [Card] -> [Card] -> [Card] -> Player
 new = Player 
@@ -42,6 +42,3 @@ fromPlayerPreparingStartingDeck p = Player (playerId p) (deck p) [] []
 
 fromPlayerDrawingInitialHand :: PlayerDrawingInitialHand -> Player
 fromPlayerDrawingInitialHand p = Player (playerId p) (deck p) (hand p) []
-
-alterDiscard :: ([Card] -> [Card]) -> Player -> Player
-alterDiscard f p = p { discard' = f (discard' p) }

@@ -100,7 +100,7 @@ verifyUpdate :: (Eq a, Show a) =>
   -> Property
 verifyUpdate prop change command = liftA2 (===) (prop . update command) (change . prop)
 
-dominion :: Player -> [Card]
+dominion :: GenericPlayer p => p -> [Card]
 dominion p = sortOn arbitraryCardOrder $ concatMap ($ p) [deck, hand, discard]
 
 cardsInPlay :: GameState -> [Card]

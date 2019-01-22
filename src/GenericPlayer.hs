@@ -11,3 +11,4 @@ class GenericPlayer a where
 
   alterDeck :: ([Card] -> [Card]) -> a -> a
   alterHand :: ([Card] -> [Card]) -> a -> a
+  alterDiscard :: ([Card] -> [Card]) -> a -> a
