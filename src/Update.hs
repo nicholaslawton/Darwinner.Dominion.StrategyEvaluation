@@ -5,7 +5,7 @@ import Command
 import GameState
 import GenericPlayer
 import PlayerWithoutDominion
-import PlayerPreparingStartingDeck
+import PlayerWithDeck
 import PlayerDrawingInitialHand
 import Player
 import Card
@@ -45,7 +45,7 @@ placeCardInSupply _ _ = error "A card may only be placed in the supply during ga
 
 beginPreparingDecks :: GameState -> GameState
 beginPreparingDecks (PreparingSupply pids cards) =
-  PreparingDecks (PlayerPreparingStartingDeck.fromPlayerWithoutDominion <$> pids) cards
+  PreparingDecks (PlayerWithDeck.fromPlayerWithoutDominion <$> pids) cards
 beginPreparingDecks _ = error "Deck preparation should occur after the supply has been prepared"
 
 addCardToDeck :: CandidateId -> Card -> GameState -> GameState
@@ -56,7 +56,7 @@ addCardToDeck _ _ _ = error "A card may only be added to a deck during game prep
 
 beginDrawingInitialHands :: GameState -> GameState
 beginDrawingInitialHands (PreparingDecks ps cards) =
-  DrawingInitialHands (PlayerDrawingInitialHand.fromPlayerPreparingStartingDeck <$> ps) cards
+  DrawingInitialHands (PlayerDrawingInitialHand.fromPlayerWithDeck <$> ps) cards
 beginDrawingInitialHands _ = error "Drawing initial hands must occur after decks have been prepared"
 
 drawCard :: CandidateId -> Card -> GameState -> GameState

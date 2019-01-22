@@ -6,7 +6,7 @@ import EvaluationParameters
 import GenericPlayer
 import Player
 import PlayerWithoutDominion
-import PlayerPreparingStartingDeck
+import PlayerWithDeck
 import PlayerDrawingInitialHand
 import Candidate
 import Strategy
@@ -29,8 +29,8 @@ instance Arbitrary Player where
 instance Arbitrary PlayerWithoutDominion where
   arbitrary = PlayerWithoutDominion.new <$> arbitrary
 
-instance Arbitrary PlayerPreparingStartingDeck where
-  arbitrary = liftA2 PlayerPreparingStartingDeck.new arbitrary arbitrary
+instance Arbitrary PlayerWithDeck where
+  arbitrary = liftA2 PlayerWithDeck.new arbitrary arbitrary
 
 instance Arbitrary PlayerDrawingInitialHand where
   arbitrary = liftA3 PlayerDrawingInitialHand.new arbitrary arbitrary arbitrary
@@ -77,9 +77,9 @@ validCandidateIds (FourCandidateIds id1 id2 id3 id4) = [id1, id2, id3, id4]
 validCandidates :: Gen [Candidate]
 validCandidates = validCandidateIds <$> arbitrary >>= traverse (\cid -> Candidate cid <$> arbitrary)
 
-validPlayersPreparingStartingDecks :: Gen [PlayerPreparingStartingDeck]
+validPlayersPreparingStartingDecks :: Gen [PlayerWithDeck]
 validPlayersPreparingStartingDecks = validCandidateIds <$> arbitrary
-  >>= traverse (\cid -> PlayerPreparingStartingDeck.new cid <$> arbitrary)
+  >>= traverse (\cid -> PlayerWithDeck.new cid <$> arbitrary)
 
 validPlayersDrawingInitialHands :: Gen [PlayerDrawingInitialHand]
 validPlayersDrawingInitialHands = validCandidateIds <$> arbitrary
@@ -89,13 +89,13 @@ validPlayers :: Gen [Player]
 validPlayers = validCandidateIds <$> arbitrary
   >>= traverse (\cid -> liftA3 (Player.new cid) arbitrary arbitrary arbitrary)
 
-data SelectedPlayerPreparingStartingDeck =
-  SelectedPlayerPreparingStartingDeck [PlayerPreparingStartingDeck] CandidateId
+data SelectedPlayerWithDeck =
+  SelectedPlayerWithDeck [PlayerWithDeck] CandidateId
   deriving (Eq, Show)
 
-instance Arbitrary SelectedPlayerPreparingStartingDeck where
+instance Arbitrary SelectedPlayerWithDeck where
   arbitrary = validPlayersPreparingStartingDecks
-    >>= fmap (uncurry SelectedPlayerPreparingStartingDeck . second playerId)
+    >>= fmap (uncurry SelectedPlayerWithDeck . second playerId)
       . selectedElement
 
 data SelectedPlayer = SelectedPlayer [Player] CandidateId

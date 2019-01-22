@@ -1,13 +1,13 @@
 module PlayerDrawingInitialHand
   ( PlayerDrawingInitialHand
   , PlayerDrawingInitialHand.new
-  , fromPlayerPreparingStartingDeck
+  , fromPlayerWithDeck
   ) where
 
 import GenericPlayer
 import Candidate
 import Card
-import PlayerPreparingStartingDeck
+import PlayerWithDeck
 
 data PlayerDrawingInitialHand = PlayerDrawingInitialHand
   { playerId' :: CandidateId
@@ -29,5 +29,5 @@ instance GenericPlayer PlayerDrawingInitialHand where
 new :: CandidateId -> [Card] -> [Card] -> PlayerDrawingInitialHand
 new = PlayerDrawingInitialHand
 
-fromPlayerPreparingStartingDeck :: PlayerPreparingStartingDeck -> PlayerDrawingInitialHand
-fromPlayerPreparingStartingDeck p = PlayerDrawingInitialHand (playerId p) (deck p) []
+fromPlayerWithDeck :: PlayerWithDeck -> PlayerDrawingInitialHand
+fromPlayerWithDeck p = PlayerDrawingInitialHand (playerId p) (deck p) []

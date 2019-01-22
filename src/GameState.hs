@@ -6,7 +6,7 @@ module GameState
 
 import Player
 import PlayerWithoutDominion
-import PlayerPreparingStartingDeck
+import PlayerWithDeck
 import PlayerDrawingInitialHand
 import Card
 import BuyAllowance
@@ -14,7 +14,7 @@ import BuyAllowance
 data GameState
   = New [PlayerWithoutDominion]
   | PreparingSupply [PlayerWithoutDominion] [Card]
-  | PreparingDecks [PlayerPreparingStartingDeck] [Card]
+  | PreparingDecks [PlayerWithDeck] [Card]
   | DrawingInitialHands [PlayerDrawingInitialHand] [Card]
   | BuyPhase BuyAllowance [Player] [Card]
   | CleanUpPhase [Player] [Card]
@@ -24,7 +24,7 @@ data GameState
 players :: GameState -> [Player]
 players (New ps) = Player.fromPlayerWithoutDominion <$> ps
 players (PreparingSupply ps _) = Player.fromPlayerWithoutDominion <$> ps
-players (PreparingDecks ps _) = Player.fromPlayerPreparingStartingDeck <$> ps
+players (PreparingDecks ps _) = Player.fromPlayerWithDeck <$> ps
 players (DrawingInitialHands ps _) = Player.fromPlayerDrawingInitialHand <$> ps
 players (BuyPhase _ ps _) = ps
 players (CleanUpPhase ps _) = ps

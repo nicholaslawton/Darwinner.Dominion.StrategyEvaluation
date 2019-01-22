@@ -40,7 +40,7 @@ updateTests = describe "update" $ do
       preparingDecks $ update MarkSupplyPrepared $ PreparingSupply ps cards
 
   describe "add card to deck of player" $
-    it "adds card to deck of player" $ property $ \(SelectedPlayerPreparingStartingDeck ps pid) cards card ->
+    it "adds card to deck of player" $ property $ \(SelectedPlayerWithDeck ps pid) cards card ->
       verifyPlayerUpdate pid (length . deck) (+1) (AddCardToDeck pid card) (PreparingDecks ps cards)
 
   describe "mark decks prepared" $

@@ -2,7 +2,7 @@ module Player
   ( Player
   , Player.new
   , Player.fromPlayerWithoutDominion
-  , Player.fromPlayerPreparingStartingDeck
+  , Player.fromPlayerWithDeck
   , fromPlayerDrawingInitialHand
   ) where
 
@@ -10,7 +10,7 @@ import GenericPlayer
 import Candidate
 import Card
 import PlayerWithoutDominion
-import PlayerPreparingStartingDeck
+import PlayerWithDeck
 import PlayerDrawingInitialHand
 
 data Player = Player
@@ -37,8 +37,8 @@ new = Player
 fromPlayerWithoutDominion :: PlayerWithoutDominion -> Player
 fromPlayerWithoutDominion p = Player (playerId p) [] [] []
 
-fromPlayerPreparingStartingDeck :: PlayerPreparingStartingDeck -> Player
-fromPlayerPreparingStartingDeck p = Player (playerId p) (deck p) [] []
+fromPlayerWithDeck :: PlayerWithDeck -> Player
+fromPlayerWithDeck p = Player (playerId p) (deck p) [] []
 
 fromPlayerDrawingInitialHand :: PlayerDrawingInitialHand -> Player
 fromPlayerDrawingInitialHand p = Player (playerId p) (deck p) (hand p) []
