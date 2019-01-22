@@ -3,7 +3,7 @@ module ArbitraryInstances where
 
 import Card
 import EvaluationParameters
-import GenericPlayer
+import Player
 import CompletePlayer
 import PlayerWithoutDominion
 import PlayerWithDeck
@@ -108,12 +108,7 @@ data CardInStartingDeck = CardInStartingDeck [PlayerWithHand] CandidateId Card
   deriving (Eq, Show)
 
 instance Arbitrary CardInStartingDeck where
-  arbitrary =
-    selectedCardInArea
-      CardInStartingDeck
-      deck
-      playerId
-      validPlayersDrawingInitialHands
+  arbitrary = selectedCardInArea CardInStartingDeck deck validPlayersDrawingInitialHands
 
 data CardInSupply = CardInSupply [Card] Card
   deriving (Eq, Show)
@@ -125,7 +120,7 @@ data CardInHand = CardInHand [CompletePlayer] CandidateId Card
   deriving (Eq, Show)
 
 instance Arbitrary CardInHand where
-  arbitrary = selectedCardInArea CardInHand hand playerId validPlayers
+  arbitrary = selectedCardInArea CardInHand hand validPlayers
 
 selectedElement :: [a] -> Gen ([a], a)
 selectedElement = selectFrom elements
@@ -136,7 +131,7 @@ selectedElementMatching predicate = selectedElement . filter predicate
 selectFrom :: (a -> Gen b) -> a -> Gen (a, b)
 selectFrom f x = (,) x <$> f x 
 
-selectedCardInArea :: ([a] -> CandidateId -> Card -> b) -> (a -> [Card]) -> (a -> CandidateId) -> Gen [a] -> Gen b
-selectedCardInArea c area ppid validPs = validPs `suchThat` (not . null . concatMap area)
+selectedCardInArea :: Player p => ([p] -> CandidateId -> Card -> b) -> (p -> [Card]) -> Gen [p] -> Gen b
+selectedCardInArea c area validPs = validPs `suchThat` (not . null . concatMap area)
   >>= selectedElementMatching (not . null . area)
-  >>= \(ps, p) -> c ps (ppid p) <$> elements (area p)
+  >>= \(ps, p) -> c ps (playerId p) <$> elements (area p)

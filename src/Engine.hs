@@ -4,7 +4,7 @@ import Card
 import Game
 import GameState
 import Update
-import GenericPlayer
+import Player
 import Command
 import EvaluationParameters
 import Candidate
@@ -64,18 +64,18 @@ nextCommand = do
     PreparingDecks ps _ ->
       return $ fromMaybe MarkDecksPrepared $ uncurry AddCardToDeck <$> playerNeedingCard ps
         where
-          playerNeedingCard :: GenericPlayer p => [p] -> Maybe (CandidateId, Card)
+          playerNeedingCard :: Player p => [p] -> Maybe (CandidateId, Card)
           playerNeedingCard = liftA2 (<|>) (playerNeeding Copper 7) (playerNeeding Estate 3)
-          playerNeeding :: GenericPlayer p => Card -> Int -> [p] -> Maybe (CandidateId, Card)
+          playerNeeding :: Player p => Card -> Int -> [p] -> Maybe (CandidateId, Card)
           playerNeeding card target =
             fmap (flip (,) card . playerId) . listToMaybe . filter ((< target) . countElem card . deck)
 
     DrawingInitialHands ps _ ->
       fromMaybe (return MarkInitialHandsDrawn) $ lift . drawCard <$> playerWithIncompleteHand ps
         where
-          playerWithIncompleteHand :: GenericPlayer p => [p] -> Maybe p
+          playerWithIncompleteHand :: Player p => [p] -> Maybe p
           playerWithIncompleteHand = listToMaybe . filter ((< 5) . length . hand)
-          drawCard :: GenericPlayer p => p -> State Game Command
+          drawCard :: Player p => p -> State Game Command
           drawCard p =
             maybe emptyDeckError (DrawCard (playerId p))
               <$> randomElement (deck p)

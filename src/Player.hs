@@ -1,9 +1,9 @@
-module GenericPlayer where
+module Player where
 
 import Candidate
 import Card
 
-class GenericPlayer a where
+class Player a where
   playerId :: a -> CandidateId
   deck :: a -> [Card]
   hand :: a -> [Card]

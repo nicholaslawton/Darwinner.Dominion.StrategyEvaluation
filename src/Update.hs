@@ -3,7 +3,7 @@ module Update (update) where
 import Candidate
 import Command
 import GameState
-import GenericPlayer
+import Player
 import PlayerWithoutDominion
 import PlayerWithDeck
 import PlayerWithHand
@@ -100,11 +100,11 @@ alterWhere p f = fmap $ liftA3 bool id f p
 alterElem :: Eq b => (a -> b) -> (a -> a) -> b -> [a] -> [a]
 alterElem on f x = alterWhere ((==) x . on) f
 
-alterPlayer :: GenericPlayer p => (p -> p) -> CandidateId -> [p] -> [p]
+alterPlayer :: Player p => (p -> p) -> CandidateId -> [p] -> [p]
 alterPlayer = alterElem playerId
 
-playerExists :: GenericPlayer p => CandidateId -> [p] -> Bool
+playerExists :: Player p => CandidateId -> [p] -> Bool
 playerExists pid = any ((==) pid . playerId)
 
-cardBelongsToPlayer :: GenericPlayer p => (p -> [Card]) -> Card -> CandidateId -> [p] -> Bool
+cardBelongsToPlayer :: Player p => (p -> [Card]) -> Card -> CandidateId -> [p] -> Bool
 cardBelongsToPlayer area card pid ps = (elem card . area <$> find ((==) pid . playerId) ps) == Just True

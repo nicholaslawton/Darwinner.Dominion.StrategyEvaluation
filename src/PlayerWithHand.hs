@@ -4,7 +4,7 @@ module PlayerWithHand
   , fromPlayerWithDeck
   ) where
 
-import GenericPlayer
+import Player
 import Candidate
 import Card
 import PlayerWithDeck
@@ -16,7 +16,7 @@ data PlayerWithHand = PlayerWithHand
   }
   deriving (Eq, Show)
 
-instance GenericPlayer PlayerWithHand where
+instance Player PlayerWithHand where
   playerId = playerId'
   deck = deck'
   hand = hand'

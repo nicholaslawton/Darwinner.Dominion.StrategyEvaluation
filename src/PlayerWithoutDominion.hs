@@ -3,13 +3,13 @@ module PlayerWithoutDominion
   , new
   ) where
 
-import GenericPlayer
+import Player
 import Candidate
 
 data PlayerWithoutDominion = PlayerWithoutDominion CandidateId
   deriving (Eq, Show)
 
-instance GenericPlayer PlayerWithoutDominion where
+instance Player PlayerWithoutDominion where
   playerId (PlayerWithoutDominion pid) = pid
   deck = const []
   hand = const []
