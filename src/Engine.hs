@@ -5,7 +5,6 @@ import Game
 import GameState
 import Update
 import GenericPlayer
-import PlayerDrawingInitialHand
 import Command
 import EvaluationParameters
 import Candidate
@@ -74,9 +73,9 @@ nextCommand = do
     DrawingInitialHands ps _ ->
       fromMaybe (return MarkInitialHandsDrawn) $ lift . drawCard <$> playerWithIncompleteHand ps
         where
-          playerWithIncompleteHand :: [PlayerDrawingInitialHand] -> Maybe PlayerDrawingInitialHand
+          playerWithIncompleteHand :: GenericPlayer p => [p] -> Maybe p
           playerWithIncompleteHand = listToMaybe . filter ((< 5) . length . hand)
-          drawCard :: PlayerDrawingInitialHand -> State Game Command
+          drawCard :: GenericPlayer p => p -> State Game Command
           drawCard p =
             maybe emptyDeckError (DrawCard (playerId p))
               <$> randomElement (deck p)

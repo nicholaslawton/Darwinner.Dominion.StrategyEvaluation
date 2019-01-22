@@ -2,7 +2,6 @@ module PlayerDrawingInitialHand
   ( PlayerDrawingInitialHand
   , PlayerDrawingInitialHand.new
   , fromPlayerPreparingStartingDeck
-  , alterHand
   ) where
 
 import GenericPlayer
@@ -24,12 +23,10 @@ instance GenericPlayer PlayerDrawingInitialHand where
   discard = const []
 
   alterDeck f p = p { deck' = f (deck p) }
+  alterHand f p = p { hand' = f (hand p) }
 
 new :: CandidateId -> [Card] -> [Card] -> PlayerDrawingInitialHand
 new = PlayerDrawingInitialHand
 
 fromPlayerPreparingStartingDeck :: PlayerPreparingStartingDeck -> PlayerDrawingInitialHand
 fromPlayerPreparingStartingDeck p = PlayerDrawingInitialHand (playerId p) (deck p) []
-
-alterHand :: ([Card] -> [Card]) -> PlayerDrawingInitialHand -> PlayerDrawingInitialHand
-alterHand f p = p { hand' = f (hand' p) }

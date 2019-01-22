@@ -15,7 +15,8 @@ instance GenericPlayer PlayerWithoutDominion where
   hand = const []
   discard = const []
 
-  alterDeck = flip const
+  alterDeck = const $ error "Cannot alter the deck of a player who has no dominion"
+  alterHand = const $ error "Cannot alter the hand of a player who has no dominion"
 
 new :: CandidateId -> PlayerWithoutDominion
 new = PlayerWithoutDominion

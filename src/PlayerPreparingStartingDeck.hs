@@ -22,6 +22,7 @@ instance GenericPlayer PlayerPreparingStartingDeck where
   discard = const []
 
   alterDeck f p = p { deck' = f (deck p) }
+  alterHand = const $ error "Cannot alter the hand of a player who is still preparing the starting deck"
 
 new :: CandidateId -> [Card] -> PlayerPreparingStartingDeck
 new = PlayerPreparingStartingDeck
