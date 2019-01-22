@@ -5,7 +5,7 @@ import Candidate
 import Command
 import GameState
 import GenericPlayer
-import Player
+import CompletePlayer
 import PlayerWithoutDominion
 import Card
 import BuyAllowance
@@ -84,7 +84,7 @@ updateTests = describe "update" $ do
 
 verifyPlayerUpdate :: (Eq a, Show a) =>
   CandidateId
-  -> (Player -> a)
+  -> (CompletePlayer -> a)
   -> (a -> a)
   -> Command
   -> GameState

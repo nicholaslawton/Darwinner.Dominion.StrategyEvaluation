@@ -4,7 +4,7 @@ module GameState
   , supply
   ) where
 
-import Player
+import CompletePlayer
 import PlayerWithoutDominion
 import PlayerWithDeck
 import PlayerWithHand
@@ -16,16 +16,16 @@ data GameState
   | PreparingSupply [PlayerWithoutDominion] [Card]
   | PreparingDecks [PlayerWithDeck] [Card]
   | DrawingInitialHands [PlayerWithHand] [Card]
-  | BuyPhase BuyAllowance [Player] [Card]
-  | CleanUpPhase [Player] [Card]
+  | BuyPhase BuyAllowance [CompletePlayer] [Card]
+  | CleanUpPhase [CompletePlayer] [Card]
   | GameOver
   deriving (Eq, Show)
 
-players :: GameState -> [Player]
-players (New ps) = Player.fromPlayerWithoutDominion <$> ps
-players (PreparingSupply ps _) = Player.fromPlayerWithoutDominion <$> ps
-players (PreparingDecks ps _) = Player.fromPlayerWithDeck <$> ps
-players (DrawingInitialHands ps _) = Player.fromPlayerWithHand <$> ps
+players :: GameState -> [CompletePlayer]
+players (New ps) = CompletePlayer.fromPlayerWithoutDominion <$> ps
+players (PreparingSupply ps _) = CompletePlayer.fromPlayerWithoutDominion <$> ps
+players (PreparingDecks ps _) = CompletePlayer.fromPlayerWithDeck <$> ps
+players (DrawingInitialHands ps _) = CompletePlayer.fromPlayerWithHand <$> ps
 players (BuyPhase _ ps _) = ps
 players (CleanUpPhase ps _) = ps
 players GameOver = []

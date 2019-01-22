@@ -4,7 +4,7 @@ import Command
 import Game
 import GameState
 import EvaluationParameters
-import Player
+import CompletePlayer
 import Card
 import BuyAllowance
 
@@ -25,7 +25,7 @@ buyPhaseTests = describe "buy phase" $ do
   it "completes" $ property $ \params (Positive buys) (NonEmpty ps) (NonEmpty cards) ->
     (===) BuyPhaseComplete . last . history . performBuyPhase (min buys (length cards) + 10) params . gameInBuyPhase buys ps cards
 
-gameInBuyPhase :: Int -> [Player] -> [Card] -> Int -> Game
+gameInBuyPhase :: Int -> [CompletePlayer] -> [Card] -> Int -> Game
 gameInBuyPhase buys ps cards = Game.mapState (const (BuyPhase (BuyAllowance buys) ps cards)) . Game.new
 
 performBuyPhase :: Int -> EvaluationParameters -> Game -> Game

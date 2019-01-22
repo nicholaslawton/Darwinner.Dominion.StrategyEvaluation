@@ -4,7 +4,7 @@ module ArbitraryInstances where
 import Card
 import EvaluationParameters
 import GenericPlayer
-import Player
+import CompletePlayer
 import PlayerWithoutDominion
 import PlayerWithDeck
 import PlayerWithHand
@@ -23,8 +23,8 @@ instance Arbitrary Card where
 instance Arbitrary Candidate where
   arbitrary = liftA2 Candidate arbitrary arbitrary
 
-instance Arbitrary Player where
-  arbitrary = liftM4 Player.new arbitrary arbitrary arbitrary arbitrary
+instance Arbitrary CompletePlayer where
+  arbitrary = liftM4 CompletePlayer.new arbitrary arbitrary arbitrary arbitrary
 
 instance Arbitrary PlayerWithoutDominion where
   arbitrary = PlayerWithoutDominion.new <$> arbitrary
@@ -85,9 +85,9 @@ validPlayersDrawingInitialHands :: Gen [PlayerWithHand]
 validPlayersDrawingInitialHands = validCandidateIds <$> arbitrary
   >>= traverse (\cid -> liftA2 (PlayerWithHand.new cid) arbitrary arbitrary)
 
-validPlayers :: Gen [Player]
+validPlayers :: Gen [CompletePlayer]
 validPlayers = validCandidateIds <$> arbitrary
-  >>= traverse (\cid -> liftA3 (Player.new cid) arbitrary arbitrary arbitrary)
+  >>= traverse (\cid -> liftA3 (CompletePlayer.new cid) arbitrary arbitrary arbitrary)
 
 data SelectedPlayerWithDeck =
   SelectedPlayerWithDeck [PlayerWithDeck] CandidateId
@@ -98,7 +98,7 @@ instance Arbitrary SelectedPlayerWithDeck where
     >>= fmap (uncurry SelectedPlayerWithDeck . second playerId)
       . selectedElement
 
-data SelectedPlayer = SelectedPlayer [Player] CandidateId
+data SelectedPlayer = SelectedPlayer [CompletePlayer] CandidateId
   deriving (Eq, Show)
 
 instance Arbitrary SelectedPlayer where
@@ -121,7 +121,7 @@ data CardInSupply = CardInSupply [Card] Card
 instance Arbitrary CardInSupply where
   arbitrary = arbitrary `suchThat` (not . null) >>= fmap (uncurry CardInSupply) . selectedElement
 
-data CardInHand = CardInHand [Player] CandidateId Card
+data CardInHand = CardInHand [CompletePlayer] CandidateId Card
   deriving (Eq, Show)
 
 instance Arbitrary CardInHand where

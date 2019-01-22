@@ -7,7 +7,7 @@ import GenericPlayer
 import PlayerWithoutDominion
 import PlayerWithDeck
 import PlayerWithHand
-import Player
+import CompletePlayer
 import Card
 import BuyAllowance
 
@@ -68,7 +68,7 @@ drawCard _ _ _ = error "A card may only be drawn while players are drawing their
 
 beginPlay :: GameState -> GameState
 beginPlay (DrawingInitialHands ps cards) =
-  BuyPhase BuyAllowance.initial (Player.fromPlayerWithHand <$> ps) cards
+  BuyPhase BuyAllowance.initial (CompletePlayer.fromPlayerWithHand <$> ps) cards
 beginPlay _ = error "Cannot begin play before the game has been fully prepared"
 
 gainCard :: CandidateId -> Card -> GameState -> GameState

@@ -9,7 +9,7 @@ module Game
 
 import GameState
 import Command
-import Player
+import CompletePlayer
 
 import System.Random
 
@@ -31,5 +31,5 @@ history = reverse . commands
 new :: Int -> Game
 new = Game (New []) [] . mkStdGen
 
-players :: Game -> [Player]
+players :: Game -> [CompletePlayer]
 players = GameState.players . state
