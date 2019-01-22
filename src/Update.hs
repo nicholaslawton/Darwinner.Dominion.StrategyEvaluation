@@ -6,7 +6,7 @@ import GameState
 import GenericPlayer
 import PlayerWithoutDominion
 import PlayerWithDeck
-import PlayerDrawingInitialHand
+import PlayerWithHand
 import Player
 import Card
 import BuyAllowance
@@ -56,7 +56,7 @@ addCardToDeck _ _ _ = error "A card may only be added to a deck during game prep
 
 beginDrawingInitialHands :: GameState -> GameState
 beginDrawingInitialHands (PreparingDecks ps cards) =
-  DrawingInitialHands (PlayerDrawingInitialHand.fromPlayerWithDeck <$> ps) cards
+  DrawingInitialHands (PlayerWithHand.fromPlayerWithDeck <$> ps) cards
 beginDrawingInitialHands _ = error "Drawing initial hands must occur after decks have been prepared"
 
 drawCard :: CandidateId -> Card -> GameState -> GameState
@@ -68,7 +68,7 @@ drawCard _ _ _ = error "A card may only be drawn while players are drawing their
 
 beginPlay :: GameState -> GameState
 beginPlay (DrawingInitialHands ps cards) =
-  BuyPhase BuyAllowance.initial (Player.fromPlayerDrawingInitialHand <$> ps) cards
+  BuyPhase BuyAllowance.initial (Player.fromPlayerWithHand <$> ps) cards
 beginPlay _ = error "Cannot begin play before the game has been fully prepared"
 
 gainCard :: CandidateId -> Card -> GameState -> GameState

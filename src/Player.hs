@@ -3,7 +3,7 @@ module Player
   , Player.new
   , Player.fromPlayerWithoutDominion
   , Player.fromPlayerWithDeck
-  , fromPlayerDrawingInitialHand
+  , fromPlayerWithHand
   ) where
 
 import GenericPlayer
@@ -11,7 +11,7 @@ import Candidate
 import Card
 import PlayerWithoutDominion
 import PlayerWithDeck
-import PlayerDrawingInitialHand
+import PlayerWithHand
 
 data Player = Player
   { playerId' :: CandidateId
@@ -40,5 +40,5 @@ fromPlayerWithoutDominion p = Player (playerId p) [] [] []
 fromPlayerWithDeck :: PlayerWithDeck -> Player
 fromPlayerWithDeck p = Player (playerId p) (deck p) [] []
 
-fromPlayerDrawingInitialHand :: PlayerDrawingInitialHand -> Player
-fromPlayerDrawingInitialHand p = Player (playerId p) (deck p) (hand p) []
+fromPlayerWithHand :: PlayerWithHand -> Player
+fromPlayerWithHand p = Player (playerId p) (deck p) (hand p) []

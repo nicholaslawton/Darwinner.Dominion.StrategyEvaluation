@@ -1,6 +1,6 @@
-module PlayerDrawingInitialHand
-  ( PlayerDrawingInitialHand
-  , PlayerDrawingInitialHand.new
+module PlayerWithHand
+  ( PlayerWithHand
+  , PlayerWithHand.new
   , fromPlayerWithDeck
   ) where
 
@@ -9,14 +9,14 @@ import Candidate
 import Card
 import PlayerWithDeck
 
-data PlayerDrawingInitialHand = PlayerDrawingInitialHand
+data PlayerWithHand = PlayerWithHand
   { playerId' :: CandidateId
   , deck' :: [Card]
   , hand' :: [Card]
   }
   deriving (Eq, Show)
 
-instance GenericPlayer PlayerDrawingInitialHand where
+instance GenericPlayer PlayerWithHand where
   playerId = playerId'
   deck = deck'
   hand = hand'
@@ -26,8 +26,8 @@ instance GenericPlayer PlayerDrawingInitialHand where
   alterHand f p = p { hand' = f (hand p) }
   alterDiscard = const $ error "Cannot alter the discard of a player who is still drawing their initial hand"
 
-new :: CandidateId -> [Card] -> [Card] -> PlayerDrawingInitialHand
-new = PlayerDrawingInitialHand
+new :: CandidateId -> [Card] -> [Card] -> PlayerWithHand
+new = PlayerWithHand
 
-fromPlayerWithDeck :: PlayerWithDeck -> PlayerDrawingInitialHand
-fromPlayerWithDeck p = PlayerDrawingInitialHand (playerId p) (deck p) []
+fromPlayerWithDeck :: PlayerWithDeck -> PlayerWithHand
+fromPlayerWithDeck p = PlayerWithHand (playerId p) (deck p) []
