@@ -1,7 +1,6 @@
 module GamePreparationTests where
 
 import Game
-import GameState
 import Card
 import Command
 import EvaluationParameters
@@ -14,6 +13,7 @@ import Data.Map (Map, fromList, fromListWith)
 import Data.Maybe
 import Control.Applicative
 
+import GameStateValidation
 import EngineValidation
 import ArbitraryInstances()
 import CardOrder
@@ -70,7 +70,7 @@ gamePreparationTests = describe "game preparation" $ do
       === (fmap length . categorise fst snd . mapMaybe cardDrawn . history . prepareGame seed) params
 
 prepareGame :: Int -> EvaluationParameters -> Game
-prepareGame seed params = execUntil (== GameOver) 300 params (Game.new seed)
+prepareGame seed params = execUntil buyPhase 300 params (Game.new seed)
 
 categorise :: Ord k => (a -> k) -> (a -> v) -> [a] -> Map k [v]
 categorise key value xs = fromListWith (++) $ liftA2 (,) key ((: []) . value) <$> xs
