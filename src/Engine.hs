@@ -85,11 +85,16 @@ nextCommand = do
 
     BuyPhase _ (p:_) (card:_) -> return $ GainCard (playerId p) card
 
-    BuyPhase _ [] _ -> error "Unexpected game in progress with no players"
+    BuyPhase _ [] _ -> error "Unexpected game in buy phase with no players"
 
     BuyPhase _ _ [] -> return BuyPhaseComplete -- error "Unexpected empty supply while game in progress"
 
-    CleanUpPhase _ _ -> return EndGame
+    CleanUpPhase (p:_) _ ->
+      if (not . null . hand) p
+      then return $ DiscardCard (playerId p) ((head . hand) p)
+      else return EndGame
+
+    CleanUpPhase [] _ -> error "Unexpected game in clean up phase with no players"
 
     GameOver -> error "Game is over"
 
