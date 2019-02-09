@@ -23,13 +23,17 @@ cleanUpPhaseTests :: SpecWith ()
 cleanUpPhaseTests = describe "clean up phase" $ do
   
   it "discards all cards from hand" $ property $ \params (NonEmpty ps) cards ->
-    (===) ((sortOn arbitraryCardOrder . hand . head) ps) . sortOn arbitraryCardOrder . mapMaybe cardDiscarded . history . performCleanUpPhase (commandLimit ps) params . gameInCleanUpPhase ps cards
+    (===) ((sortOn arbitraryCardOrder . hand . head) ps) . sortOn arbitraryCardOrder . mapMaybe cardDiscarded . history
+      . runTest params ps cards
 
   it "completes" $ property $ \params (NonEmpty ps) cards ->
-    (===) EndGame . last . history . performCleanUpPhase (commandLimit ps) params . gameInCleanUpPhase ps cards
+    (===) EndGame . last . history . runTest params ps cards
 
-  where
-    commandLimit = (+10) . length . hand . head
+runTest :: EvaluationParameters -> [CompletePlayer] -> [Card] -> Int -> Game
+runTest params ps cards = performCleanUpPhase (commandLimit ps) params . gameInCleanUpPhase ps cards
+
+commandLimit :: [CompletePlayer] -> Int
+commandLimit = (+10) . length . hand . head
 
 gameInCleanUpPhase :: [CompletePlayer] -> [Card] -> Int -> Game
 gameInCleanUpPhase ps cards = Game.mapState (const (CleanUpPhase ps cards)) . Game.new
