@@ -48,11 +48,19 @@ updateTests = describe "update" $ do
       drawingInitialHands $ update MarkDecksPrepared $ PreparingDecks ps cards
 
   describe "draw card" $ do
-    it "adds card to hand" $ property $ \(CardInStartingDeck ps pid card) cards ->
-      verifyPlayerUpdate pid (length . hand) (+1) (DrawCard pid card) (DrawingInitialHands ps cards)
+    describe "for initial hand" $ do
+      it "adds card to hand" $ property $ \(CardInStartingDeck ps pid card) cards ->
+        verifyPlayerUpdate pid (length . hand) (+1) (DrawCard pid card) (DrawingInitialHands ps cards)
 
-    it "does not alter dominion of player" $ property $ \(CardInStartingDeck ps pid card) cards ->
-      verifyPlayerUpdate pid dominion id (DrawCard pid card) (DrawingInitialHands ps cards)
+      it "does not alter dominion of player" $ property $ \(CardInStartingDeck ps pid card) cards ->
+        verifyPlayerUpdate pid dominion id (DrawCard pid card) (DrawingInitialHands ps cards)
+
+    describe "during clean up phase" $ do
+      it "adds card to hand" $ property $ \(CardInDeck ps pid card) cards ->
+        verifyPlayerUpdate pid (length . hand) (+1) (DrawCard pid card) (CleanUpPhase DrawHand ps cards)
+
+      it "does not alter dominion of player" $ property $ \(CardInDeck ps pid card) cards ->
+        verifyPlayerUpdate pid dominion id (DrawCard pid card) (CleanUpPhase DrawHand ps cards)
 
   describe "mark initial hands drawn" $
     it "transitions to buy phase" $ property $ \ps cards ->

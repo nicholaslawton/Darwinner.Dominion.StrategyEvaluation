@@ -61,11 +61,16 @@ beginDrawingInitialHands (PreparingDecks ps cards) =
 beginDrawingInitialHands _ = error "Drawing initial hands must occur after decks have been prepared"
 
 drawCard :: CandidateId -> Card -> GameState -> GameState
-drawCard pid card (DrawingInitialHands ps cards)
+drawCard pid card (DrawingInitialHands ps cards) = DrawingInitialHands (drawCardForPlayer pid card ps) cards
+drawCard pid card (CleanUpPhase DrawHand ps cards) = CleanUpPhase DrawHand (drawCardForPlayer pid card ps) cards
+drawCard _ _ _ =
+  error "A card may only be drawn while players are drawing their initial hands, or during the clean up phase"
+
+drawCardForPlayer :: Player p => CandidateId -> Card -> [p] -> [p]
+drawCardForPlayer pid card ps
   | all ((/=) pid . playerId) ps = error "Invalid card draw: player not in game"
   | not $ cardBelongsToPlayer deck card pid ps = error "Invalid card draw: card not in deck of player"
-  | otherwise = DrawingInitialHands (alterPlayer (alterHand (card :) . alterDeck (delete card)) pid ps) cards
-drawCard _ _ _ = error "A card may only be drawn while players are drawing their initial hands"
+  | otherwise = alterPlayer (alterHand (card :) . alterDeck (delete card)) pid ps
 
 beginPlay :: GameState -> GameState
 beginPlay (DrawingInitialHands ps cards) =

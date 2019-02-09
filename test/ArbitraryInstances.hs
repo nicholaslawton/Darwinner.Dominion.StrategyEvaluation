@@ -110,6 +110,12 @@ data CardInStartingDeck = CardInStartingDeck [PlayerWithHand] CandidateId Card
 instance Arbitrary CardInStartingDeck where
   arbitrary = selectedCardInArea CardInStartingDeck deck validPlayersDrawingInitialHands
 
+data CardInDeck = CardInDeck [CompletePlayer] CandidateId Card
+  deriving (Eq, Show)
+
+instance Arbitrary CardInDeck where
+  arbitrary = selectedCardInArea CardInDeck deck validPlayers
+
 data CardInSupply = CardInSupply [Card] Card
   deriving (Eq, Show)
 
@@ -135,3 +141,4 @@ selectedCardInArea :: Player p => ([p] -> CandidateId -> Card -> b) -> (p -> [Ca
 selectedCardInArea c area validPs = validPs `suchThat` (not . null . concatMap area)
   >>= selectedElementMatching (not . null . area)
   >>= \(ps, p) -> c ps (playerId p) <$> elements (area p)
+  
