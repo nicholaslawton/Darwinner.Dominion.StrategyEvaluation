@@ -75,11 +75,6 @@ nextCommand = do
         where
           playerWithIncompleteHand :: Player p => [p] -> Maybe p
           playerWithIncompleteHand = listToMaybe . filter ((< 5) . length . hand)
-          drawCard :: Player p => p -> State Game Command
-          drawCard p =
-            maybe emptyDeckError (DrawCard (playerId p))
-              <$> randomElement (deck p)
-          emptyDeckError = error "unexpected empty deck when drawing card for initial hand"
 
     BuyPhase (BuyAllowance buys) _ _ | buys <= 0 -> return BuyPhaseComplete
 
@@ -97,6 +92,10 @@ nextCommand = do
     CleanUpPhase _ [] _ -> error "Unexpected game in clean up phase with no players"
 
     GameOver -> error "Game is over"
+
+drawCard :: Player p => p -> State Game Command
+drawCard p = maybe emptyDeckError (DrawCard $ playerId p) <$> randomElement (deck p)
+  where emptyDeckError = error "Need to reform new deck from discard"
 
 randomElement :: [a] -> State Game (Maybe a)
 randomElement [] = return Nothing
