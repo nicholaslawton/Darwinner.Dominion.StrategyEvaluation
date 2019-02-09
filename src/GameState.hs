@@ -1,5 +1,6 @@
 module GameState
   ( GameState(..)
+  , CleanUpStep(..)
   , players
   , supply
   ) where
@@ -17,8 +18,12 @@ data GameState
   | PreparingDecks [PlayerWithDeck] [Card]
   | DrawingInitialHands [PlayerWithHand] [Card]
   | BuyPhase BuyAllowance [CompletePlayer] [Card]
-  | CleanUpPhase [CompletePlayer] [Card]
+  | CleanUpPhase CleanUpStep [CompletePlayer] [Card]
   | GameOver
+  deriving (Eq, Show)
+
+data CleanUpStep
+  = Discard
   deriving (Eq, Show)
 
 players :: GameState -> [CompletePlayer]
@@ -27,7 +32,7 @@ players (PreparingSupply ps _) = CompletePlayer.fromPlayerWithoutDominion <$> ps
 players (PreparingDecks ps _) = CompletePlayer.fromPlayerWithDeck <$> ps
 players (DrawingInitialHands ps _) = CompletePlayer.fromPlayerWithHand <$> ps
 players (BuyPhase _ ps _) = ps
-players (CleanUpPhase ps _) = ps
+players (CleanUpPhase _ ps _) = ps
 players GameOver = []
 
 supply :: GameState -> [Card]
@@ -36,5 +41,5 @@ supply (PreparingSupply _ cards) = cards
 supply (PreparingDecks _ cards) = cards
 supply (DrawingInitialHands _ cards) = cards
 supply (BuyPhase _ _ cards) = cards
-supply (CleanUpPhase _ cards) = cards
+supply (CleanUpPhase _ _ cards) = cards
 supply GameOver = []

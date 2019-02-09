@@ -84,14 +84,14 @@ gainCard pid card (BuyPhase (BuyAllowance buys) ps cards)
 gainCard _ _ _ = error "A card may only be gained during the buy phase"
 
 discardCard :: CandidateId -> Card -> GameState -> GameState
-discardCard pid card (CleanUpPhase ps cards)
+discardCard pid card (CleanUpPhase Discard ps cards)
   | not $ playerExists pid ps = error "Invalid discard: player not in game"
   | not $ cardBelongsToPlayer hand card pid ps = error "Invalid discard: card not in hand of player"
-  | otherwise = CleanUpPhase (alterPlayer (alterDiscard (card :) . alterHand (delete card)) pid ps) cards
-discardCard _ _ _ = error "A card may only be discarded during the clean up phase"
+  | otherwise = CleanUpPhase Discard (alterPlayer (alterDiscard (card :) . alterHand (delete card)) pid ps) cards
+discardCard _ _ _ = error "A card may only be discarded during the discard step of the clean up phase"
 
 beginCleanUpPhase :: GameState -> GameState
-beginCleanUpPhase (BuyPhase _ ps cards) = CleanUpPhase ps cards
+beginCleanUpPhase (BuyPhase _ ps cards) = CleanUpPhase Discard ps cards
 beginCleanUpPhase _ = error "Clean up phase must follow buy phase"
 
 alterWhere :: (a -> Bool) -> (a -> a) -> [a] -> [a]

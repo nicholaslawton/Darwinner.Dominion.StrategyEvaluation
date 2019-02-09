@@ -16,7 +16,7 @@ import EngineValidation
 import ArbitraryInstances()
 import CardOrder
 import Test.Hspec
-import Test.QuickCheck
+import Test.QuickCheck hiding (Discard)
 
 cleanUpPhaseTests :: SpecWith ()
 cleanUpPhaseTests = describe "clean up phase" $ do
@@ -26,19 +26,19 @@ cleanUpPhaseTests = describe "clean up phase" $ do
       . sortOn arbitraryCardOrder
       . mapMaybe cardDiscarded
       . history
-      . runTest params ps cards
+      . runTest params Discard ps cards
 
   it "completes" $ property $ \params (NonEmpty ps) cards ->
-    (===) EndGame . last . history . runTest params ps cards
+    (===) EndGame . last . history . runTest params Discard ps cards
 
-runTest :: EvaluationParameters -> [CompletePlayer] -> [Card] -> Int -> Game
-runTest params ps cards = execWhile cleanUpPhase (commandLimit ps) params . gameInCleanUpPhase ps cards
+runTest :: EvaluationParameters -> CleanUpStep -> [CompletePlayer] -> [Card] -> Int -> Game
+runTest params step ps cards = execWhile cleanUpPhase (commandLimit ps) params . gameInCleanUpPhase step ps cards
 
 commandLimit :: [CompletePlayer] -> Int
 commandLimit = (+10) . length . hand . head
 
-gameInCleanUpPhase :: [CompletePlayer] -> [Card] -> Int -> Game
-gameInCleanUpPhase ps cards = gameInState $ CleanUpPhase ps cards
+gameInCleanUpPhase :: CleanUpStep -> [CompletePlayer] -> [Card] -> Int -> Game
+gameInCleanUpPhase step ps cards = gameInState $ CleanUpPhase step ps cards
 
 cardDiscarded :: Command -> Maybe Card
 cardDiscarded (DiscardCard _ card) = Just card

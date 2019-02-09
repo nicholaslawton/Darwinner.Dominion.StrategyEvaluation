@@ -17,7 +17,7 @@ import GameStateValidation
 import ArbitraryInstances
 import CardOrder
 import Test.Hspec
-import Test.QuickCheck hiding (discard)
+import Test.QuickCheck hiding (Discard, discard)
 
 updateTests :: SpecWith ()
 updateTests = describe "update" $ do
@@ -74,13 +74,13 @@ updateTests = describe "update" $ do
 
   describe "discard card" $ do
     it "removes card from hand" $ property $ \(CardInHand ps pid card) cards ->
-      verifyPlayerUpdate pid (length . hand) (subtract 1) (DiscardCard pid card) (CleanUpPhase ps cards)
+      verifyPlayerUpdate pid (length . hand) (subtract 1) (DiscardCard pid card) (CleanUpPhase Discard ps cards)
 
     it "adds card to discard" $ property $ \(CardInHand ps pid card) cards ->
-      verifyPlayerUpdate pid (length . discard) (+1) (DiscardCard pid card) (CleanUpPhase ps cards)
+      verifyPlayerUpdate pid (length . discard) (+1) (DiscardCard pid card) (CleanUpPhase Discard ps cards)
 
     it "does not alter dominion of player" $ property $ \(CardInHand ps pid card) cards ->
-      verifyPlayerUpdate pid dominion id (DiscardCard pid card) (CleanUpPhase ps cards)
+      verifyPlayerUpdate pid dominion id (DiscardCard pid card) (CleanUpPhase Discard ps cards)
 
 verifyPlayerUpdate :: (Eq a, Show a) =>
   CandidateId

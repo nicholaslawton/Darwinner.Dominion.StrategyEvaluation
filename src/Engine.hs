@@ -89,10 +89,10 @@ nextCommand = do
 
     BuyPhase _ _ [] -> return BuyPhaseComplete -- error "Unexpected empty supply while game in progress"
 
-    CleanUpPhase (p:_) _ ->
+    CleanUpPhase Discard (p:_) _ ->
       return $ maybe EndGame (DiscardCard $ playerId p) (listToMaybe $ hand p)
 
-    CleanUpPhase [] _ -> error "Unexpected game in clean up phase with no players"
+    CleanUpPhase _ [] _ -> error "Unexpected game in clean up phase with no players"
 
     GameOver -> error "Game is over"
 
