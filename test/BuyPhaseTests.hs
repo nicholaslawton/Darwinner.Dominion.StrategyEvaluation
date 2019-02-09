@@ -1,4 +1,4 @@
-module BuyPhaseTests where
+module BuyPhaseTests (buyPhaseTests) where
 
 import Command
 import Game

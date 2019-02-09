@@ -4,6 +4,7 @@ import ParsingTests
 import UpdateTests
 import GamePreparationTests
 import BuyPhaseTests
+import CleanUpPhaseTests
 
 import Test.Hspec
 
@@ -13,3 +14,4 @@ main = hspec $ do
   updateTests
   gamePreparationTests
   buyPhaseTests
+  cleanUpPhaseTests
