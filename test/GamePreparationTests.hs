@@ -70,10 +70,7 @@ gamePreparationTests = describe "game preparation" $ do
       === (fmap length . categorise fst snd . mapMaybe cardDrawn . history . prepareGame seed) params
 
 prepareGame :: Int -> EvaluationParameters -> Game
-prepareGame seed params = execUntil prepared params (Game.new seed)
-
-prepared :: Game -> Bool
-prepared = inState ((==) GameOver) 300
+prepareGame seed params = execUntil (== GameOver) 300 params (Game.new seed)
 
 categorise :: Ord k => (a -> k) -> (a -> v) -> [a] -> Map k [v]
 categorise key value xs = fromListWith (++) $ liftA2 (,) key ((: []) . value) <$> xs

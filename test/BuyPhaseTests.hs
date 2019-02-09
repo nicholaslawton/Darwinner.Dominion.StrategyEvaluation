@@ -24,7 +24,7 @@ buyPhaseTests = describe "buy phase" $ do
     (===) BuyPhaseComplete . last . history . runTest params buys ps cards
 
 runTest :: EvaluationParameters -> Int -> [CompletePlayer] -> [Card] -> Int -> Game
-runTest params buys ps cards = execPhase buyPhase (commandLimit buys cards) params . gameInBuyPhase buys ps cards
+runTest params buys ps cards = execWhile buyPhase (commandLimit buys cards) params . gameInBuyPhase buys ps cards
 
 commandLimit :: Int -> [Card] -> Int
 commandLimit buys cards = min buys (length cards) + 10

@@ -29,7 +29,7 @@ cleanUpPhaseTests = describe "clean up phase" $ do
     (===) EndGame . last . history . runTest params ps cards
 
 runTest :: EvaluationParameters -> [CompletePlayer] -> [Card] -> Int -> Game
-runTest params ps cards = execPhase cleanUpPhase (commandLimit ps) params . gameInCleanUpPhase ps cards
+runTest params ps cards = execWhile cleanUpPhase (commandLimit ps) params . gameInCleanUpPhase ps cards
 
 commandLimit :: [CompletePlayer] -> Int
 commandLimit = (+10) . length . hand . head
