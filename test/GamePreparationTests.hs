@@ -73,7 +73,7 @@ prepareGame :: Int -> EvaluationParameters -> Game
 prepareGame seed params = execUntil prepared params (Game.new seed)
 
 prepared :: Game -> Bool
-prepared = liftA2 (||) ((== GameOver) . Game.state) ((>300) . length . Game.history)
+prepared = inState ((==) GameOver) 300
 
 categorise :: Ord k => (a -> k) -> (a -> v) -> [a] -> Map k [v]
 categorise key value xs = fromListWith (++) $ liftA2 (,) key ((: []) . value) <$> xs

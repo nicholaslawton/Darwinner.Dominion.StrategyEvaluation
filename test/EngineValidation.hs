@@ -1,4 +1,4 @@
-module EngineValidation (execUntil, execPhase) where
+module EngineValidation (execUntil, execPhase, inState) where
 
 import Game
 import GameState
