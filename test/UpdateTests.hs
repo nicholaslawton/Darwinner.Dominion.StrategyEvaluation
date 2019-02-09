@@ -48,19 +48,11 @@ updateTests = describe "update" $ do
       drawingInitialHands $ update MarkDecksPrepared $ PreparingDecks ps cards
 
   describe "draw card" $ do
-    describe "for initial hand" $ do
-      it "adds card to hand" $ property $ \(CardInStartingDeck ps pid card) cards ->
-        verifyPlayerUpdate pid (length . hand) (+1) (DrawCard pid card) (DrawingInitialHands ps cards)
+    describe "for initial hand" $
+      drawCardProperties (\(CardInStartingDeck ps pid card) -> (ps, pid, card)) DrawingInitialHands
 
-      it "does not alter dominion of player" $ property $ \(CardInStartingDeck ps pid card) cards ->
-        verifyPlayerUpdate pid dominion id (DrawCard pid card) (DrawingInitialHands ps cards)
-
-    describe "during clean up phase" $ do
-      it "adds card to hand" $ property $ \(CardInDeck ps pid card) cards ->
-        verifyPlayerUpdate pid (length . hand) (+1) (DrawCard pid card) (CleanUpPhase DrawHand ps cards)
-
-      it "does not alter dominion of player" $ property $ \(CardInDeck ps pid card) cards ->
-        verifyPlayerUpdate pid dominion id (DrawCard pid card) (CleanUpPhase DrawHand ps cards)
+    describe "during clean up phase" $
+      drawCardProperties (\(CardInDeck ps pid card) -> (ps, pid, card)) (CleanUpPhase DrawHand)
 
   describe "mark initial hands drawn" $
     it "transitions to buy phase" $ property $ \ps cards ->
@@ -93,6 +85,19 @@ updateTests = describe "update" $ do
   describe "discard step completion" $
     it "transitions to draw next hand step" $ property $ \ps cards ->
       drawHandStep $ update DiscardStepComplete $ CleanUpPhase Discard ps cards
+
+drawCardProperties :: (Arbitrary a, Show a, Player p) =>
+  (a -> ([p], CandidateId, Card))
+  -> ([p] -> [Card] -> GameState)
+  -> SpecWith ()
+drawCardProperties unpack constructGame = do
+  it "adds card to hand" $ property $ \cardInDeck cards ->
+    let (ps, pid, card) = unpack cardInDeck
+    in verifyPlayerUpdate pid (length . hand) (+1) (DrawCard pid card) (constructGame ps cards)
+
+  it "does not alter dominion of player" $ property $ \cardInDeck cards ->
+    let (ps, pid, card) = unpack cardInDeck
+    in verifyPlayerUpdate pid dominion id (DrawCard pid card) (constructGame ps cards)
 
 verifyPlayerUpdate :: (Eq a, Show a) =>
   CandidateId
