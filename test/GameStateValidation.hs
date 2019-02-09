@@ -2,8 +2,8 @@ module GameStateValidation
   ( preparingSupply
   , preparingDecks
   , drawingInitialHands
-  , inCleanUpPhase
-  , inBuyPhase )
+  , cleanUpPhase
+  , buyPhase )
   where
 
 import GameState
@@ -20,10 +20,10 @@ drawingInitialHands :: GameState -> Bool
 drawingInitialHands (DrawingInitialHands _ _) = True
 drawingInitialHands _ = False
 
-inCleanUpPhase :: GameState -> Bool
-inCleanUpPhase (CleanUpPhase _ _) = True
-inCleanUpPhase _ = False
+cleanUpPhase :: GameState -> Bool
+cleanUpPhase (CleanUpPhase _ _) = True
+cleanUpPhase _ = False
 
-inBuyPhase :: GameState -> Bool
-inBuyPhase (BuyPhase _ _ _) = True
-inBuyPhase _ = False
+buyPhase :: GameState -> Bool
+buyPhase (BuyPhase _ _ _) = True
+buyPhase _ = False

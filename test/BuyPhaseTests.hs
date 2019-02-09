@@ -8,8 +8,6 @@ import CompletePlayer
 import Card
 import BuyAllowance
 
-import Control.Applicative
-
 import GameStateValidation
 import EngineValidation
 import ArbitraryInstances()
@@ -20,25 +18,19 @@ buyPhaseTests :: SpecWith ()
 buyPhaseTests = describe "buy phase" $ do
 
   it "gains a card" $ property $ \params (Positive buys) (NonEmpty ps) (NonEmpty cards) ->
-    any gainCard . history . performBuyPhase 10 params . gameInBuyPhase buys ps cards
+    any gainCard . history . runTest params buys ps cards
 
   it "completes" $ property $ \params (Positive buys) (NonEmpty ps) (NonEmpty cards) ->
     (===) BuyPhaseComplete . last . history . runTest params buys ps cards
 
 runTest :: EvaluationParameters -> Int -> [CompletePlayer] -> [Card] -> Int -> Game
-runTest params buys ps cards = performBuyPhase (commandLimit buys cards) params . gameInBuyPhase buys ps cards
+runTest params buys ps cards = execPhase buyPhase (commandLimit buys cards) params . gameInBuyPhase buys ps cards
 
 commandLimit :: Int -> [Card] -> Int
 commandLimit buys cards = min buys (length cards) + 10
 
 gameInBuyPhase :: Int -> [CompletePlayer] -> [Card] -> Int -> Game
 gameInBuyPhase buys ps cards = Game.mapState (const (BuyPhase (BuyAllowance buys) ps cards)) . Game.new
-
-performBuyPhase :: Int -> EvaluationParameters -> Game -> Game
-performBuyPhase = execUntil . buyPhaseOver
-
-buyPhaseOver :: Int -> Game -> Bool
-buyPhaseOver limit = liftA2 (||) (not . inBuyPhase . Game.state) ((> limit) . length . Game.history)
 
 gainCard :: Command -> Bool
 gainCard (GainCard _ _) = True

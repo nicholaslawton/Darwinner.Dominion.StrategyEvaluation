@@ -56,7 +56,7 @@ updateTests = describe "update" $ do
 
   describe "mark initial hands drawn" $
     it "transitions to buy phase" $ property $ \ps cards ->
-      inBuyPhase $ update MarkInitialHandsDrawn $ DrawingInitialHands ps cards
+      buyPhase $ update MarkInitialHandsDrawn $ DrawingInitialHands ps cards
 
   describe "gain card" $ do
     it "adds card to discard" $ property $ \(SelectedPlayer ps pid) (CardInSupply cards card) (Positive buys) ->
@@ -70,7 +70,7 @@ updateTests = describe "update" $ do
 
   describe "buy phase completion" $
     it "transitions to clean up phase" $ property $ \ps cards ->
-      inCleanUpPhase $ update BuyPhaseComplete $ BuyPhase (BuyAllowance 0) ps cards
+      cleanUpPhase $ update BuyPhaseComplete $ BuyPhase (BuyAllowance 0) ps cards
 
   describe "discard card" $ do
     it "removes card from hand" $ property $ \(CardInHand ps pid card) cards ->
