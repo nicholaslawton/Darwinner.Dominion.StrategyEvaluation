@@ -23,7 +23,13 @@ buyPhaseTests = describe "buy phase" $ do
     any gainCard . history . performBuyPhase 10 params . gameInBuyPhase buys ps cards
 
   it "completes" $ property $ \params (Positive buys) (NonEmpty ps) (NonEmpty cards) ->
-    (===) BuyPhaseComplete . last . history . performBuyPhase (min buys (length cards) + 10) params . gameInBuyPhase buys ps cards
+    (===) BuyPhaseComplete . last . history . runTest params buys ps cards
+
+runTest :: EvaluationParameters -> Int -> [CompletePlayer] -> [Card] -> Int -> Game
+runTest params buys ps cards = performBuyPhase (commandLimit buys cards) params . gameInBuyPhase buys ps cards
+
+commandLimit :: Int -> [Card] -> Int
+commandLimit buys cards = min buys (length cards) + 10
 
 gameInBuyPhase :: Int -> [CompletePlayer] -> [Card] -> Int -> Game
 gameInBuyPhase buys ps cards = Game.mapState (const (BuyPhase (BuyAllowance buys) ps cards)) . Game.new
