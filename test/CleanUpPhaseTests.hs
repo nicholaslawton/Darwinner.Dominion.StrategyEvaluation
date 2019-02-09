@@ -22,7 +22,10 @@ cleanUpPhaseTests :: SpecWith ()
 cleanUpPhaseTests = describe "clean up phase" $ do
   
   it "discards all cards from hand" $ property $ \params (NonEmpty ps) cards ->
-    (===) ((sortOn arbitraryCardOrder . hand . head) ps) . sortOn arbitraryCardOrder . mapMaybe cardDiscarded . history
+    (===) (sortOn arbitraryCardOrder . hand . head $ ps)
+      . sortOn arbitraryCardOrder
+      . mapMaybe cardDiscarded
+      . history
       . runTest params ps cards
 
   it "completes" $ property $ \params (NonEmpty ps) cards ->
