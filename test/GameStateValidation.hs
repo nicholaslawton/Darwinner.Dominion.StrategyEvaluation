@@ -3,10 +3,12 @@ module GameStateValidation
   , preparingDecks
   , drawingInitialHands
   , cleanUpPhase
-  , buyPhase )
-  where
+  , buyPhase
+  , gameInState
+  ) where
 
 import GameState
+import Game
 
 preparingSupply :: GameState -> Bool
 preparingSupply (PreparingSupply _ _) = True
@@ -27,3 +29,6 @@ cleanUpPhase _ = False
 buyPhase :: GameState -> Bool
 buyPhase (BuyPhase _ _ _) = True
 buyPhase _ = False
+
+gameInState :: GameState -> Int -> Game
+gameInState gameState = Game.mapState (const gameState) . Game.new

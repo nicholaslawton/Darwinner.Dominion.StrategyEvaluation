@@ -35,7 +35,7 @@ commandLimit :: [CompletePlayer] -> Int
 commandLimit = (+10) . length . hand . head
 
 gameInCleanUpPhase :: [CompletePlayer] -> [Card] -> Int -> Game
-gameInCleanUpPhase ps cards = Game.mapState (const (CleanUpPhase ps cards)) . Game.new
+gameInCleanUpPhase ps cards = gameInState $ CleanUpPhase ps cards
 
 cardDiscarded :: Command -> Maybe Card
 cardDiscarded (DiscardCard _ card) = Just card

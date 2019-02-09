@@ -30,7 +30,7 @@ commandLimit :: Int -> [Card] -> Int
 commandLimit buys cards = min buys (length cards) + 10
 
 gameInBuyPhase :: Int -> [CompletePlayer] -> [Card] -> Int -> Game
-gameInBuyPhase buys ps cards = Game.mapState (const (BuyPhase (BuyAllowance buys) ps cards)) . Game.new
+gameInBuyPhase buys ps cards = gameInState $ BuyPhase (BuyAllowance buys) ps cards
 
 gainCard :: Command -> Bool
 gainCard (GainCard _ _) = True
