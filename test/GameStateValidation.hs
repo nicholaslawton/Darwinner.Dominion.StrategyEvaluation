@@ -2,8 +2,9 @@ module GameStateValidation
   ( preparingSupply
   , preparingDecks
   , drawingInitialHands
-  , cleanUpPhase
   , buyPhase
+  , cleanUpPhase
+  , drawHandStep
   , gameInState
   ) where
 
@@ -22,13 +23,17 @@ drawingInitialHands :: GameState -> Bool
 drawingInitialHands (DrawingInitialHands _ _) = True
 drawingInitialHands _ = False
 
+buyPhase :: GameState -> Bool
+buyPhase (BuyPhase _ _ _) = True
+buyPhase _ = False
+
 cleanUpPhase :: GameState -> Bool
 cleanUpPhase (CleanUpPhase _ _ _) = True
 cleanUpPhase _ = False
 
-buyPhase :: GameState -> Bool
-buyPhase (BuyPhase _ _ _) = True
-buyPhase _ = False
+drawHandStep :: GameState -> Bool
+drawHandStep (CleanUpPhase DrawHand _ _) = True
+drawHandStep _ = False
 
 gameInState :: GameState -> Int -> Game
 gameInState gameState = Game.mapState (const gameState) . Game.new

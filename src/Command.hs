@@ -15,5 +15,6 @@ data Command
   | GainCard CandidateId Card
   | DiscardCard CandidateId Card
   | BuyPhaseComplete
+  | DiscardStepComplete
   | EndGame
   deriving (Eq, Show)

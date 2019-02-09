@@ -82,6 +82,10 @@ updateTests = describe "update" $ do
     it "does not alter dominion of player" $ property $ \(CardInHand ps pid card) cards ->
       verifyPlayerUpdate pid dominion id (DiscardCard pid card) (CleanUpPhase Discard ps cards)
 
+  describe "discard step completion" $
+    it "transitions to draw next hand step" $ property $ \ps cards ->
+      drawHandStep $ update DiscardStepComplete $ CleanUpPhase Discard ps cards
+
 verifyPlayerUpdate :: (Eq a, Show a) =>
   CandidateId
   -> (CompletePlayer -> a)

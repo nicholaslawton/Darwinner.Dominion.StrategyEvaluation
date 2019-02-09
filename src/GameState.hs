@@ -24,6 +24,7 @@ data GameState
 
 data CleanUpStep
   = Discard
+  | DrawHand
   deriving (Eq, Show)
 
 players :: GameState -> [CompletePlayer]

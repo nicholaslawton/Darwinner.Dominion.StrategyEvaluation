@@ -27,6 +27,7 @@ update MarkInitialHandsDrawn = beginPlay
 update (GainCard pid card) = gainCard pid card
 update (DiscardCard pid card) = discardCard pid card
 update BuyPhaseComplete = beginCleanUpPhase
+update DiscardStepComplete = beginDrawingNextHand
 update EndGame = const GameOver
 
 addPlayer :: CandidateId -> GameState -> GameState
@@ -93,6 +94,10 @@ discardCard _ _ _ = error "A card may only be discarded during the discard step 
 beginCleanUpPhase :: GameState -> GameState
 beginCleanUpPhase (BuyPhase _ ps cards) = CleanUpPhase Discard ps cards
 beginCleanUpPhase _ = error "Clean up phase must follow buy phase"
+
+beginDrawingNextHand :: GameState -> GameState
+beginDrawingNextHand (CleanUpPhase Discard ps cards) = CleanUpPhase DrawHand ps cards
+beginDrawingNextHand _ = error "Drawing the next hand must follow the discard step of the clean up phase"
 
 alterWhere :: (a -> Bool) -> (a -> a) -> [a] -> [a]
 alterWhere p f = fmap $ liftA3 bool id f p
