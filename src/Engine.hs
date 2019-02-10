@@ -71,10 +71,12 @@ nextCommand = do
             fmap (flip (,) card . playerId) . listToMaybe . filter ((< target) . countElem card . deck)
 
     DrawingInitialHands ps _ ->
-      fromMaybe (return MarkInitialHandsDrawn) $ lift . drawCard <$> playerWithIncompleteHand ps
+      fromMaybe (return MarkInitialHandsDrawn) $ lift . drawCard unexpected <$> playerWithIncompleteHand ps
         where
           playerWithIncompleteHand :: Player p => [p] -> Maybe p
           playerWithIncompleteHand = listToMaybe . filter ((< 5) . length . hand)
+
+          unexpected = error "Unexpected failure drawing a card for initial hand"
 
     BuyPhase (BuyAllowance buys) _ _ | buys <= 0 -> return BuyPhaseComplete
 
@@ -93,9 +95,12 @@ nextCommand = do
 
     GameOver -> error "Game is over"
 
-drawCard :: Player p => p -> State Game Command
-drawCard p = maybe emptyDeckError (DrawCard $ playerId p) <$> randomElement (deck p)
-  where emptyDeckError = error "Need to reform new deck from discard"
+drawCard :: Player p => Command -> p -> State Game Command
+drawCard alternateCommand p
+  | not $ null $ deck p = maybe unexpected (DrawCard $ playerId p) <$> randomElement (deck p)
+  | not $ null $ discard p = return $ ReformDeck $ playerId p
+  | otherwise = return alternateCommand
+    where unexpected = error "Unexpected failure drawing a card from a non-empty deck"
 
 randomElement :: [a] -> State Game (Maybe a)
 randomElement [] = return Nothing

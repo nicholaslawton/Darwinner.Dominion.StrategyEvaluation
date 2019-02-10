@@ -27,6 +27,10 @@ cleanUpPhaseTests = describe "clean up phase" $ do
       . mapMaybe cardDiscarded
       . history
       . runTest params Discard ps cards
+{-
+  it "draws new hand" $ property $ \params (NonEmpty ps) cards ->
+    (===) expectedHandSize . length . filter cardDrawn . history . runTest params DrawHand ps cards
+    -}
 
   it "completes" $ property $ \params (NonEmpty ps) cards ->
     (===) EndGame . last . history . runTest params Discard ps cards
