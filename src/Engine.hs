@@ -89,7 +89,7 @@ nextCommand = do
     CleanUpPhase Discard (p:_) _ ->
       return $ maybe DiscardStepComplete (DiscardCard $ playerId p) (listToMaybe $ hand p)
 
-    CleanUpPhase DrawHand _ _ -> return EndGame
+    CleanUpPhase DrawHand (p:_) _ -> if length (hand p) < 5 then lift $ drawCard EndGame p else return EndGame
 
     CleanUpPhase _ [] _ -> error "Unexpected game in clean up phase with no players"
 

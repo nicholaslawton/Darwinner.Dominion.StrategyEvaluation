@@ -13,6 +13,8 @@ import Data.Maybe
 
 import GameStateValidation
 import EngineValidation
+import CommandValidation
+import PlayerValidation
 import ArbitraryInstances()
 import CardOrder
 import Test.Hspec
@@ -27,10 +29,13 @@ cleanUpPhaseTests = describe "clean up phase" $ do
       . mapMaybe cardDiscarded
       . history
       . runTest params Discard ps cards
-{-
+
   it "draws new hand" $ property $ \params (NonEmpty ps) cards ->
-    (===) expectedHandSize . length . filter cardDrawn . history . runTest params DrawHand ps cards
-    -}
+    (===) (min 5 . length . dominion $ head ps)
+      . length
+      . filter ((/=) Nothing . cardDrawn)
+      . history
+      . runTest params Discard ps cards
 
   it "completes" $ property $ \params (NonEmpty ps) cards ->
     (===) EndGame . last . history . runTest params Discard ps cards

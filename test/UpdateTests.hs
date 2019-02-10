@@ -14,6 +14,7 @@ import Data.List
 import Control.Applicative
 
 import GameStateValidation
+import PlayerValidation
 import ArbitraryInstances
 import CardOrder
 import Test.Hspec
@@ -127,9 +128,6 @@ verifyUpdate prop change command = liftA2 (===) (prop . update command) (change 
 verifyPlayerState :: CandidateId -> (CompletePlayer -> Bool) -> GameState -> Property
 verifyPlayerState pid verification game =
   fmap verification (find ((==) pid . playerId) (players game)) === Just True
-
-dominion :: Player p => p -> [Card]
-dominion p = sortOn arbitraryCardOrder $ concatMap ($ p) [deck, hand, discard]
 
 cardsInPlay :: GameState -> [Card]
 cardsInPlay gameState = sortOn arbitraryCardOrder $ concatMap ($ gameState) [concatMap dominion . players, supply]
