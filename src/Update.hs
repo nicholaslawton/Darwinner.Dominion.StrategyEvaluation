@@ -99,7 +99,7 @@ discardCard _ _ _ = error "A card may only be discarded during the discard step 
 
 reformDeck :: CandidateId -> GameState -> GameState
 reformDeck pid (CleanUpPhase DrawHand ps cards) =
-  CleanUpPhase DrawHand (alterPlayer (alterDiscard (const [])) pid ps) cards
+  CleanUpPhase DrawHand (alterPlayer (\p -> (alterDiscard (const []) . alterDeck (++ discard p)) p) pid ps) cards
 reformDeck _ _ = error "Reforming the deck must occur while drawing the next hand during the clean up phase"
 
 beginCleanUpPhase :: GameState -> GameState

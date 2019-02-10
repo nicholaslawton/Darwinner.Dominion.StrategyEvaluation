@@ -78,9 +78,12 @@ updateTests = describe "update" $ do
     it "does not alter dominion of player" $ property $ \(CardInHand ps pid card) cards ->
       verifyPlayerUpdate pid dominion id (DiscardCard pid card) (CleanUpPhase Discard ps cards)
 
-  describe "reform deck" $
+  describe "reform deck" $ do
     it "leaves discard empty" $ property $ \(SelectedPlayer ps pid) cards ->
       verifyPlayerState pid (null . discard) $ update (ReformDeck pid) (CleanUpPhase DrawHand ps cards)
+
+    it "does not alter combined deck and discard" $ property $ \(SelectedPlayer ps pid) cards ->
+      verifyPlayerUpdate pid (liftA2 (++) deck discard) id (ReformDeck pid) (CleanUpPhase DrawHand ps cards)
 
   describe "buy phase completion" $
     it "transitions to clean up phase" $ property $ \ps cards ->
