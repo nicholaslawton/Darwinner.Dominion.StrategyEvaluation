@@ -47,16 +47,16 @@ updateTests = describe "update" $ do
     it "begins drawing initial hands" $ property $ \ps cards ->
       drawingInitialHands $ update MarkDecksPrepared $ PreparingDecks ps cards
 
+  describe "mark initial hands drawn" $
+    it "transitions to buy phase" $ property $ \ps cards ->
+      buyPhase $ update MarkInitialHandsDrawn $ DrawingInitialHands ps cards
+
   describe "draw card" $ do
     describe "for initial hand" $
       drawCardProperties (\(CardInStartingDeck ps pid card) -> (ps, pid, card)) DrawingInitialHands
 
     describe "during clean up phase" $
       drawCardProperties (\(CardInDeck ps pid card) -> (ps, pid, card)) (CleanUpPhase DrawHand)
-
-  describe "mark initial hands drawn" $
-    it "transitions to buy phase" $ property $ \ps cards ->
-      buyPhase $ update MarkInitialHandsDrawn $ DrawingInitialHands ps cards
 
   describe "gain card" $ do
     it "adds card to discard" $ property $ \(SelectedPlayer ps pid) (CardInSupply cards card) (Positive buys) ->
@@ -68,10 +68,6 @@ updateTests = describe "update" $ do
     it "decrements buy allowance" $ property $ \(SelectedPlayer ps pid) (CardInSupply cards card) (Positive buys) ->
       verifyUpdate buyAllowance (subtract 1) (GainCard pid card) (BuyPhase (BuyAllowance buys) ps cards)
 
-  describe "buy phase completion" $
-    it "transitions to clean up phase" $ property $ \ps cards ->
-      cleanUpPhase $ update BuyPhaseComplete $ BuyPhase (BuyAllowance 0) ps cards
-
   describe "discard card" $ do
     it "removes card from hand" $ property $ \(CardInHand ps pid card) cards ->
       verifyPlayerUpdate pid (length . hand) (subtract 1) (DiscardCard pid card) (CleanUpPhase Discard ps cards)
@@ -81,6 +77,14 @@ updateTests = describe "update" $ do
 
     it "does not alter dominion of player" $ property $ \(CardInHand ps pid card) cards ->
       verifyPlayerUpdate pid dominion id (DiscardCard pid card) (CleanUpPhase Discard ps cards)
+
+  describe "reform deck" $
+    it "leaves discard empty" $ property $ \(SelectedPlayer ps pid) cards ->
+      verifyPlayerState pid (null . discard) $ update (ReformDeck pid) (CleanUpPhase DrawHand ps cards)
+
+  describe "buy phase completion" $
+    it "transitions to clean up phase" $ property $ \ps cards ->
+      cleanUpPhase $ update BuyPhaseComplete $ BuyPhase (BuyAllowance 0) ps cards
 
   describe "discard step completion" $
     it "transitions to draw next hand step" $ property $ \ps cards ->
@@ -116,6 +120,10 @@ verifyUpdate :: (Eq a, Show a) =>
   -> GameState
   -> Property
 verifyUpdate prop change command = liftA2 (===) (prop . update command) (change . prop)
+
+verifyPlayerState :: CandidateId -> (CompletePlayer -> Bool) -> GameState -> Property
+verifyPlayerState pid verification game =
+  fmap verification (find ((==) pid . playerId) (players game)) === Just True
 
 dominion :: Player p => p -> [Card]
 dominion p = sortOn arbitraryCardOrder $ concatMap ($ p) [deck, hand, discard]

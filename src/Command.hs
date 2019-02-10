@@ -10,10 +10,11 @@ data Command
   | MarkSupplyPrepared
   | AddCardToDeck CandidateId Card
   | MarkDecksPrepared
-  | DrawCard CandidateId Card
   | MarkInitialHandsDrawn
+  | DrawCard CandidateId Card
   | GainCard CandidateId Card
   | DiscardCard CandidateId Card
+  | ReformDeck CandidateId
   | BuyPhaseComplete
   | DiscardStepComplete
   | EndGame

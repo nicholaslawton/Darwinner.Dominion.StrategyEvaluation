@@ -22,10 +22,11 @@ update (PlaceCardInSupply card) = placeCardInSupply card
 update MarkSupplyPrepared = beginPreparingDecks
 update (AddCardToDeck pid card) = addCardToDeck pid card
 update MarkDecksPrepared = beginDrawingInitialHands
-update (DrawCard pid card) = drawCard pid card
 update MarkInitialHandsDrawn = beginPlay
+update (DrawCard pid card) = drawCard pid card
 update (GainCard pid card) = gainCard pid card
 update (DiscardCard pid card) = discardCard pid card
+update (ReformDeck pid) = reformDeck pid
 update BuyPhaseComplete = beginCleanUpPhase
 update DiscardStepComplete = beginDrawingNextHand
 update EndGame = const GameOver
@@ -60,6 +61,11 @@ beginDrawingInitialHands (PreparingDecks ps cards) =
   DrawingInitialHands (PlayerWithHand.fromPlayerWithDeck <$> ps) cards
 beginDrawingInitialHands _ = error "Drawing initial hands must occur after decks have been prepared"
 
+beginPlay :: GameState -> GameState
+beginPlay (DrawingInitialHands ps cards) =
+  BuyPhase BuyAllowance.initial (CompletePlayer.fromPlayerWithHand <$> ps) cards
+beginPlay _ = error "Cannot begin play before the game has been fully prepared"
+
 drawCard :: CandidateId -> Card -> GameState -> GameState
 drawCard pid card (DrawingInitialHands ps cards) = DrawingInitialHands (drawCardForPlayer pid card ps) cards
 drawCard pid card (CleanUpPhase DrawHand ps cards) = CleanUpPhase DrawHand (drawCardForPlayer pid card ps) cards
@@ -71,11 +77,6 @@ drawCardForPlayer pid card ps
   | all ((/=) pid . playerId) ps = error "Invalid card draw: player not in game"
   | not $ cardBelongsToPlayer deck card pid ps = error "Invalid card draw: card not in deck of player"
   | otherwise = alterPlayer (alterHand (card :) . alterDeck (delete card)) pid ps
-
-beginPlay :: GameState -> GameState
-beginPlay (DrawingInitialHands ps cards) =
-  BuyPhase BuyAllowance.initial (CompletePlayer.fromPlayerWithHand <$> ps) cards
-beginPlay _ = error "Cannot begin play before the game has been fully prepared"
 
 gainCard :: CandidateId -> Card -> GameState -> GameState
 gainCard pid card (BuyPhase (BuyAllowance buys) ps cards)
@@ -95,6 +96,11 @@ discardCard pid card (CleanUpPhase Discard ps cards)
   | not $ cardBelongsToPlayer hand card pid ps = error "Invalid discard: card not in hand of player"
   | otherwise = CleanUpPhase Discard (alterPlayer (alterDiscard (card :) . alterHand (delete card)) pid ps) cards
 discardCard _ _ _ = error "A card may only be discarded during the discard step of the clean up phase"
+
+reformDeck :: CandidateId -> GameState -> GameState
+reformDeck pid (CleanUpPhase DrawHand ps cards) =
+  CleanUpPhase DrawHand (alterPlayer (alterDiscard (const [])) pid ps) cards
+reformDeck _ _ = error "Reforming the deck must occur while drawing the next hand during the clean up phase"
 
 beginCleanUpPhase :: GameState -> GameState
 beginCleanUpPhase (BuyPhase _ ps cards) = CleanUpPhase Discard ps cards
