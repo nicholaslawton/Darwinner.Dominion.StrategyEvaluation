@@ -98,8 +98,12 @@ discardCard pid card (CleanUpPhase Discard ps cards)
 discardCard _ _ _ = error "A card may only be discarded during the discard step of the clean up phase"
 
 reformDeck :: CandidateId -> GameState -> GameState
-reformDeck pid (CleanUpPhase DrawHand ps cards) =
-  CleanUpPhase DrawHand (alterPlayer (\p -> (alterDiscard (const []) . alterDeck (++ discard p)) p) pid ps) cards
+reformDeck pid (CleanUpPhase DrawHand ps cards)
+  | not $ playerExists pid ps = error "Invalid discard: player not in game"
+  | otherwise = CleanUpPhase DrawHand (alterPlayer moveDiscardToDeck pid ps) cards
+    where
+      moveDiscardToDeck :: CompletePlayer -> CompletePlayer
+      moveDiscardToDeck p = alterDiscard (const []) $ alterDeck (++ discard p) p
 reformDeck _ _ = error "Reforming the deck must occur while drawing the next hand during the clean up phase"
 
 beginCleanUpPhase :: GameState -> GameState
