@@ -15,6 +15,7 @@ import Control.Applicative
 
 import GameStateValidation
 import EngineValidation
+import CommandValidation
 import ArbitraryInstances()
 import CardOrder
 import Test.Hspec
@@ -89,7 +90,3 @@ cardAddedToDeck _ = Nothing
 
 cardPutInPlay :: Command -> Maybe Card
 cardPutInPlay = liftA2 (<|>) cardPlacedInSupply (fmap snd . cardAddedToDeck)
-
-cardDrawn :: Command -> Maybe (CandidateId, Card)
-cardDrawn (DrawCard pid card) = Just (pid, card)
-cardDrawn _ = Nothing
