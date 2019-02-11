@@ -1,8 +1,8 @@
 module GameState
   ( GameState(..)
   , CleanUpStep(..)
-  , players
-  , supply
+  , GameState.players
+  , GameState.supply
   ) where
 
 import CompletePlayer
@@ -11,14 +11,15 @@ import PlayerWithDeck
 import PlayerWithHand
 import Card
 import BuyAllowance
+import PlayState
 
 data GameState
   = New [PlayerWithoutDominion]
   | PreparingSupply [PlayerWithoutDominion] [Card]
   | PreparingDecks [PlayerWithDeck] [Card]
   | DrawingInitialHands [PlayerWithHand] [Card]
-  | BuyPhase BuyAllowance [CompletePlayer] [Card]
-  | CleanUpPhase CleanUpStep [CompletePlayer] [Card]
+  | BuyPhase PlayState BuyAllowance
+  | CleanUpPhase PlayState CleanUpStep
   | GameOver
   deriving (Eq, Show)
 
@@ -32,8 +33,8 @@ players (New ps) = CompletePlayer.fromPlayerWithoutDominion <$> ps
 players (PreparingSupply ps _) = CompletePlayer.fromPlayerWithoutDominion <$> ps
 players (PreparingDecks ps _) = CompletePlayer.fromPlayerWithDeck <$> ps
 players (DrawingInitialHands ps _) = CompletePlayer.fromPlayerWithHand <$> ps
-players (BuyPhase _ ps _) = ps
-players (CleanUpPhase _ ps _) = ps
+players (BuyPhase g _) = PlayState.players g
+players (CleanUpPhase g _) = PlayState.players g
 players GameOver = []
 
 supply :: GameState -> [Card]
@@ -41,6 +42,6 @@ supply (New _) = []
 supply (PreparingSupply _ cards) = cards
 supply (PreparingDecks _ cards) = cards
 supply (DrawingInitialHands _ cards) = cards
-supply (BuyPhase _ _ cards) = cards
-supply (CleanUpPhase _ _ cards) = cards
+supply (BuyPhase g _) = PlayState.supply g
+supply (CleanUpPhase g _) = PlayState.supply g
 supply GameOver = []

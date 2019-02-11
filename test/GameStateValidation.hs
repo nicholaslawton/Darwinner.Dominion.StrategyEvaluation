@@ -24,15 +24,15 @@ drawingInitialHands (DrawingInitialHands _ _) = True
 drawingInitialHands _ = False
 
 buyPhase :: GameState -> Bool
-buyPhase (BuyPhase _ _ _) = True
+buyPhase (BuyPhase _ _) = True
 buyPhase _ = False
 
 cleanUpPhase :: GameState -> Bool
-cleanUpPhase (CleanUpPhase _ _ _) = True
+cleanUpPhase (CleanUpPhase _ _) = True
 cleanUpPhase _ = False
 
 drawHandStep :: GameState -> Bool
-drawHandStep (CleanUpPhase DrawHand _ _) = True
+drawHandStep (CleanUpPhase _ DrawHand) = True
 drawHandStep _ = False
 
 gameInState :: GameState -> Int -> Game

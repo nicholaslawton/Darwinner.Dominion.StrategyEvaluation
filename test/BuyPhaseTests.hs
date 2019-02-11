@@ -3,6 +3,7 @@ module BuyPhaseTests (buyPhaseTests) where
 import Command
 import Game
 import GameState
+import PlayState
 import EvaluationParameters
 import CompletePlayer
 import Card
@@ -30,7 +31,7 @@ commandLimit :: Int -> [Card] -> Int
 commandLimit buys cards = min buys (length cards) + 10
 
 gameInBuyPhase :: Int -> [CompletePlayer] -> [Card] -> Int -> Game
-gameInBuyPhase buys ps cards = gameInState $ BuyPhase (BuyAllowance buys) ps cards
+gameInBuyPhase buys ps cards = gameInState $ BuyPhase (PlayState ps cards) (BuyAllowance buys)
 
 gainCard :: Command -> Bool
 gainCard (GainCard _ _) = True

@@ -3,6 +3,7 @@ module CleanUpPhaseTests (cleanUpPhaseTests) where
 import Command
 import Game
 import GameState
+import PlayState
 import EvaluationParameters
 import Player
 import CompletePlayer
@@ -47,7 +48,7 @@ commandLimit :: [CompletePlayer] -> Int
 commandLimit = (+10) . length . hand . head
 
 gameInCleanUpPhase :: CleanUpStep -> [CompletePlayer] -> [Card] -> Int -> Game
-gameInCleanUpPhase step ps cards = gameInState $ CleanUpPhase step ps cards
+gameInCleanUpPhase step ps cards = gameInState $ CleanUpPhase (PlayState ps cards) step
 
 cardDiscarded :: Command -> Maybe Card
 cardDiscarded (DiscardCard _ card) = Just card

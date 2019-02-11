@@ -3,6 +3,7 @@ module Engine (run, runUntil) where
 import Card
 import Game
 import GameState
+import PlayState
 import Update
 import Player
 import Command
@@ -78,20 +79,20 @@ nextCommand = do
 
           unexpected = error "Unexpected failure drawing a card for initial hand"
 
-    BuyPhase (BuyAllowance buys) _ _ | buys <= 0 -> return BuyPhaseComplete
+    BuyPhase _ (BuyAllowance buys) | buys <= 0 -> return BuyPhaseComplete
 
-    BuyPhase _ (p:_) (card:_) -> return $ GainCard (playerId p) card
+    BuyPhase (PlayState (p:_) (card:_)) _ -> return $ GainCard (playerId p) card
 
-    BuyPhase _ [] _ -> error "Unexpected game in buy phase with no players"
+    BuyPhase (PlayState [] _) _ -> error "Unexpected game in buy phase with no players"
 
-    BuyPhase _ _ [] -> return BuyPhaseComplete -- error "Unexpected empty supply while game in progress"
+    BuyPhase (PlayState _ []) _ -> return BuyPhaseComplete -- error "Unexpected empty supply while game in progress"
 
-    CleanUpPhase Discard (p:_) _ ->
+    CleanUpPhase (PlayState (p:_) _) Discard ->
       return $ maybe DiscardStepComplete (DiscardCard $ playerId p) (listToMaybe $ hand p)
 
-    CleanUpPhase DrawHand (p:_) _ -> if length (hand p) < 5 then lift $ drawCard EndGame p else return EndGame
+    CleanUpPhase (PlayState (p:_) _) DrawHand -> if length (hand p) < 5 then lift $ drawCard EndGame p else return EndGame
 
-    CleanUpPhase _ [] _ -> error "Unexpected game in clean up phase with no players"
+    CleanUpPhase (PlayState [] _) _ -> error "Unexpected game in clean up phase with no players"
 
     GameOver -> error "Game is over"
 
