@@ -63,7 +63,7 @@ nextCommand = do
           numCurseCards = (* 10) . subtract 1 . length
 
     PreparingDecks ps _ ->
-      return $ fromMaybe MarkDecksPrepared $ uncurry AddCardToDeck <$> playerNeedingCard ps
+      return $ maybe MarkDecksPrepared (uncurry AddCardToDeck) (playerNeedingCard ps)
         where
           playerNeedingCard :: Player p => [p] -> Maybe (CandidateId, Card)
           playerNeedingCard = liftA2 (<|>) (playerNeeding Copper 7) (playerNeeding Estate 3)
@@ -72,7 +72,7 @@ nextCommand = do
             fmap (flip (,) card . playerId) . listToMaybe . filter ((< target) . countElem card . deck)
 
     DrawingInitialHands ps _ ->
-      fromMaybe (return MarkInitialHandsDrawn) $ lift . drawCard unexpected <$> playerWithIncompleteHand ps
+      maybe (return MarkInitialHandsDrawn) (lift . drawCard unexpected) (playerWithIncompleteHand ps)
         where
           playerWithIncompleteHand :: Player p => [p] -> Maybe p
           playerWithIncompleteHand = listToMaybe . filter ((< 5) . length . hand)

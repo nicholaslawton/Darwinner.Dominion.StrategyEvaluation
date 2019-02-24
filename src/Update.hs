@@ -2,7 +2,7 @@ module Update (update) where
 
 import Candidate
 import Command
-import GameState
+import GameState hiding (players)
 import PlayState
 import Player
 import PlayerWithoutDominion
@@ -69,8 +69,8 @@ beginPlay _ = error "Cannot begin play before the game has been fully prepared"
 
 drawCard :: CandidateId -> Card -> GameState -> GameState
 drawCard pid card (DrawingInitialHands ps cards) = DrawingInitialHands (drawCardForPlayer pid card ps) cards
-drawCard pid card (CleanUpPhase (PlayState ps cards) DrawHand) =
-  CleanUpPhase (PlayState (drawCardForPlayer pid card ps) cards) DrawHand
+drawCard pid card (CleanUpPhase playState DrawHand) =
+  CleanUpPhase (playState { players = drawCardForPlayer pid card (players playState) }) DrawHand
 drawCard _ _ _ =
   error "A card may only be drawn while players are drawing their initial hands, or during the clean up phase"
 
@@ -94,19 +94,20 @@ gainCard pid card (BuyPhase (PlayState ps cards) (BuyAllowance buys))
 gainCard _ _ _ = error "A card may only be gained during the buy phase"
 
 discardCard :: CandidateId -> Card -> GameState -> GameState
-discardCard pid card (CleanUpPhase (PlayState ps cards) Discard)
+discardCard pid card (CleanUpPhase playState Discard)
   | not $ playerExists pid ps = error "Invalid discard: player not in game"
   | not $ cardBelongsToPlayer hand card pid ps = error "Invalid discard: card not in hand of player"
-  | otherwise = CleanUpPhase (PlayState (alterPlayer (alterDiscard (card :) . alterHand (delete card)) pid ps) cards) Discard
+  | otherwise = CleanUpPhase (playState { players = alterPlayer (moveFromDeckToHand card) pid ps }) Discard
+      where
+        ps = players playState
 discardCard _ _ _ = error "A card may only be discarded during the discard step of the clean up phase"
 
 reformDeck :: CandidateId -> GameState -> GameState
-reformDeck pid (CleanUpPhase (PlayState ps cards) DrawHand)
+reformDeck pid (CleanUpPhase playState DrawHand)
   | not $ playerExists pid ps = error "Invalid discard: player not in game"
-  | otherwise = CleanUpPhase (PlayState (alterPlayer moveDiscardToDeck pid ps) cards) DrawHand
-    where
-      moveDiscardToDeck :: CompletePlayer -> CompletePlayer
-      moveDiscardToDeck p = alterDiscard (const []) $ alterDeck (++ discard p) p
+  | otherwise = CleanUpPhase (playState { players = alterPlayer moveDiscardToDeck pid ps }) DrawHand
+      where
+        ps = players playState
 reformDeck _ _ = error "Reforming the deck must occur while drawing the next hand during the clean up phase"
 
 beginCleanUpPhase :: GameState -> GameState
@@ -117,11 +118,20 @@ beginDrawingNextHand :: GameState -> GameState
 beginDrawingNextHand (CleanUpPhase playState Discard) = CleanUpPhase playState DrawHand
 beginDrawingNextHand _ = error "Drawing the next hand must follow the discard step of the clean up phase"
 
-alterWhere :: (a -> Bool) -> (a -> a) -> [a] -> [a]
-alterWhere p f = fmap $ liftA3 bool id f p
+moveFromDeckToHand :: Card -> CompletePlayer -> CompletePlayer
+moveFromDeckToHand card = alterDiscard (card :) . alterHand (delete card)
+
+moveDiscardToDeck :: CompletePlayer -> CompletePlayer
+moveDiscardToDeck p = alterDiscard (const []) $ alterDeck (++ discard p) p
+
+alterIf :: (a -> a) -> (a -> Bool) -> a -> a
+alterIf = liftA3 bool id
+
+alterWhere :: (a -> a) -> (a -> Bool) -> [a] -> [a]
+alterWhere f p = fmap (alterIf f p)
 
 alterElem :: Eq b => (a -> b) -> (a -> a) -> b -> [a] -> [a]
-alterElem on f x = alterWhere ((==) x . on) f
+alterElem on f x = alterWhere f ((==) x . on)
 
 alterPlayer :: Player p => (p -> p) -> CandidateId -> [p] -> [p]
 alterPlayer = alterElem playerId
