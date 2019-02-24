@@ -10,6 +10,7 @@ import PlayerWithDeck
 import PlayerWithHand
 import Candidate
 import Strategy
+import PlayState
 
 import Data.Bifunctor
 import Control.Applicative
@@ -43,6 +44,9 @@ instance Arbitrary Strategy where
 
 instance Arbitrary EvaluationParameters where
   arbitrary = EvaluationParameters <$> validCandidates
+
+instance Arbitrary PlayState where
+  arbitrary = liftA2 PlayState arbitrary arbitrary
 
 data ValidCandidateIds
   = TwoCandidateIds CandidateId CandidateId

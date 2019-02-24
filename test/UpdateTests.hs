@@ -90,12 +90,12 @@ updateTests = describe "update" $ do
       verifyPlayerUpdate pid (liftA2 (++) deck discard) id (ReformDeck pid) (CleanUpPhase (PlayState ps cards) DrawHand)
 
   describe "buy phase completion" $
-    it "transitions to clean up phase" $ property $ \ps cards ->
-      cleanUpPhase $ update BuyPhaseComplete $ BuyPhase (PlayState ps cards) (BuyAllowance 0)
+    it "transitions to clean up phase" $ property $ \playState ->
+      cleanUpPhase $ update BuyPhaseComplete $ BuyPhase playState (BuyAllowance 0)
 
   describe "discard step completion" $
-    it "transitions to draw next hand step" $ property $ \ps cards ->
-      drawHandStep $ update DiscardStepComplete $ CleanUpPhase (PlayState ps cards) Discard
+    it "transitions to draw next hand step" $ property $ \playState ->
+      drawHandStep $ update DiscardStepComplete $ CleanUpPhase playState Discard
 
 drawCardProperties :: (Arbitrary a, Show a, Player p) =>
   (a -> ([p], CandidateId, Card))
