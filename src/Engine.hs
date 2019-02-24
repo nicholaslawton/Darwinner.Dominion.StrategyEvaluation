@@ -81,18 +81,19 @@ nextCommand = do
 
     BuyPhase _ (BuyAllowance buys) | buys <= 0 -> return BuyPhaseComplete
 
-    BuyPhase (PlayState (p:_) (card:_)) _ -> return $ GainCard (playerId p) card
+    BuyPhase playState _ ->
+      return $ maybe BuyPhaseComplete (GainCard $ playerId p) (listToMaybe $ PlayState.supply playState)
+        where
+          p = activePlayer playState
 
-    BuyPhase (PlayState [] _) _ -> error "Unexpected game in buy phase with no players"
-
-    BuyPhase (PlayState _ []) _ -> return BuyPhaseComplete -- error "Unexpected empty supply while game in progress"
-
-    CleanUpPhase (PlayState (p:_) _) Discard ->
+    CleanUpPhase playState Discard ->
       return $ maybe DiscardStepComplete (DiscardCard $ playerId p) (listToMaybe $ hand p)
+        where
+          p = activePlayer playState
 
-    CleanUpPhase (PlayState (p:_) _) DrawHand -> if length (hand p) < 5 then lift $ drawCard EndGame p else return EndGame
-
-    CleanUpPhase (PlayState [] _) _ -> error "Unexpected game in clean up phase with no players"
+    CleanUpPhase playState DrawHand -> if length (hand p) < 5 then lift $ drawCard EndGame p else return EndGame
+      where
+        p = activePlayer playState
 
     GameOver -> error "Game is over"
 
