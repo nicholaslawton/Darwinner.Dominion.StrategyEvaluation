@@ -79,19 +79,19 @@ nextCommand = do
 
           unexpected = error "Unexpected failure drawing a card for initial hand"
 
-    BuyPhase _ (BuyAllowance buys) | buys <= 0 -> return BuyPhaseComplete
+    BuyPhase (BuyAllowance buys) _ | buys <= 0 -> return BuyPhaseComplete
 
-    BuyPhase playState _ ->
+    BuyPhase _ playState ->
       return $ maybe BuyPhaseComplete (GainCard $ playerId p) (listToMaybe $ PlayState.supply playState)
         where
           p = activePlayer playState
 
-    CleanUpPhase playState Discard ->
+    CleanUpPhase Discard playState ->
       return $ maybe DiscardStepComplete (DiscardCard $ playerId p) (listToMaybe $ hand p)
         where
           p = activePlayer playState
 
-    CleanUpPhase playState DrawHand -> if length (hand p) < 5 then lift $ drawCard EndGame p else return EndGame
+    CleanUpPhase DrawHand playState -> if length (hand p) < 5 then lift $ drawCard EndGame p else return EndGame
       where
         p = activePlayer playState
 

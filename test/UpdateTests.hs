@@ -60,42 +60,42 @@ updateTests = describe "update" $ do
     describe "during clean up phase" $
       drawCardProperties
         (\(CardInDeck ps pid card) -> (ps, pid, card))
-        (\ps cards -> CleanUpPhase (PlayState ps cards) DrawHand)
+        (\ps cards -> CleanUpPhase DrawHand (PlayState ps cards))
 
   describe "gain card" $ do
     it "adds card to discard" $ property $ \(SelectedPlayer ps pid) (CardInSupply cards card) (Positive buys) ->
-      verifyPlayerUpdate pid (length . discard) (+1) (GainCard pid card) (BuyPhase (PlayState ps cards) (BuyAllowance buys))
+      verifyPlayerUpdate pid (length . discard) (+1) (GainCard pid card) (BuyPhase (BuyAllowance buys) (PlayState ps cards))
 
     it "does not alter cards in play" $ property $ \(SelectedPlayer ps pid) (CardInSupply cards card) (Positive buys) ->
-      verifyUpdate cardsInPlay id (GainCard pid card) (BuyPhase (PlayState ps cards) (BuyAllowance buys))
+      verifyUpdate cardsInPlay id (GainCard pid card) (BuyPhase (BuyAllowance buys) (PlayState ps cards))
 
     it "decrements buy allowance" $ property $ \(SelectedPlayer ps pid) (CardInSupply cards card) (Positive buys) ->
-      verifyUpdate buyAllowance (subtract 1) (GainCard pid card) (BuyPhase (PlayState ps cards) (BuyAllowance buys))
+      verifyUpdate buyAllowance (subtract 1) (GainCard pid card) (BuyPhase (BuyAllowance buys) (PlayState ps cards))
 
   describe "discard card" $ do
     it "removes card from hand" $ property $ \(CardInHand ps pid card) cards ->
-      verifyPlayerUpdate pid (length . hand) (subtract 1) (DiscardCard pid card) (CleanUpPhase (PlayState ps cards) Discard)
+      verifyPlayerUpdate pid (length . hand) (subtract 1) (DiscardCard pid card) (CleanUpPhase Discard (PlayState ps cards))
 
     it "adds card to discard" $ property $ \(CardInHand ps pid card) cards ->
-      verifyPlayerUpdate pid (length . discard) (+1) (DiscardCard pid card) (CleanUpPhase (PlayState ps cards) Discard)
+      verifyPlayerUpdate pid (length . discard) (+1) (DiscardCard pid card) (CleanUpPhase Discard (PlayState ps cards))
 
     it "does not alter dominion of player" $ property $ \(CardInHand ps pid card) cards ->
-      verifyPlayerUpdate pid dominion id (DiscardCard pid card) (CleanUpPhase (PlayState ps cards) Discard)
+      verifyPlayerUpdate pid dominion id (DiscardCard pid card) (CleanUpPhase Discard (PlayState ps cards))
 
   describe "reform deck" $ do
     it "leaves discard empty" $ property $ \(SelectedPlayer ps pid) cards ->
-      verifyPlayerState pid (null . discard) $ update (ReformDeck pid) (CleanUpPhase (PlayState ps cards) DrawHand)
+      verifyPlayerState pid (null . discard) $ update (ReformDeck pid) (CleanUpPhase DrawHand (PlayState ps cards))
 
     it "does not alter combined deck and discard" $ property $ \(SelectedPlayer ps pid) cards ->
-      verifyPlayerUpdate pid (liftA2 (++) deck discard) id (ReformDeck pid) (CleanUpPhase (PlayState ps cards) DrawHand)
+      verifyPlayerUpdate pid (liftA2 (++) deck discard) id (ReformDeck pid) (CleanUpPhase DrawHand (PlayState ps cards))
 
   describe "buy phase completion" $
-    it "transitions to clean up phase" $ property $ \playState ->
-      cleanUpPhase $ update BuyPhaseComplete $ BuyPhase playState (BuyAllowance 0)
+    it "transitions to clean up phase" $ property $
+      cleanUpPhase . update BuyPhaseComplete . BuyPhase (BuyAllowance 0)
 
   describe "discard step completion" $
-    it "transitions to draw next hand step" $ property $ \playState ->
-      drawHandStep $ update DiscardStepComplete $ CleanUpPhase playState Discard
+    it "transitions to draw next hand step" $ property $
+      drawHandStep . update DiscardStepComplete . CleanUpPhase Discard
 
 drawCardProperties :: (Arbitrary a, Show a, Player p) =>
   (a -> ([p], CandidateId, Card))
@@ -136,5 +136,5 @@ cardsInPlay :: GameState -> [Card]
 cardsInPlay gameState = sortOn arbitraryCardOrder $ concatMap ($ gameState) [concatMap dominion . players, supply]
 
 buyAllowance :: GameState -> Int
-buyAllowance (BuyPhase _ (BuyAllowance buys)) = buys
+buyAllowance (BuyPhase (BuyAllowance buys) _) = buys
 buyAllowance _ = 0

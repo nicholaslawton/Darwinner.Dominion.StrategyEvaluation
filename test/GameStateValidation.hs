@@ -32,7 +32,7 @@ cleanUpPhase (CleanUpPhase _ _) = True
 cleanUpPhase _ = False
 
 drawHandStep :: GameState -> Bool
-drawHandStep (CleanUpPhase _ DrawHand) = True
+drawHandStep (CleanUpPhase DrawHand _) = True
 drawHandStep _ = False
 
 gameInState :: GameState -> Int -> Game

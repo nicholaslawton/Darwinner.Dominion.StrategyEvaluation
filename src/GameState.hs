@@ -18,8 +18,8 @@ data GameState
   | PreparingSupply [PlayerWithoutDominion] [Card]
   | PreparingDecks [PlayerWithDeck] [Card]
   | DrawingInitialHands [PlayerWithHand] [Card]
-  | BuyPhase PlayState BuyAllowance
-  | CleanUpPhase PlayState CleanUpStep
+  | BuyPhase BuyAllowance PlayState
+  | CleanUpPhase CleanUpStep PlayState
   | GameOver
   deriving (Eq, Show)
 
@@ -33,8 +33,8 @@ players (New ps) = CompletePlayer.fromPlayerWithoutDominion <$> ps
 players (PreparingSupply ps _) = CompletePlayer.fromPlayerWithoutDominion <$> ps
 players (PreparingDecks ps _) = CompletePlayer.fromPlayerWithDeck <$> ps
 players (DrawingInitialHands ps _) = CompletePlayer.fromPlayerWithHand <$> ps
-players (BuyPhase g _) = PlayState.players g
-players (CleanUpPhase g _) = PlayState.players g
+players (BuyPhase _ g) = PlayState.players g
+players (CleanUpPhase _ g) = PlayState.players g
 players GameOver = []
 
 supply :: GameState -> [Card]
@@ -42,6 +42,6 @@ supply (New _) = []
 supply (PreparingSupply _ cards) = cards
 supply (PreparingDecks _ cards) = cards
 supply (DrawingInitialHands _ cards) = cards
-supply (BuyPhase g _) = PlayState.supply g
-supply (CleanUpPhase g _) = PlayState.supply g
+supply (BuyPhase _ g) = PlayState.supply g
+supply (CleanUpPhase _ g) = PlayState.supply g
 supply GameOver = []
