@@ -5,6 +5,7 @@ module GameStateValidation
   , buyPhase
   , cleanUpPhase
   , drawHandStep
+  , gameOver
   , gameInState
   ) where
 
@@ -34,6 +35,10 @@ cleanUpPhase _ = False
 drawHandStep :: GameState -> Bool
 drawHandStep (CleanUpPhase DrawHand _) = True
 drawHandStep _ = False
+
+gameOver :: GameState -> Bool
+gameOver GameOver = True
+gameOver _ = False
 
 gameInState :: GameState -> Int -> Game
 gameInState gameState = Game.mapState (const gameState) . Game.new

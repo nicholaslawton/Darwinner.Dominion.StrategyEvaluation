@@ -41,6 +41,9 @@ cleanUpPhaseTests = describe "clean up phase" $ do
   it "completes" $ property $ \params (NonEmpty ps) cards ->
     (===) CleanUpPhaseComplete . last . history . runTest params Discard ps cards
 
+  it "does not end immediately" $ property $ \params (NonEmpty ps) cards ->
+    not . gameOver . state . execUntil gameOver 1000 params . gameInCleanUpPhase Discard ps cards
+
 runTest :: EvaluationParameters -> CleanUpStep -> [CompletePlayer] -> [Card] -> Int -> Game
 runTest params step ps cards = execWhile cleanUpPhase (commandLimit ps) params . gameInCleanUpPhase step ps cards
 
