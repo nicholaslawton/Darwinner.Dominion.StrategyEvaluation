@@ -12,9 +12,10 @@ import Candidate
 import Strategy
 import PlayState
 
-import Data.Bifunctor
 import Control.Applicative
 import Control.Monad
+import Data.Bifunctor
+import Data.Composition
 
 import Test.QuickCheck
 
@@ -102,35 +103,41 @@ instance Arbitrary SelectedPlayerWithDeck where
     >>= fmap (uncurry SelectedPlayerWithDeck . second playerId)
       . selectedElement
 
-data SelectedPlayer = SelectedPlayer [CompletePlayer] CandidateId
+data SelectedPlayer = SelectedPlayer PlayState CandidateId
   deriving (Eq, Show)
 
 instance Arbitrary SelectedPlayer where
-  arbitrary = validPlayers >>= fmap (uncurry SelectedPlayer . second playerId) . selectedElement
+  arbitrary = do
+    cards <- arbitrary
+    validPlayers >>= fmap (\(ps, p) -> SelectedPlayer (PlayState ps cards) (playerId p)) . selectedElement
 
-data CardInStartingDeck = CardInStartingDeck [PlayerWithHand] CandidateId Card
+data SelectedPlayerAndCardInSupply = SelectedPlayerAndCardInSupply PlayState CandidateId Card
+  deriving (Eq, Show)
+
+instance Arbitrary SelectedPlayerAndCardInSupply where
+  arbitrary = do
+    (ps, p) <- validPlayers >>= selectedElement
+    (cards, card) <- arbitrary `suchThat` (not . null) >>= selectedElement
+    return $ SelectedPlayerAndCardInSupply (PlayState ps cards) (playerId p) card
+
+data CardInStartingDeck = CardInStartingDeck [PlayerWithHand] [Card] CandidateId Card
   deriving (Eq, Show)
 
 instance Arbitrary CardInStartingDeck where
-  arbitrary = selectedCardInArea CardInStartingDeck deck validPlayersDrawingInitialHands
+  arbitrary =
+    selectedCardInArea CardInStartingDeck deck validPlayersDrawingInitialHands
 
-data CardInDeck = CardInDeck [CompletePlayer] CandidateId Card
+data CardInDeck = CardInDeck PlayState CandidateId Card
   deriving (Eq, Show)
 
 instance Arbitrary CardInDeck where
-  arbitrary = selectedCardInArea CardInDeck deck validPlayers
+  arbitrary = selectedCardInArea (CardInDeck .: PlayState) deck validPlayers
 
-data CardInSupply = CardInSupply [Card] Card
-  deriving (Eq, Show)
-
-instance Arbitrary CardInSupply where
-  arbitrary = arbitrary `suchThat` (not . null) >>= fmap (uncurry CardInSupply) . selectedElement
-
-data CardInHand = CardInHand [CompletePlayer] CandidateId Card
+data CardInHand = CardInHand PlayState CandidateId Card
   deriving (Eq, Show)
 
 instance Arbitrary CardInHand where
-  arbitrary = selectedCardInArea CardInHand hand validPlayers
+  arbitrary = selectedCardInArea (CardInHand .: PlayState) hand validPlayers
 
 selectedElement :: [a] -> Gen ([a], a)
 selectedElement = selectFrom elements
@@ -141,8 +148,10 @@ selectedElementMatching predicate = selectedElement . filter predicate
 selectFrom :: (a -> Gen b) -> a -> Gen (a, b)
 selectFrom f x = (,) x <$> f x 
 
-selectedCardInArea :: Player p => ([p] -> CandidateId -> Card -> b) -> (p -> [Card]) -> Gen [p] -> Gen b
-selectedCardInArea c area validPs = validPs `suchThat` (not . null . concatMap area)
-  >>= selectedElementMatching (not . null . area)
-  >>= \(ps, p) -> c ps (playerId p) <$> elements (area p)
+selectedCardInArea :: Player p => ([p] -> [Card] -> CandidateId -> Card -> b) -> (p -> [Card]) -> Gen [p] -> Gen b
+selectedCardInArea c area validPs = do
+  cards <- arbitrary
+  validPs `suchThat` (not . null . concatMap area)
+    >>= selectedElementMatching (not . null . area)
+    >>= \(ps, p) -> c ps cards (playerId p) <$> elements (area p)
   

@@ -12,6 +12,7 @@ import Card
 import BuyAllowance
 
 import Data.List
+import Data.Composition
 import Control.Applicative
 
 import GameStateValidation
@@ -55,39 +56,39 @@ updateTests = describe "update" $ do
 
   describe "draw card" $ do
     describe "for initial hand" $
-      drawCardProperties (\(CardInStartingDeck ps pid card) -> (ps, pid, card)) DrawingInitialHands
+      drawCardProperties (\(CardInStartingDeck ps cards pid card) -> (ps, cards, pid, card)) DrawingInitialHands
 
     describe "during clean up phase" $
       drawCardProperties
-        (\(CardInDeck ps pid card) -> (ps, pid, card))
-        (\ps cards -> CleanUpPhase DrawHand (PlayState ps cards))
+        (\(CardInDeck (PlayState ps cards) pid card) -> (ps, cards, pid, card))
+        (CleanUpPhase DrawHand .: PlayState)
 
   describe "gain card" $ do
-    it "adds card to discard" $ property $ \(SelectedPlayer ps pid) (CardInSupply cards card) (Positive buys) ->
-      verifyPlayerUpdate pid (length . discard) (+1) (GainCard pid card) (BuyPhase (BuyAllowance buys) (PlayState ps cards))
+    it "adds card to discard" $ property $ \(SelectedPlayerAndCardInSupply g pid card) (Positive buys) ->
+      verifyPlayerUpdate pid (length . discard) (+1) (GainCard pid card) (BuyPhase (BuyAllowance buys) g)
 
-    it "does not alter cards in play" $ property $ \(SelectedPlayer ps pid) (CardInSupply cards card) (Positive buys) ->
-      verifyUpdate cardsInPlay id (GainCard pid card) (BuyPhase (BuyAllowance buys) (PlayState ps cards))
+    it "does not alter cards in play" $ property $ \(SelectedPlayerAndCardInSupply g pid card) (Positive buys) ->
+      verifyUpdate cardsInPlay id (GainCard pid card) (BuyPhase (BuyAllowance buys) g)
 
-    it "decrements buy allowance" $ property $ \(SelectedPlayer ps pid) (CardInSupply cards card) (Positive buys) ->
-      verifyUpdate buyAllowance (subtract 1) (GainCard pid card) (BuyPhase (BuyAllowance buys) (PlayState ps cards))
+    it "decrements buy allowance" $ property $ \(SelectedPlayerAndCardInSupply g pid card) (Positive buys) ->
+      verifyUpdate buyAllowance (subtract 1) (GainCard pid card) (BuyPhase (BuyAllowance buys) g)
 
   describe "discard card" $ do
-    it "removes card from hand" $ property $ \(CardInHand ps pid card) cards ->
-      verifyPlayerUpdate pid (length . hand) (subtract 1) (DiscardCard pid card) (CleanUpPhase Discard (PlayState ps cards))
+    it "removes card from hand" $ property $ \(CardInHand g pid card) ->
+      verifyPlayerUpdate pid (length . hand) (subtract 1) (DiscardCard pid card) (CleanUpPhase Discard g)
 
-    it "adds card to discard" $ property $ \(CardInHand ps pid card) cards ->
-      verifyPlayerUpdate pid (length . discard) (+1) (DiscardCard pid card) (CleanUpPhase Discard (PlayState ps cards))
+    it "adds card to discard" $ property $ \(CardInHand g pid card) ->
+      verifyPlayerUpdate pid (length . discard) (+1) (DiscardCard pid card) (CleanUpPhase Discard g)
 
-    it "does not alter dominion of player" $ property $ \(CardInHand ps pid card) cards ->
-      verifyPlayerUpdate pid dominion id (DiscardCard pid card) (CleanUpPhase Discard (PlayState ps cards))
+    it "does not alter dominion of player" $ property $ \(CardInHand g pid card) ->
+      verifyPlayerUpdate pid dominion id (DiscardCard pid card) (CleanUpPhase Discard g)
 
   describe "reform deck" $ do
-    it "leaves discard empty" $ property $ \(SelectedPlayer ps pid) cards ->
-      verifyPlayerState pid (null . discard) $ update (ReformDeck pid) (CleanUpPhase DrawHand (PlayState ps cards))
+    it "leaves discard empty" $ property $ \(SelectedPlayer g pid) ->
+      verifyPlayerState pid (null . discard) $ update (ReformDeck pid) (CleanUpPhase DrawHand g)
 
-    it "does not alter combined deck and discard" $ property $ \(SelectedPlayer ps pid) cards ->
-      verifyPlayerUpdate pid (liftA2 (++) deck discard) id (ReformDeck pid) (CleanUpPhase DrawHand (PlayState ps cards))
+    it "does not alter combined deck and discard" $ property $ \(SelectedPlayer g pid) ->
+      verifyPlayerUpdate pid (liftA2 (++) deck discard) id (ReformDeck pid) (CleanUpPhase DrawHand g)
 
   describe "buy phase completion" $
     it "transitions to clean up phase" $ property $
@@ -98,16 +99,16 @@ updateTests = describe "update" $ do
       drawHandStep . update DiscardStepComplete . CleanUpPhase Discard
 
 drawCardProperties :: (Arbitrary a, Show a, Player p) =>
-  (a -> ([p], CandidateId, Card))
+  (a -> ([p], [Card], CandidateId, Card))
   -> ([p] -> [Card] -> GameState)
   -> SpecWith ()
 drawCardProperties unpack constructGame = do
-  it "adds card to hand" $ property $ \cardInDeck cards ->
-    let (ps, pid, card) = unpack cardInDeck
+  it "adds card to hand" $ property $ \cardInDeck ->
+    let (ps, cards, pid, card) = unpack cardInDeck
     in verifyPlayerUpdate pid (length . hand) (+1) (DrawCard pid card) (constructGame ps cards)
 
-  it "does not alter dominion of player" $ property $ \cardInDeck cards ->
-    let (ps, pid, card) = unpack cardInDeck
+  it "does not alter dominion of player" $ property $ \cardInDeck ->
+    let (ps, cards, pid, card) = unpack cardInDeck
     in verifyPlayerUpdate pid dominion id (DrawCard pid card) (constructGame ps cards)
 
 verifyPlayerUpdate :: (Eq a, Show a) =>
