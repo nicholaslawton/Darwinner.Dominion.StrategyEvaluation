@@ -91,9 +91,10 @@ nextCommand = do
         where
           p = activePlayer playState
 
-    CleanUpPhase DrawHand playState -> if length (hand p) < 5 then lift $ drawCard EndGame p else return EndGame
-      where
-        p = activePlayer playState
+    CleanUpPhase DrawHand playState ->
+      if length (hand p) < 5 then lift $ drawCard CleanUpPhaseComplete p else return CleanUpPhaseComplete
+        where
+          p = activePlayer playState
 
     GameOver -> error "Game is over"
 

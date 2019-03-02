@@ -39,7 +39,7 @@ cleanUpPhaseTests = describe "clean up phase" $ do
       . runTest params Discard ps cards
 
   it "completes" $ property $ \params (NonEmpty ps) cards ->
-    (===) EndGame . last . history . runTest params Discard ps cards
+    (===) CleanUpPhaseComplete . last . history . runTest params Discard ps cards
 
 runTest :: EvaluationParameters -> CleanUpStep -> [CompletePlayer] -> [Card] -> Int -> Game
 runTest params step ps cards = execWhile cleanUpPhase (commandLimit ps) params . gameInCleanUpPhase step ps cards

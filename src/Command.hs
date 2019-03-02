@@ -17,5 +17,6 @@ data Command
   | ReformDeck CandidateId
   | BuyPhaseComplete
   | DiscardStepComplete
+  | CleanUpPhaseComplete
   | EndGame
   deriving (Eq, Show)

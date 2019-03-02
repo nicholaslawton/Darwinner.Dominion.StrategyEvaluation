@@ -30,6 +30,7 @@ update (DiscardCard pid card) = discardCard pid card
 update (ReformDeck pid) = reformDeck pid
 update BuyPhaseComplete = beginCleanUpPhase
 update DiscardStepComplete = beginDrawingNextHand
+update CleanUpPhaseComplete = const GameOver
 update EndGame = const GameOver
 
 addPlayer :: CandidateId -> GameState -> GameState
