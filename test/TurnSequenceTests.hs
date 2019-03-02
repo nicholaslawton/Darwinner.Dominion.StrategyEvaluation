@@ -7,6 +7,8 @@ import BuyAllowance
 import CompletePlayer
 import Card
 
+import Data.Composition
+
 import GameStateValidation
 import EngineValidation
 import ArbitraryInstances()
@@ -20,4 +22,4 @@ turnSequenceTests = describe "turn sequence" $
     not . gameOver . state . execUntil gameOver 1000 params . gameInProgress ps cards
 
 gameInProgress :: [CompletePlayer] -> [Card] -> Int -> Game
-gameInProgress ps cards = gameInState $ BuyPhase BuyAllowance.initial (PlayState ps cards)
+gameInProgress = gameInState . BuyPhase BuyAllowance.initial .: PlayState

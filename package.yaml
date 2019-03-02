@@ -28,6 +28,7 @@ dependencies:
 - random
 - transformers
 - Unique
+- composition
 
 library:
   source-dirs: src
