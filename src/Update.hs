@@ -2,7 +2,7 @@ module Update (update) where
 
 import Candidate
 import Command
-import GameState hiding (players)
+import GameState hiding (players, supply)
 import PlayState
 import Player
 import PlayerWithoutDominion
@@ -11,6 +11,7 @@ import PlayerWithHand
 import CompletePlayer
 import Card
 import BuyAllowance
+import Turn
 
 import Data.Bool
 import Data.List
@@ -65,7 +66,7 @@ beginDrawingInitialHands _ = error "Drawing initial hands must occur after decks
 
 beginPlay :: GameState -> GameState
 beginPlay (DrawingInitialHands ps cards) =
-  BuyPhase BuyAllowance.initial (PlayState (CompletePlayer.fromPlayerWithHand <$> ps) cards)
+  BuyPhase BuyAllowance.initial (PlayState (CompletePlayer.fromPlayerWithHand <$> ps) cards firstTurn)
 beginPlay _ = error "Cannot begin play before the game has been fully prepared"
 
 drawCard :: CandidateId -> Card -> GameState -> GameState
@@ -82,16 +83,20 @@ drawCardForPlayer pid card ps
   | otherwise = alterPlayer (alterHand (card :) . alterDeck (delete card)) pid ps
 
 gainCard :: CandidateId -> Card -> GameState -> GameState
-gainCard pid card (BuyPhase (BuyAllowance buys) (PlayState ps cards))
+gainCard pid card (BuyPhase (BuyAllowance buys) playState)
   | not $ playerExists pid ps = error "Invalid card gain: player not in game"
   | notElem card cards = error "Invalid card gain: card not in supply"
   | buys <= 0 = error "Invalid card gain: buy allowance exhausted"
   | otherwise = 
       BuyPhase
         (BuyAllowance (buys - 1))
-        (PlayState
-          (alterPlayer (alterDiscard (card :)) pid ps)
-          (delete card cards))
+        (playState
+          { players = alterPlayer (alterDiscard (card :)) pid ps
+          , supply = delete card cards
+          })
+      where
+        ps = players playState
+        cards = supply playState
 gainCard _ _ _ = error "A card may only be gained during the buy phase"
 
 discardCard :: CandidateId -> Card -> GameState -> GameState

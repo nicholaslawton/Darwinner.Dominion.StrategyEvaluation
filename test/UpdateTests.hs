@@ -10,6 +10,7 @@ import CompletePlayer
 import PlayerWithoutDominion
 import Card
 import BuyAllowance
+import Turn
 
 import Data.List
 import Data.Composition
@@ -56,12 +57,14 @@ updateTests = describe "update" $ do
 
   describe "draw card" $ do
     describe "for initial hand" $
-      drawCardProperties (\(CardInStartingDeck ps cards pid card) -> (ps, cards, pid, card)) DrawingInitialHands
+      drawCardProperties
+        (\(CardInStartingDeck ps cards pid card) -> (ps, cards, pid, card))
+        (\ps cards _ -> DrawingInitialHands ps cards)
 
     describe "during clean up phase" $
       drawCardProperties
-        (\(CardInDeck (PlayState ps cards) pid card) -> (ps, cards, pid, card))
-        (CleanUpPhase DrawHand .: PlayState)
+        (\(CardInDeck (PlayState ps cards _) pid card) -> (ps, cards, pid, card))
+        (CleanUpPhase DrawHand .:. PlayState)
 
   describe "gain card" $ do
     it "adds card to discard" $ property $ \(SelectedPlayerAndCardInSupply g pid card) (Positive buys) ->
@@ -98,18 +101,18 @@ updateTests = describe "update" $ do
     it "transitions to draw next hand step" $ property $
       drawHandStep . update DiscardStepComplete . CleanUpPhase Discard
 
-drawCardProperties :: (Arbitrary a, Show a, Player p) =>
-  (a -> ([p], [Card], CandidateId, Card))
-  -> ([p] -> [Card] -> GameState)
+drawCardProperties :: (Arbitrary a, Show a, Player p)
+  => (a -> ([p], [Card], CandidateId, Card))
+  -> ([p] -> [Card] -> Turn -> GameState)
   -> SpecWith ()
 drawCardProperties unpack constructGame = do
   it "adds card to hand" $ property $ \cardInDeck ->
     let (ps, cards, pid, card) = unpack cardInDeck
-    in verifyPlayerUpdate pid (length . hand) (+1) (DrawCard pid card) (constructGame ps cards)
+    in verifyPlayerUpdate pid (length . hand) (+1) (DrawCard pid card) . constructGame ps cards
 
   it "does not alter dominion of player" $ property $ \cardInDeck ->
     let (ps, cards, pid, card) = unpack cardInDeck
-    in verifyPlayerUpdate pid dominion id (DrawCard pid card) (constructGame ps cards)
+    in verifyPlayerUpdate pid dominion id (DrawCard pid card) . constructGame ps cards
 
 verifyPlayerUpdate :: (Eq a, Show a) =>
   CandidateId

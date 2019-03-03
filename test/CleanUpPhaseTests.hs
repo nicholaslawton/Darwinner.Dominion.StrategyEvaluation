@@ -8,9 +8,11 @@ import EvaluationParameters
 import Player
 import CompletePlayer
 import Card
+import Turn
 
 import Data.List
 import Data.Maybe
+import Data.Composition
 
 import GameStateValidation
 import EngineValidation
@@ -24,31 +26,32 @@ import Test.QuickCheck hiding (Discard)
 cleanUpPhaseTests :: SpecWith ()
 cleanUpPhaseTests = describe "clean up phase" $ do
   
-  it "discards all cards from hand" $ property $ \params (NonEmpty ps) cards ->
+  it "discards all cards from hand" $ property $ \params (NonEmpty ps) ->
     (===) (sortOn arbitraryCardOrder . hand . head $ ps)
       . sortOn arbitraryCardOrder
       . mapMaybe cardDiscarded
       . history
-      . runTest params Discard ps cards
+      .:. runTest params Discard ps
 
-  it "draws new hand" $ property $ \params (NonEmpty ps) cards ->
+  it "draws new hand" $ property $ \params (NonEmpty ps) ->
     (===) (min 5 . length . dominion $ head ps)
       . length
       . filter ((/=) Nothing . cardDrawn)
       . history
-      . runTest params Discard ps cards
+      .:. runTest params Discard ps
 
-  it "completes" $ property $ \params (NonEmpty ps) cards ->
-    (===) CleanUpPhaseComplete . last . history . runTest params Discard ps cards
+  it "completes" $ property $ \params (NonEmpty ps) ->
+    (===) CleanUpPhaseComplete . last . history .:. runTest params Discard ps
 
-runTest :: EvaluationParameters -> CleanUpStep -> [CompletePlayer] -> [Card] -> Int -> Game
-runTest params step ps cards = execWhile cleanUpPhase (commandLimit ps) params . gameInCleanUpPhase step ps cards
+runTest :: EvaluationParameters -> CleanUpStep -> [CompletePlayer] -> [Card] -> Turn -> Int -> Game
+runTest params step ps =
+  execWhile cleanUpPhase (commandLimit ps) params .:. gameInCleanUpPhase step ps
 
 commandLimit :: [CompletePlayer] -> Int
 commandLimit = (+10) . length . hand . head
 
-gameInCleanUpPhase :: CleanUpStep -> [CompletePlayer] -> [Card] -> Int -> Game
-gameInCleanUpPhase step ps cards = gameInState $ CleanUpPhase step (PlayState ps cards)
+gameInCleanUpPhase :: CleanUpStep -> [CompletePlayer] -> [Card] -> Turn -> Int -> Game
+gameInCleanUpPhase step = gameInState . CleanUpPhase step .:. PlayState
 
 cardDiscarded :: Command -> Maybe Card
 cardDiscarded (DiscardCard _ card) = Just card

@@ -5,12 +5,14 @@ module PlayState
 
 import CompletePlayer
 import Card
+import Turn
 
 import Data.Maybe
 
 data PlayState = PlayState
   { players :: [CompletePlayer]
   , supply :: [Card]
+  , turn :: Turn
   }
   deriving (Eq, Show)
 
