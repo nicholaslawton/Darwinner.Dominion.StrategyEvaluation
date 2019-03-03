@@ -12,14 +12,14 @@ import Data.Composition
 
 import GameStateValidation
 import EngineValidation
-import ArbitraryInstances()
+import ArbitraryInstances
 import Test.Hspec
 import Test.QuickCheck hiding (Discard)
 
 turnSequenceTests :: SpecWith ()
 turnSequenceTests = describe "turn sequence" $
 
-  it "does not end immediately" $ property $ \params (NonEmpty ps) ->
+  it "does not end immediately" $ property $ \params (ValidPlayers ps) ->
     not . gameOver . state . execUntil gameOver 1000 params .:. gameInProgress ps
 
 gameInProgress :: [CompletePlayer] -> [Card] -> Turn -> Int -> Game

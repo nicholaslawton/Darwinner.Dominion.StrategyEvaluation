@@ -97,8 +97,13 @@ validPlayers :: Gen [CompletePlayer]
 validPlayers = validCandidateIds <$> arbitrary
   >>= traverse (\cid -> liftA3 (CompletePlayer.new cid) arbitrary arbitrary arbitrary)
 
-data SelectedPlayerWithDeck =
-  SelectedPlayerWithDeck [PlayerWithDeck] CandidateId
+data ValidPlayers = ValidPlayers [CompletePlayer] 
+  deriving (Eq, Show)
+
+instance Arbitrary ValidPlayers where
+  arbitrary = ValidPlayers <$> validPlayers
+
+data SelectedPlayerWithDeck = SelectedPlayerWithDeck [PlayerWithDeck] CandidateId
   deriving (Eq, Show)
 
 instance Arbitrary SelectedPlayerWithDeck where
