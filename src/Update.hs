@@ -31,7 +31,7 @@ update (DiscardCard pid card) = discardCard pid card
 update (ReformDeck pid) = reformDeck pid
 update BuyPhaseComplete = beginCleanUpPhase
 update DiscardStepComplete = beginDrawingNextHand
-update CleanUpPhaseComplete = nextTurn
+update CleanUpPhaseComplete = advanceTurn
 update EndGame = const GameOver
 
 addPlayer :: CandidateId -> GameState -> GameState
@@ -124,9 +124,9 @@ beginDrawingNextHand :: GameState -> GameState
 beginDrawingNextHand (CleanUpPhase Discard playState) = CleanUpPhase DrawHand playState
 beginDrawingNextHand _ = error "Drawing the next hand must follow the discard step of the clean up phase"
 
-nextTurn :: GameState -> GameState
-nextTurn (CleanUpPhase DrawHand playState) = BuyPhase BuyAllowance.initial playState
-nextTurn _ = error "Cannot start next turn before current turn is complete"
+advanceTurn :: GameState -> GameState
+advanceTurn (CleanUpPhase DrawHand playState) = BuyPhase BuyAllowance.initial playState
+advanceTurn _ = error "Cannot start next turn before current turn is complete"
 
 moveFromDeckToHand :: Card -> CompletePlayer -> CompletePlayer
 moveFromDeckToHand card = alterDiscard (card :) . alterHand (delete card)

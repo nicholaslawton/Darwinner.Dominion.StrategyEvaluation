@@ -47,7 +47,7 @@ instance Arbitrary EvaluationParameters where
   arbitrary = EvaluationParameters <$> validCandidates
 
 instance Arbitrary Turn where
-  arbitrary = Turn <$> arbitrary
+  arbitrary = Turn . getPositive <$> arbitrary
 
 instance Arbitrary PlayState where
   arbitrary = liftA3 PlayState arbitrary arbitrary arbitrary
