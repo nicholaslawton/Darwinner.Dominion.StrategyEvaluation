@@ -10,7 +10,7 @@ import Turn
 
 import Control.Applicative
 import Data.Composition
-import Data.Map hiding (mapMaybe)
+import Data.Map hiding (mapMaybe, foldr)
 import Data.Maybe
 
 import GameStateValidation
@@ -34,14 +34,18 @@ turnSequenceTests = describe "turn sequence" $ do
       . liftA2 (-) maximum minimum
       . elems
       . fmap length
+      . addEmpty pids
       . categorise fst snd
       . mapMaybe cardDrawn
       . history
       . execUntil gameOver 1000 params
-      .:. gameInProgress ((\pid -> CompletePlayer.new pid deck hand discard) <$> pids)
+      .: gameInProgress ((\pid -> CompletePlayer.new pid deck hand discard) <$> pids) []
 
 categorise :: Ord k => (a -> k) -> (a -> v) -> [a] -> Map k [v]
 categorise key value xs = fromListWith (++) $ liftA2 (,) key ((: []) . value) <$> xs
+
+addEmpty :: Ord k => [k] -> Map k [a] -> Map k [a]
+addEmpty ks m = foldr (\k m' -> insertWith (flip const) k [] m') m ks
 
 gameInProgress :: [CompletePlayer] -> [Card] -> Turn -> Int -> Game
 gameInProgress = gameInState . BuyPhase BuyAllowance.initial .:. PlayState
