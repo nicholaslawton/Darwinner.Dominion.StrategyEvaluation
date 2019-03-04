@@ -9,7 +9,7 @@ import Candidate
 import Data.List
 import Data.List.Unique
 import Data.Bifunctor
-import Data.Map (Map, fromList, fromListWith)
+import Data.Map hiding (mapMaybe)
 import Data.Maybe
 import Control.Applicative
 

@@ -10,7 +10,7 @@ import Turn
 
 import Control.Applicative
 import Data.Composition
-import Data.Map (Map, fromListWith, elems)
+import Data.Map hiding (mapMaybe)
 import Data.Maybe
 
 import GameStateValidation
