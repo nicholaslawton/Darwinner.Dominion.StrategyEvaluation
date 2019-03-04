@@ -16,6 +16,7 @@ import Control.Applicative
 import GameStateValidation
 import EngineValidation
 import CommandValidation
+import Categorisation
 import ArbitraryInstances()
 import CardOrder
 import Test.Hspec
@@ -72,9 +73,6 @@ gamePreparationTests = describe "game preparation" $ do
 
 prepareGame :: Int -> EvaluationParameters -> Game
 prepareGame seed params = execUntil buyPhase 300 params (Game.new seed)
-
-categorise :: Ord k => (a -> k) -> (a -> v) -> [a] -> Map k [v]
-categorise key value xs = fromListWith (++) $ liftA2 (,) key ((: []) . value) <$> xs
 
 playerAdded :: Command -> Maybe CandidateId
 playerAdded (AddPlayer pid) = Just pid

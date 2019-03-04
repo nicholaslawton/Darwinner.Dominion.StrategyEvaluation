@@ -16,6 +16,7 @@ import Data.Maybe
 import GameStateValidation
 import EngineValidation
 import CommandValidation
+import Categorisation
 import ArbitraryInstances
 import Test.Hspec
 import Test.QuickCheck hiding (Discard, discard)
@@ -41,11 +42,8 @@ turnSequenceTests = describe "turn sequence" $ do
       . execUntil gameOver 1000 params
       .: gameInProgress ((\pid -> CompletePlayer.new pid deck hand discard) <$> pids) []
 
-categorise :: Ord k => (a -> k) -> (a -> v) -> [a] -> Map k [v]
-categorise key value xs = fromListWith (++) $ liftA2 (,) key ((: []) . value) <$> xs
-
 addEmpty :: Ord k => [k] -> Map k [a] -> Map k [a]
-addEmpty ks m = foldr (\k m' -> insertWith (flip const) k [] m') m ks
+addEmpty = flip $ foldr (\k m -> insertWith (flip const) k [] m)
 
 gameInProgress :: [CompletePlayer] -> [Card] -> Turn -> Int -> Game
 gameInProgress = gameInState . BuyPhase BuyAllowance.initial .:. PlayState
