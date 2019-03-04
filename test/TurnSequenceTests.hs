@@ -26,16 +26,19 @@ turnSequenceTests = describe "turn sequence" $ do
   it "does not end immediately" $ property $ \params (ValidPlayers ps) ->
     not . gameOver . state . execUntil gameOver 1000 params .:. gameInProgress ps
 
-  it "provides equal opportunity" $ property $ \params (NonEmpty deck) (NonEmpty hand) (NonEmpty discard) pids ->
-    (<= 5)
-    . liftA2 (-) maximum minimum
-    . elems
-    . fmap length
-    . categorise fst snd
-    . mapMaybe cardDrawn
-    . history
-    . execUntil gameOver 1000 params
-    .:. gameInProgress ((\pid -> CompletePlayer.new pid deck hand discard) <$> validCandidateIds pids)
+  it "provides equal opportunity" $ property $ \params (NonEmpty deck) (NonEmpty hand) (NonEmpty discard) cids ->
+    let
+      pids = validCandidateIds cids
+    in
+      (<= 5)
+      . liftA2 (-) maximum minimum
+      . elems
+      . fmap length
+      . categorise fst snd
+      . mapMaybe cardDrawn
+      . history
+      . execUntil gameOver 1000 params
+      .:. gameInProgress ((\pid -> CompletePlayer.new pid deck hand discard) <$> pids)
 
 categorise :: Ord k => (a -> k) -> (a -> v) -> [a] -> Map k [v]
 categorise key value xs = fromListWith (++) $ liftA2 (,) key ((: []) . value) <$> xs
