@@ -101,6 +101,10 @@ updateTests = describe "update" $ do
     it "transitions to draw next hand step" $ property $
       drawHandStep . update DiscardStepComplete . CleanUpPhase Discard
 
+  describe "draw next hand step completion" $
+    it "transitions to next turn" $ property $
+      buyPhase . update CleanUpPhaseComplete . CleanUpPhase DrawHand
+
 drawCardProperties :: (Arbitrary a, Show a, Player p)
   => (a -> ([p], [Card], CandidateId, Card))
   -> ([p] -> [Card] -> Turn -> GameState)
