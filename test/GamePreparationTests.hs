@@ -6,12 +6,12 @@ import Command
 import EvaluationParameters
 import Candidate
 
+import Control.Applicative
 import Data.List
 import Data.List.Unique
 import Data.Bifunctor
 import Data.Map hiding (mapMaybe)
 import Data.Maybe
-import Control.Applicative
 
 import GameStateValidation
 import EngineValidation
@@ -70,6 +70,9 @@ gamePreparationTests = describe "game preparation" $ do
   it "draws initial hand for each player" $ property $ \seed (params@(EvaluationParameters candidates)) ->
     fromList (flip (,) 5 . candidateId <$> candidates)
       === (fmap length . categorise fst snd . mapMaybe cardDrawn . history . prepareGame seed) params
+
+  it "begins first turn" $ property $
+    buyPhase . state . uncurry prepareGame
 
 prepareGame :: Int -> EvaluationParameters -> Game
 prepareGame seed params = execUntil buyPhase 300 params (Game.new seed)
