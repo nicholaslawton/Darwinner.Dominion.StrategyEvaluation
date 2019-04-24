@@ -92,7 +92,7 @@ nextCommand = do
           p = activePlayer playState
 
     CleanUpPhase DrawHand playState ->
-      if length (hand p) < 5 then lift $ drawCard CleanUpPhaseComplete p else return CleanUpPhaseComplete
+      if length (hand p) < 5 then lift $ drawCard DrawHandStepComplete p else return DrawHandStepComplete
         where
           p = activePlayer playState
 

@@ -103,10 +103,10 @@ updateTests = describe "update" $ do
 
   describe "draw next hand step completion" $ do
     it "transitions to next turn when game end conditions not met" $ property $
-      buyPhase . update CleanUpPhaseComplete . CleanUpPhase DrawHand . addProvinceToSupply
+      buyPhase . update DrawHandStepComplete . CleanUpPhase DrawHand . addProvinceToSupply
 
     it "transitions to game over when no province remains in supply" $ property $
-      gameOver . update CleanUpPhaseComplete . CleanUpPhase DrawHand . removeProvincesFromSupply
+      gameOver . update DrawHandStepComplete . CleanUpPhase DrawHand . removeProvincesFromSupply
 
 addProvinceToSupply :: PlayState -> PlayState
 addProvinceToSupply g = g { PlayState.supply = Province : PlayState.supply g }
