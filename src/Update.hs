@@ -125,8 +125,9 @@ beginDrawingNextHand (CleanUpPhase Discard playState) = CleanUpPhase DrawHand pl
 beginDrawingNextHand _ = error "Drawing the next hand must follow the discard step of the clean up phase"
 
 advanceTurn :: GameState -> GameState
-advanceTurn (CleanUpPhase DrawHand playState) =
-  BuyPhase BuyAllowance.initial $ playState { turn = nextTurn (turn playState) }
+advanceTurn (CleanUpPhase DrawHand playState)
+  | gameEndConditions playState = GameOver
+  | otherwise = BuyPhase BuyAllowance.initial $ playState { turn = nextTurn (turn playState) }
 advanceTurn _ = error "Cannot start next turn before current turn is complete"
 
 moveFromDeckToHand :: Card -> CompletePlayer -> CompletePlayer

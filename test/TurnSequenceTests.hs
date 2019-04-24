@@ -22,10 +22,7 @@ import Test.Hspec
 import Test.QuickCheck hiding (Discard, discard)
 
 turnSequenceTests :: SpecWith ()
-turnSequenceTests = describe "turn sequence" $ do
-
-  it "does not end immediately" $ property $ \params (ValidPlayers ps) ->
-    not . gameOver . state . execUntil gameOver 1000 params .:. gameInProgress ps
+turnSequenceTests = describe "turn sequence" $
 
   it "provides equal opportunity" $ property $ \params (NonEmpty deck) (NonEmpty hand) (NonEmpty discard) cids ->
     let

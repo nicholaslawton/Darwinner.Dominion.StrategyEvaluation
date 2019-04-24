@@ -4,7 +4,7 @@ import Update
 import Candidate
 import Command
 import GameState
-import PlayState hiding (players, supply)
+import PlayState hiding (players)
 import Player
 import CompletePlayer
 import PlayerWithoutDominion
@@ -37,7 +37,7 @@ updateTests = describe "update" $ do
 
   describe "place card in supply" $
     it "adds card" $ property $ \ps cards card ->
-      length (supply (update (PlaceCardInSupply card) (PreparingSupply ps cards))) === length cards + 1
+      length (GameState.supply (update (PlaceCardInSupply card) (PreparingSupply ps cards))) === length cards + 1
 
   describe "mark supply prepared" $
     it "begins preparing decks" $ property $ \ps cards ->
@@ -101,9 +101,18 @@ updateTests = describe "update" $ do
     it "transitions to draw next hand step" $ property $
       drawHandStep . update DiscardStepComplete . CleanUpPhase Discard
 
-  describe "draw next hand step completion" $
-    it "transitions to next turn" $ property $
-      buyPhase . update CleanUpPhaseComplete . CleanUpPhase DrawHand
+  describe "draw next hand step completion" $ do
+    it "transitions to next turn when game end conditions not met" $ property $
+      buyPhase . update CleanUpPhaseComplete . CleanUpPhase DrawHand . addProvinceToSupply
+
+    it "transitions to game over when no province remains in supply" $ property $
+      gameOver . update CleanUpPhaseComplete . CleanUpPhase DrawHand . removeProvincesFromSupply
+
+addProvinceToSupply :: PlayState -> PlayState
+addProvinceToSupply g = g { PlayState.supply = Province : PlayState.supply g }
+
+removeProvincesFromSupply :: PlayState -> PlayState
+removeProvincesFromSupply g = g { PlayState.supply = filter (/= Province) $ PlayState.supply g }
 
 drawCardProperties :: (Arbitrary a, Show a, Player p)
   => (a -> ([p], [Card], CandidateId, Card))
@@ -141,7 +150,7 @@ verifyPlayerState pid verification game =
   fmap verification (find ((==) pid . playerId) (players game)) === Just True
 
 cardsInPlay :: GameState -> [Card]
-cardsInPlay gameState = sortOn arbitraryCardOrder $ concatMap ($ gameState) [concatMap dominion . players, supply]
+cardsInPlay gameState = sortOn arbitraryCardOrder $ concatMap ($ gameState) [concatMap dominion . players, GameState.supply]
 
 buyAllowance :: GameState -> Int
 buyAllowance (BuyPhase (BuyAllowance buys) _) = buys

@@ -1,6 +1,7 @@
 module PlayState
   ( PlayState(..)
   , activePlayer
+  , gameEndConditions
   ) where
 
 import CompletePlayer
@@ -23,3 +24,6 @@ activePlayer g =
     if null ps
     then error "Unexpected game in progress with no players"
     else ps !! activeIndex
+
+gameEndConditions :: PlayState -> Bool
+gameEndConditions = notElem Province . supply
