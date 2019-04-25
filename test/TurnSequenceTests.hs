@@ -41,17 +41,11 @@ turnSequenceTests = describe "turn sequence" $ do
 
   describe "turn end" $ do
 
-    it "transitions to next turn when game end conditions not met" $ property $ \seed params g ->
-      buyPhase
-      $ state
-      $ execWhile turnEnd 10 params
-      $ gameInState (TurnEnd $ addProvinceToSupply g) seed
+    it "transitions to next turn when game end conditions not met" $ property $ \params ->
+      buyPhase . state . execWhile turnEnd 10 params .: gameAtTurnEnd addProvinceToSupply
 
-    it "transitions to game over when no province remains in supply" $ property $ \seed params g ->
-      gameOver
-      $ state
-      $ execWhile turnEnd 10 params
-      $ gameInState (TurnEnd  $ removeProvincesFromSupply g) seed
+    it "transitions to game over when no province remains in supply" $ property $ \params ->
+      gameOver . state . execWhile turnEnd 10 params .: gameAtTurnEnd removeProvincesFromSupply
 
 addProvinceToSupply :: PlayState -> PlayState
 addProvinceToSupply g = g { PlayState.supply = Province : PlayState.supply g }
@@ -64,3 +58,6 @@ addEmpty = flip $ foldr (\k m -> insertWith (flip const) k [] m)
 
 gameInProgress :: [CompletePlayer] -> [Card] -> Turn -> Int -> Game
 gameInProgress = gameInState . BuyPhase BuyAllowance.initial .:. PlayState
+
+gameAtTurnEnd :: (PlayState -> PlayState) -> PlayState -> Int -> Game
+gameAtTurnEnd f = gameInState . TurnEnd . f
