@@ -1,6 +1,6 @@
 module BuyPhaseTests (buyPhaseTests) where
 
-import Command
+import Event
 import Game
 import GameState
 import PlayState
@@ -12,7 +12,7 @@ import Turn
 
 import Data.Composition
 
-import CommandValidation
+import EventValidation
 import GameStateValidation
 import EngineValidation
 import ArbitraryInstances()

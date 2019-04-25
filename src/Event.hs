@@ -1,9 +1,9 @@
-module Command (Command(..)) where
+module Event (Event(..)) where
 
 import Candidate
 import Card
 
-data Command
+data Event
   = PlayerAdded CandidateId 
   | PlayersReady
   | CardPlacedInSupply Card

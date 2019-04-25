@@ -13,7 +13,7 @@ import System.Random
 
 import Parsing
 import EvaluationParameters
-import Command
+import Event
 import Game
 import Engine
 
@@ -24,14 +24,14 @@ main = scotty 3000 $
       >>= \seed -> fmap (evaluate seed) . parseEvaluationParameters . toStrict <$> body
       >>= response
 
-evaluate :: Int -> EvaluationParameters -> [Command]
+evaluate :: Int -> EvaluationParameters -> [Event]
 evaluate seed parameters = history (execState (runReaderT Engine.run parameters) (Game.new seed))
 
-response :: (Show a) => Either a [Command] -> ActionM ()
+response :: (Show a) => Either a [Event] -> ActionM ()
 response (Left a) = showContent a >> status badRequest400
 response (Right commands) = stringContent (formatCommands commands) >> status ok200
 
-formatCommands :: [Command] -> String
+formatCommands :: [Event] -> String
 formatCommands = foldr (\a b -> show a ++ "\n" ++ b) ""
 
 showContent :: Show a => a -> ActionM ()

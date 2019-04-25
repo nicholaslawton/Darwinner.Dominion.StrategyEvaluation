@@ -1,6 +1,6 @@
 module CleanUpPhaseTests (cleanUpPhaseTests) where
 
-import Command
+import Event
 import Game
 import GameState
 import PlayState
@@ -16,7 +16,7 @@ import Data.Composition
 
 import GameStateValidation
 import EngineValidation
-import CommandValidation
+import EventValidation
 import PlayerValidation
 import ArbitraryInstances()
 import CardOrder

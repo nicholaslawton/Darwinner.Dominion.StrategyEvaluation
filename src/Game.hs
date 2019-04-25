@@ -9,14 +9,14 @@ module Game
 
 import GameState
 import Message
-import Command
+import Event
 import CompletePlayer
 
 import System.Random
 
 data Game = Game
   { state :: GameState
-  , commands :: [Command]
+  , commands :: [Event]
   , gen :: StdGen
   }
 
@@ -26,7 +26,7 @@ mapState f game = game { Game.state = f (Game.state game) }
 record :: Message -> Game -> Game
 record msg game = game { commands = event msg : commands game }
 
-event :: Message -> Command
+event :: Message -> Event
 event (AddPlayer pid) = PlayerAdded pid
 event MarkPlayersReady = PlayersReady
 event (PlaceCardInSupply card) = CardPlacedInSupply card
@@ -44,7 +44,7 @@ event DrawHandStepComplete = NextHandDrawn
 event EndTurn = TurnEnded
 event EndGame = GameEnded
 
-history :: Game -> [Command]
+history :: Game -> [Event]
 history = reverse . commands
 
 new :: Int -> Game

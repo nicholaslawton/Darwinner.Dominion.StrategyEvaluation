@@ -13,7 +13,7 @@ import Data.Maybe
 
 import GameStateValidation
 import EngineValidation
-import CommandValidation
+import EventValidation
 import Categorisation
 import ArbitraryInstances()
 import CardOrder
