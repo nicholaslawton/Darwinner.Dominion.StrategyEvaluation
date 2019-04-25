@@ -96,6 +96,8 @@ nextCommand = do
         where
           p = activePlayer playState
 
+    TurnEnd _ -> return EndTurn
+
     GameOver -> error "Game is over"
 
 drawCard :: Player p => Command -> p -> State Game Command

@@ -5,6 +5,7 @@ module GameStateValidation
   , buyPhase
   , cleanUpPhase
   , drawHandStep
+  , turnEnd
   , gameOver
   , gameInState
   ) where
@@ -35,6 +36,10 @@ cleanUpPhase _ = False
 drawHandStep :: GameState -> Bool
 drawHandStep (CleanUpPhase DrawHand _) = True
 drawHandStep _ = False
+
+turnEnd :: GameState -> Bool
+turnEnd (TurnEnd _) = True
+turnEnd _ = False
 
 gameOver :: GameState -> Bool
 gameOver GameOver = True

@@ -18,5 +18,6 @@ data Command
   | BuyPhaseComplete
   | DiscardStepComplete
   | DrawHandStepComplete
+  | EndTurn
   | EndGame
   deriving (Eq, Show)
