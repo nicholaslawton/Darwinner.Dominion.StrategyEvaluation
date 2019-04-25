@@ -27,16 +27,16 @@ run = runUntil ((== GameOver) . Game.state)
 
 runUntil :: (Game -> Bool) -> ReaderT EvaluationParameters (State Game) ()
 runUntil predicate = do
-  cmd <- nextCommand
-  game <- lift $ apply cmd <$> get
+  message <- nextMessage
+  game <- lift $ apply message <$> get
   lift $ put game
   unless (predicate game) (runUntil predicate)
 
 apply :: Message -> Game -> Game
-apply msg = record msg . Game.mapState (update msg)
+apply message = record message . Game.mapState (update message)
 
-nextCommand :: ReaderT EvaluationParameters (State Game) Message
-nextCommand = do
+nextMessage :: ReaderT EvaluationParameters (State Game) Message
+nextMessage = do
   EvaluationParameters candidates <- ask
   game <- lift get
   case Game.state game of
@@ -101,10 +101,10 @@ nextCommand = do
     GameOver -> error "Game is over"
 
 drawCard :: Player p => Message -> p -> State Game Message
-drawCard alternateCommand p
+drawCard alternateMessage p
   | not $ null $ deck p = maybe unexpected (DrawCard $ playerId p) <$> randomElement (deck p)
   | not $ null $ discard p = return $ ReformDeck $ playerId p
-  | otherwise = return alternateCommand
+  | otherwise = return alternateMessage
     where unexpected = error "Unexpected failure drawing a card from a non-empty deck"
 
 randomElement :: [a] -> State Game (Maybe a)

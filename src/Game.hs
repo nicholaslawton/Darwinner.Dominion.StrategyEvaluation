@@ -16,7 +16,7 @@ import System.Random
 
 data Game = Game
   { state :: GameState
-  , commands :: [Event]
+  , events :: [Event]
   , gen :: StdGen
   }
 
@@ -24,7 +24,7 @@ mapState :: (GameState -> GameState) -> Game -> Game
 mapState f game = game { Game.state = f (Game.state game) }
 
 record :: Message -> Game -> Game
-record msg game = game { commands = event msg : commands game }
+record msg game = game { events = event msg : events game }
 
 event :: Message -> Event
 event (AddPlayer pid) = PlayerAdded pid
@@ -45,7 +45,7 @@ event EndTurn = TurnEnded
 event EndGame = GameEnded
 
 history :: Game -> [Event]
-history = reverse . commands
+history = reverse . events
 
 new :: Int -> Game
 new = Game (New []) [] . mkStdGen

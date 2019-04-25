@@ -147,7 +147,7 @@ verifyUpdate :: (Eq a, Show a) =>
   -> Message
   -> GameState
   -> Property
-verifyUpdate prop change command = liftA2 (===) (prop . update command) (change . prop)
+verifyUpdate prop change message = liftA2 (===) (prop . update message) (change . prop)
 
 verifyPlayerState :: CandidateId -> (CompletePlayer -> Bool) -> GameState -> Property
 verifyPlayerState pid verification game =

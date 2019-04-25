@@ -30,10 +30,10 @@ buyPhaseTests = describe "buy phase" $ do
 
 runTest :: EvaluationParameters -> Int -> [CompletePlayer] -> [Card] -> Turn -> Int -> Game
 runTest params buys ps cards =
-  execWhile buyPhase (commandLimit buys cards) params .: gameInBuyPhase buys ps cards
+  execWhile buyPhase (actionLimit buys cards) params .: gameInBuyPhase buys ps cards
 
-commandLimit :: Int -> [Card] -> Int
-commandLimit buys cards = min buys (length cards) + 10
+actionLimit :: Int -> [Card] -> Int
+actionLimit buys cards = min buys (length cards) + 10
 
 gameInBuyPhase :: Int -> [CompletePlayer] -> [Card] -> Turn -> Int -> Game
 gameInBuyPhase buys = gameInState . BuyPhase (BuyAllowance buys) .:. PlayState
