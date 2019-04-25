@@ -1,6 +1,5 @@
 module CleanUpPhaseTests (cleanUpPhaseTests) where
 
-import Event
 import Game
 import GameState
 import PlayState
@@ -39,9 +38,6 @@ cleanUpPhaseTests = describe "clean up phase" $ do
       . filter ((/=) Nothing . cardDrawn)
       . history
       . runTest params Discard ps cards firstTurn
-
-  it "completes" $ property $ \params (NonEmpty ps) cards ->
-    (===) NextHandDrawn . last . history . runTest params Discard ps cards firstTurn
 
 runTest :: EvaluationParameters -> CleanUpStep -> [CompletePlayer] -> [Card] -> Turn -> Int -> Game
 runTest params step ps = execWhile cleanUpPhase (actionLimit ps) params .:. gameInCleanUpPhase step ps

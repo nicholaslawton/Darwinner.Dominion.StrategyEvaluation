@@ -96,7 +96,9 @@ nextMessage = do
         where
           p = activePlayer playState
 
-    TurnEnd _ -> return EndTurn
+    TurnEnd playState
+      | gameEndConditions playState -> return EndGame
+      | otherwise -> return EndTurn
 
     GameOver -> error "Game is over"
 

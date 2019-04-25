@@ -105,18 +105,13 @@ updateTests = describe "update" $ do
     it "transitions to turn end" $ property $
       turnEnd . update DrawHandStepComplete . CleanUpPhase DrawHand
 
-  describe "game end check" $ do
-    it "transitions to next turn when game end conditions not met" $ property $
-      buyPhase . update EndTurn . TurnEnd . addProvinceToSupply
+  describe "end turn" $
+    it "transitions to next turn" $ property $
+      buyPhase . update EndTurn . TurnEnd
 
-    it "transitions to game over when no province remains in supply" $ property $
-      gameOver . update EndTurn . TurnEnd . removeProvincesFromSupply
-
-addProvinceToSupply :: PlayState -> PlayState
-addProvinceToSupply g = g { PlayState.supply = Province : PlayState.supply g }
-
-removeProvincesFromSupply :: PlayState -> PlayState
-removeProvincesFromSupply g = g { PlayState.supply = filter (/= Province) $ PlayState.supply g }
+  describe "end game" $
+    it "transitions to game over" $ property $
+      gameOver . update EndGame . TurnEnd
 
 drawCardProperties :: (Arbitrary a, Show a, Player p)
   => (a -> ([p], [Card], CandidateId, Card))

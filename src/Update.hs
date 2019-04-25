@@ -32,8 +32,8 @@ update (ReformDeck pid) = reformDeck pid
 update BuyPhaseComplete = beginCleanUpPhase
 update DiscardStepComplete = beginDrawingNextHand
 update DrawHandStepComplete = advanceToTurnEnd
-update EndTurn = endTurn
-update EndGame = const GameOver
+update EndTurn = startNextTurn
+update EndGame = endGame
 
 addPlayer :: CandidateId -> GameState -> GameState
 addPlayer pid (New ps)
@@ -129,11 +129,13 @@ advanceToTurnEnd :: GameState -> GameState
 advanceToTurnEnd (CleanUpPhase DrawHand playState) = TurnEnd playState
 advanceToTurnEnd _ = error "Cannot advance to turn end before clean up phase is complete"
 
-endTurn :: GameState -> GameState
-endTurn (TurnEnd playState)
-  | gameEndConditions playState = GameOver
-  | otherwise = BuyPhase BuyAllowance.initial $ playState { turn = nextTurn (turn playState) }
-endTurn _ = error "Cannot start next turn before current turn is complete"
+startNextTurn :: GameState -> GameState
+startNextTurn (TurnEnd playState) =
+  BuyPhase BuyAllowance.initial $ playState { turn = nextTurn (turn playState) }
+startNextTurn _ = error "Cannot start next turn before current turn is complete"
+
+endGame :: GameState -> GameState
+endGame = const GameOver
 
 moveFromDeckToHand :: Card -> CompletePlayer -> CompletePlayer
 moveFromDeckToHand card = alterDiscard (card :) . alterHand (delete card)
