@@ -1,6 +1,6 @@
 module Game
   ( Game(state, gen)
-  , recordCommand
+  , record
   , mapState
   , history
   , Game.new
@@ -8,6 +8,7 @@ module Game
   ) where
 
 import GameState
+import Message
 import Command
 import CompletePlayer
 
@@ -22,8 +23,26 @@ data Game = Game
 mapState :: (GameState -> GameState) -> Game -> Game
 mapState f game = game { Game.state = f (Game.state game) }
 
-recordCommand :: Command -> Game -> Game
-recordCommand event game = game { commands = event : commands game }
+record :: Message -> Game -> Game
+record msg game = game { commands = event msg : commands game }
+
+event :: Message -> Command
+event (AddPlayer pid) = PlayerAdded pid
+event MarkPlayersReady = PlayersReady
+event (PlaceCardInSupply card) = CardPlacedInSupply card
+event MarkSupplyPrepared = SupplyPrepared
+event (AddCardToDeck pid card) = CardAddedToDeck pid card
+event MarkDecksPrepared = DecksPrepared
+event MarkInitialHandsDrawn = InitialHandsDrawn
+event (DrawCard pid card) = CardDrawn pid card
+event (GainCard pid card) = CardGained pid card
+event (DiscardCard pid card) = CardDiscarded pid card
+event (ReformDeck pid) = DeckReformed pid
+event BuyPhaseComplete = BuyPhaseCompleted
+event DiscardStepComplete = HandAndPlayedCardsDiscarded
+event DrawHandStepComplete = NextHandDrawn
+event EndTurn = TurnEnded
+event EndGame = GameEnded
 
 history :: Game -> [Command]
 history = reverse . commands

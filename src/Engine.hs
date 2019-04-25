@@ -6,7 +6,7 @@ import GameState
 import PlayState
 import Update
 import Player
-import Command
+import Message
 import EvaluationParameters
 import Candidate
 import BuyAllowance
@@ -32,10 +32,10 @@ runUntil predicate = do
   lift $ put game
   unless (predicate game) (runUntil predicate)
 
-apply :: Command -> Game -> Game
-apply command = recordCommand command . Game.mapState (update command)
+apply :: Message -> Game -> Game
+apply msg = record msg . Game.mapState (update msg)
 
-nextCommand :: ReaderT EvaluationParameters (State Game) Command
+nextCommand :: ReaderT EvaluationParameters (State Game) Message
 nextCommand = do
   EvaluationParameters candidates <- ask
   game <- lift get
@@ -100,7 +100,7 @@ nextCommand = do
 
     GameOver -> error "Game is over"
 
-drawCard :: Player p => Command -> p -> State Game Command
+drawCard :: Player p => Message -> p -> State Game Message
 drawCard alternateCommand p
   | not $ null $ deck p = maybe unexpected (DrawCard $ playerId p) <$> randomElement (deck p)
   | not $ null $ discard p = return $ ReformDeck $ playerId p

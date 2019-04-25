@@ -2,11 +2,9 @@ module GamePreparationTests where
 
 import Game
 import Card
-import Command
 import EvaluationParameters
 import Candidate
 
-import Control.Applicative
 import Data.List
 import Data.List.Unique
 import Data.Bifunctor
@@ -76,18 +74,3 @@ gamePreparationTests = describe "game preparation" $ do
 
 prepareGame :: Int -> EvaluationParameters -> Game
 prepareGame seed params = execUntil buyPhase 300 params (Game.new seed)
-
-playerAdded :: Command -> Maybe CandidateId
-playerAdded (AddPlayer pid) = Just pid
-playerAdded _ = Nothing
-
-cardPlacedInSupply :: Command -> Maybe Card
-cardPlacedInSupply (PlaceCardInSupply card) = Just card
-cardPlacedInSupply _ = Nothing
-
-cardAddedToDeck :: Command -> Maybe (CandidateId, Card)
-cardAddedToDeck (AddCardToDeck pid card) = Just (pid, card)
-cardAddedToDeck _ = Nothing
-
-cardPutInPlay :: Command -> Maybe Card
-cardPutInPlay = liftA2 (<|>) cardPlacedInSupply (fmap snd . cardAddedToDeck)

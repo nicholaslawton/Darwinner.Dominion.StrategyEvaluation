@@ -2,7 +2,7 @@ module UpdateTests where
 
 import Update
 import Candidate
-import Command
+import Message
 import GameState
 import PlayState hiding (players)
 import Player
@@ -135,7 +135,7 @@ verifyPlayerUpdate :: (Eq a, Show a) =>
   CandidateId
   -> (CompletePlayer -> a)
   -> (a -> a)
-  -> Command
+  -> Message
   -> GameState
   -> Property
 verifyPlayerUpdate pid prop change =
@@ -144,7 +144,7 @@ verifyPlayerUpdate pid prop change =
 verifyUpdate :: (Eq a, Show a) =>
   (GameState -> a)
   -> (a -> a)
-  -> Command
+  -> Message
   -> GameState
   -> Property
 verifyUpdate prop change command = liftA2 (===) (prop . update command) (change . prop)

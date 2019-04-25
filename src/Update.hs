@@ -1,7 +1,7 @@
 module Update (update) where
 
 import Candidate
-import Command
+import Message
 import GameState hiding (players, supply)
 import PlayState
 import Player
@@ -17,7 +17,7 @@ import Data.Bool
 import Data.List
 import Control.Applicative
 
-update :: Command -> GameState -> GameState
+update :: Message -> GameState -> GameState
 update (AddPlayer pid) = addPlayer pid
 update MarkPlayersReady = beginPreparingSupply
 update (PlaceCardInSupply card) = placeCardInSupply card

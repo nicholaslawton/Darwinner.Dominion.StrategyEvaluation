@@ -41,7 +41,7 @@ cleanUpPhaseTests = describe "clean up phase" $ do
       . runTest params Discard ps cards firstTurn
 
   it "completes" $ property $ \params (NonEmpty ps) cards ->
-    (===) DrawHandStepComplete . last . history . runTest params Discard ps cards firstTurn
+    (===) NextHandDrawn . last . history . runTest params Discard ps cards firstTurn
 
 runTest :: EvaluationParameters -> CleanUpStep -> [CompletePlayer] -> [Card] -> Turn -> Int -> Game
 runTest params step ps = execWhile cleanUpPhase (commandLimit ps) params .:. gameInCleanUpPhase step ps
@@ -51,7 +51,3 @@ commandLimit = (+10) . length . hand . head
 
 gameInCleanUpPhase :: CleanUpStep -> [CompletePlayer] -> [Card] -> Turn -> Int -> Game
 gameInCleanUpPhase step = gameInState . CleanUpPhase step .:. PlayState
-
-cardDiscarded :: Command -> Maybe Card
-cardDiscarded (DiscardCard _ card) = Just card
-cardDiscarded _ = Nothing
