@@ -7,7 +7,7 @@ module CompletePlayer
   ) where
 
 import Player
-import Candidate
+import CandidateId
 import Card
 import PlayerWithoutDominion
 import PlayerWithDeck

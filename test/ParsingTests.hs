@@ -8,6 +8,7 @@ import EvaluationParameters
 import Card
 import Strategy
 import Candidate
+import CandidateId
 
 import Data.ByteString (ByteString)
 import Test.Hspec

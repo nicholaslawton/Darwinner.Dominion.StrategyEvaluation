@@ -9,9 +9,12 @@ import Player
 import Message
 import EvaluationParameters
 import Candidate
+import CandidateId
 import BuyAllowance
+import Strategy
 
 import Data.Bool
+import Data.List
 import Data.List.Unique
 import Data.Maybe
 import Data.Bifunctor
@@ -82,9 +85,11 @@ nextMessage = do
     BuyPhase (BuyAllowance buys) _ | buys <= 0 -> return BuyPhaseComplete
 
     BuyPhase _ playState ->
-      return $ maybe BuyPhaseComplete (GainCard $ playerId p) (listToMaybe $ PlayState.supply playState)
+      return $ maybe BuyPhaseComplete (GainCard activePlayerId) (Strategy.execute s playState)
         where
-          p = activePlayer playState
+          activePlayerId = playerId $ activePlayer playState
+          s = fromMaybe unexpected $ strategy <$> find ((== activePlayerId) . candidateId) candidates
+          unexpected = error "Active player not found among candidates"
 
     CleanUpPhase Discard playState ->
       return $ maybe DiscardStepComplete (DiscardCard $ playerId p) (listToMaybe $ hand p)

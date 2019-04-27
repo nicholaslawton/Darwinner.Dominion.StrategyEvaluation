@@ -5,7 +5,7 @@ module PlayerWithHand
   ) where
 
 import Player
-import Candidate
+import CandidateId
 import Card
 import PlayerWithDeck
 

@@ -9,6 +9,7 @@ import PlayerWithoutDominion
 import PlayerWithDeck
 import PlayerWithHand
 import Candidate
+import CandidateId
 import Strategy
 import PlayState
 import Turn

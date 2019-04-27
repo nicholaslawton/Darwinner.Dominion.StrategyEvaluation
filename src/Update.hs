@@ -1,6 +1,6 @@
 module Update (update) where
 
-import Candidate
+import CandidateId
 import Message
 import GameState hiding (players, supply)
 import PlayState

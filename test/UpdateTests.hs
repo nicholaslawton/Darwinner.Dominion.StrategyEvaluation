@@ -1,7 +1,7 @@
 module UpdateTests where
 
 import Update
-import Candidate
+import CandidateId
 import Message
 import GameState
 import PlayState hiding (players)

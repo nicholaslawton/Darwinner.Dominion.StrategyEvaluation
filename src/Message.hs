@@ -1,6 +1,6 @@
 module Message (Message(..)) where
 
-import Candidate
+import CandidateId
 import Card
 
 data Message 

@@ -1,6 +1,6 @@
 module Player where
 
-import Candidate
+import CandidateId
 import Card
 
 class Player a where

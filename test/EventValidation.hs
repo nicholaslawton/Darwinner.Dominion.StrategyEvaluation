@@ -9,7 +9,7 @@ module EventValidation
   ) where
 
 import Event
-import Candidate
+import CandidateId
 import Card
 
 import Control.Applicative

@@ -1,8 +1,8 @@
 module Candidate
   ( Candidate(..)
-  , CandidateId(..)
   ) where
 
+import CandidateId
 import Strategy
 
 data Candidate = Candidate
@@ -10,6 +10,3 @@ data Candidate = Candidate
   , strategy :: Strategy
   }
   deriving (Eq, Show)
-
-newtype CandidateId = CandidateId String
-  deriving (Eq, Ord, Show)

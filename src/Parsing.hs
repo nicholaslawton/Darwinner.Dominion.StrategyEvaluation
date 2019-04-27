@@ -6,6 +6,7 @@ module Parsing
 import Card
 import Strategy
 import Candidate
+import CandidateId
 import EvaluationParameters
 
 import Control.Applicative

@@ -6,7 +6,7 @@ module PlayerWithDeck
 
 import Player
 import PlayerWithoutDominion
-import Candidate
+import CandidateId
 import Card
 
 data PlayerWithDeck = PlayerWithDeck

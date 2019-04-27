@@ -4,7 +4,7 @@ module PlayerWithoutDominion
   ) where
 
 import Player
-import Candidate
+import CandidateId
 
 data PlayerWithoutDominion = PlayerWithoutDominion CandidateId
   deriving (Eq, Show)
