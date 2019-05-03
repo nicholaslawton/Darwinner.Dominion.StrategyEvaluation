@@ -7,6 +7,8 @@ import BuyAllowance
 import CompletePlayer
 import Card
 import Turn
+import EvaluationParameters
+import Candidate
 
 import Control.Applicative
 import Data.Composition
@@ -17,27 +19,28 @@ import GameStateValidation
 import EngineValidation
 import EventValidation
 import Categorisation
-import ArbitraryInstances
+import ArbitraryInstances()
 import Test.Hspec
 import Test.QuickCheck hiding (Discard, discard)
 
 turnSequenceTests :: SpecWith ()
 turnSequenceTests = describe "turn sequence" $ do
 
-  it "provides equal opportunity" $ property $ \params (NonEmpty deck) (NonEmpty hand) (NonEmpty discard) cids ->
-    let
-      pids = validCandidateIds cids
-    in
-      (<= 5)
-      . liftA2 (-) maximum minimum
-      . elems
-      . fmap length
-      . addEmpty pids
-      . categorise fst snd
-      . mapMaybe cardDrawn
-      . history
-      . execUntil gameOver 1000 params
-      .: gameInProgress ((\pid -> CompletePlayer.new pid deck hand discard) <$> pids) []
+  it "provides equal opportunity" $ property $
+    \params@(EvaluationParameters candidates) (NonEmpty deck) (NonEmpty hand) (NonEmpty discard) ->
+      let
+        pids = candidateId <$> candidates
+      in
+        (<= 5)
+        . liftA2 (-) maximum minimum
+        . elems
+        . fmap length
+        . addEmpty pids
+        . categorise fst snd
+        . mapMaybe cardDrawn
+        . history
+        . execUntil gameOver 1000 params
+        .: gameInProgress ((\pid -> CompletePlayer.new pid deck hand discard) <$> pids) []
 
   describe "turn end" $ do
 
