@@ -6,6 +6,7 @@ import GamePreparationTests
 import BuyPhaseTests
 import CleanUpPhaseTests
 import TurnSequenceTests
+import StrategyTests
 
 import Test.Hspec
 
@@ -17,3 +18,4 @@ main = hspec $ do
   buyPhaseTests
   cleanUpPhaseTests
   turnSequenceTests
+  strategyTests
