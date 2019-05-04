@@ -6,10 +6,10 @@ module Strategy
 import Card
 import PlayState
 
-import Data.Maybe
+import Data.List
 
 data Strategy = Strategy [Card]
   deriving (Eq, Show)
 
 execute :: Strategy -> PlayState -> Maybe Card
-execute _ = listToMaybe . supply
+execute (Strategy priority) g = find (`elem` supply g) priority
