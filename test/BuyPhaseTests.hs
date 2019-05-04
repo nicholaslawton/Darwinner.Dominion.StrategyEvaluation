@@ -15,17 +15,17 @@ import Data.Composition
 import EventValidation
 import GameStateValidation
 import EngineValidation
-import ArbitraryInstances()
+import ArbitraryInstances
 import Test.Hspec
 import Test.QuickCheck
 
 buyPhaseTests :: SpecWith ()
 buyPhaseTests = describe "buy phase" $ do
 
-  it "gains a card" $ property $ \params (Positive buys) (NonEmpty ps) (NonEmpty cards) ->
+  it "gains a card" $ property $ \(ValidPlayersWithParams ps params) (Positive buys) (NonEmpty cards) ->
     any cardGained . history .: runTest params buys ps cards
 
-  it "completes" $ property $ \params (Positive buys) (NonEmpty ps) (NonEmpty cards) ->
+  it "completes" $ property $ \(ValidPlayersWithParams ps params) (Positive buys) (NonEmpty cards) ->
     (===) BuyPhaseCompleted . last . history .: runTest params buys ps cards
 
 runTest :: EvaluationParameters -> Int -> [CompletePlayer] -> [Card] -> Turn -> Int -> Game

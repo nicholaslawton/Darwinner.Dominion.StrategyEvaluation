@@ -83,8 +83,11 @@ validCandidateIds (TwoCandidateIds id1 id2) = [id1, id2]
 validCandidateIds (ThreeCandidateIds id1 id2 id3) = [id1, id2, id3]
 validCandidateIds (FourCandidateIds id1 id2 id3 id4) = [id1, id2, id3, id4]
 
+validCandidate :: CandidateId -> Gen Candidate
+validCandidate cid = Candidate cid <$> arbitrary
+
 validCandidates :: Gen [Candidate]
-validCandidates = validCandidateIds <$> arbitrary >>= traverse (\cid -> Candidate cid <$> arbitrary)
+validCandidates = validCandidateIds <$> arbitrary >>= traverse validCandidate
 
 validPlayersPreparingStartingDecks :: Gen [PlayerWithDeck]
 validPlayersPreparingStartingDecks = validCandidateIds <$> arbitrary
@@ -94,15 +97,28 @@ validPlayersDrawingInitialHands :: Gen [PlayerWithHand]
 validPlayersDrawingInitialHands = validCandidateIds <$> arbitrary
   >>= traverse (\cid -> liftA2 (PlayerWithHand.new cid) arbitrary arbitrary)
 
+validPlayer :: CandidateId -> Gen CompletePlayer
+validPlayer cid = liftA3 (CompletePlayer.new cid) arbitrary arbitrary arbitrary
+
 validPlayers :: Gen [CompletePlayer]
-validPlayers = validCandidateIds <$> arbitrary
-  >>= traverse (\cid -> liftA3 (CompletePlayer.new cid) arbitrary arbitrary arbitrary)
+validPlayers = validCandidateIds <$> arbitrary >>= traverse validPlayer
 
 data ValidPlayers = ValidPlayers [CompletePlayer] 
   deriving (Eq, Show)
 
 instance Arbitrary ValidPlayers where
   arbitrary = ValidPlayers <$> validPlayers
+
+data ValidPlayersWithParams = ValidPlayersWithParams [CompletePlayer] EvaluationParameters
+  deriving (Eq, Show)
+
+instance Arbitrary ValidPlayersWithParams where
+  arbitrary = fmap combine $ validCandidateIds <$> arbitrary >>= traverse validPlayerAndCandidate
+    where
+      validPlayerAndCandidate :: CandidateId -> Gen (CompletePlayer, Candidate)
+      validPlayerAndCandidate cid = validPlayer cid >>= liftA2 fmap (,) (validCandidate . playerId)
+      combine :: [(CompletePlayer, Candidate)] -> ValidPlayersWithParams
+      combine = uncurry ValidPlayersWithParams . second EvaluationParameters . unzip
 
 data SelectedPlayerWithDeck = SelectedPlayerWithDeck [PlayerWithDeck] CandidateId
   deriving (Eq, Show)
