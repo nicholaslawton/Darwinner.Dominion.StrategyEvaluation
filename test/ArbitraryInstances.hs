@@ -1,6 +1,7 @@
 {-# OPTIONS_GHC -fno-warn-orphans #-} 
 module ArbitraryInstances where
 
+import Coins
 import Card
 import EvaluationParameters
 import Player
@@ -19,6 +20,9 @@ import Control.Monad
 import Data.Bifunctor
 
 import Test.QuickCheck
+
+instance Arbitrary Coins where
+  arbitrary = Coins <$> arbitrary
 
 instance Arbitrary Card where
   arbitrary = oneof [return Province, return Duchy, return Estate, return Gold, return Silver, return Copper]

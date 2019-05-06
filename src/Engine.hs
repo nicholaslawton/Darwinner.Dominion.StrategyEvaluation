@@ -10,6 +10,7 @@ import Message
 import EvaluationParameters
 import Candidate
 import CandidateId
+import Coins
 import BuyAllowance
 import Strategy
 
@@ -85,7 +86,7 @@ nextMessage = do
     BuyPhase (BuyAllowance buys) _ | buys <= 0 -> return BuyPhaseComplete
 
     BuyPhase _ playState ->
-      return $ maybe BuyPhaseComplete (GainCard activePlayerId) (Strategy.execute s playState)
+      return $ maybe BuyPhaseComplete (GainCard activePlayerId) (Strategy.execute s (Coins 100) playState)
         where
           activePlayerId = playerId $ activePlayer playState
           s = fromMaybe unexpected $ strategy <$> find ((== activePlayerId) . candidateId) candidates
