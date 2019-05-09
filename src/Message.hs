@@ -13,6 +13,7 @@ data Message
   | MarkInitialHandsDrawn
   | DrawCard CandidateId Card
   | GainCard CandidateId Card
+  | PlayTreasureCard CandidateId Card
   | DiscardCard CandidateId Card
   | ReformDeck CandidateId
   | BuyPhaseComplete

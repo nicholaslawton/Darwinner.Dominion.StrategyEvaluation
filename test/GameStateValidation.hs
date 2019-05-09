@@ -26,7 +26,7 @@ drawingInitialHands (DrawingInitialHands _ _) = True
 drawingInitialHands _ = False
 
 buyPhase :: GameState -> Bool
-buyPhase (BuyPhase _ _) = True
+buyPhase (BuyPhase _ _ _) = True
 buyPhase _ = False
 
 cleanUpPhase :: GameState -> Bool

@@ -3,7 +3,7 @@ module Parsing
   , parseEvaluationParameters
   ) where
 
-import Card
+import Card (Card(..))
 import Strategy
 import Candidate
 import CandidateId

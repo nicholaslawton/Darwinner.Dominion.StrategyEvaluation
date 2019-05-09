@@ -83,9 +83,9 @@ nextMessage = do
 
           unexpected = error "Unexpected failure drawing a card for initial hand"
 
-    BuyPhase (BuyAllowance buys) _ | buys <= 0 -> return BuyPhaseComplete
+    BuyPhase _ (BuyAllowance buys) _ | buys <= 0 -> return BuyPhaseComplete
 
-    BuyPhase _ playState ->
+    BuyPhase _ _ playState ->
       return $ maybe BuyPhaseComplete (GainCard activePlayerId) (Strategy.execute s (Coins 100) playState)
         where
           activePlayerId = playerId $ activePlayer playState

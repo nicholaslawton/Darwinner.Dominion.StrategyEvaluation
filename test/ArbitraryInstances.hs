@@ -2,6 +2,7 @@
 module ArbitraryInstances where
 
 import Coins
+import BuyAllowance
 import Card
 import EvaluationParameters
 import Player
@@ -23,6 +24,9 @@ import Test.QuickCheck
 
 instance Arbitrary Coins where
   arbitrary = Coins <$> arbitrary
+
+instance Arbitrary BuyAllowance where
+  arbitrary = BuyAllowance <$> arbitrary
 
 instance Arbitrary Card where
   arbitrary = oneof [return Province, return Duchy, return Estate, return Gold, return Silver, return Copper]

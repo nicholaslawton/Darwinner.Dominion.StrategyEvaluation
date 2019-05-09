@@ -3,6 +3,7 @@ module TurnSequenceTests (turnSequenceTests) where
 import Game
 import GameState
 import PlayState
+import Coins
 import BuyAllowance
 import CompletePlayer
 import Card
@@ -60,7 +61,7 @@ addEmpty :: Ord k => [k] -> Map k [a] -> Map k [a]
 addEmpty = flip $ foldr (\k m -> insertWith (flip const) k [] m)
 
 gameInProgress :: [CompletePlayer] -> [Card] -> Turn -> Int -> Game
-gameInProgress = gameInState . BuyPhase BuyAllowance.initial .:. PlayState
+gameInProgress = gameInState . BuyPhase Coins.base BuyAllowance.initial .:. PlayState
 
 gameAtTurnEnd :: (PlayState -> PlayState) -> PlayState -> Int -> Game
 gameAtTurnEnd f = gameInState . TurnEnd . f

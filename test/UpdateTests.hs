@@ -9,6 +9,7 @@ import Player
 import CompletePlayer
 import PlayerWithoutDominion
 import Card
+import Coins
 import BuyAllowance
 import Turn
 
@@ -67,14 +68,18 @@ updateTests = describe "update" $ do
         (CleanUpPhase DrawHand .:. PlayState)
 
   describe "gain card" $ do
-    it "adds card to discard" $ property $ \(SelectedPlayerAndCardInSupply g pid card) (Positive buys) ->
-      verifyPlayerUpdate pid (length . discard) (+1) (GainCard pid card) (BuyPhase (BuyAllowance buys) g)
+    it "adds card to discard" $ property $ \(SelectedPlayerAndCardInSupply g pid card) coins (Positive buys) ->
+      verifyPlayerUpdate pid (length . discard) (+1) (GainCard pid card) (BuyPhase coins (BuyAllowance buys) g)
 
-    it "does not alter cards in play" $ property $ \(SelectedPlayerAndCardInSupply g pid card) (Positive buys) ->
-      verifyUpdate cardsInPlay id (GainCard pid card) (BuyPhase (BuyAllowance buys) g)
+    it "does not alter cards in play" $ property $ \(SelectedPlayerAndCardInSupply g pid card) coins (Positive buys) ->
+      verifyUpdate cardsInPlay id (GainCard pid card) (BuyPhase coins (BuyAllowance buys) g)
 
-    it "decrements buy allowance" $ property $ \(SelectedPlayerAndCardInSupply g pid card) (Positive buys) ->
-      verifyUpdate buyAllowance (subtract 1) (GainCard pid card) (BuyPhase (BuyAllowance buys) g)
+    it "decrements buy allowance" $ property $ \(SelectedPlayerAndCardInSupply g pid card) coins (Positive buys) ->
+      verifyUpdate buyAllowance (subtract 1) (GainCard pid card) (BuyPhase coins (BuyAllowance buys) g)
+
+  describe "playing treasure card" $
+    it "increases the coins to spend" $ property $ \(CardInHand g pid card) coins buys ->
+      verifyUpdate coinBalance (+ value card) (PlayTreasureCard pid card) (BuyPhase coins buys g)
 
   describe "discard card" $ do
     it "removes card from hand" $ property $ \(CardInHand g pid card) ->
@@ -94,8 +99,8 @@ updateTests = describe "update" $ do
       verifyPlayerUpdate pid (liftA2 (++) deck discard) id (ReformDeck pid) (CleanUpPhase DrawHand g)
 
   describe "buy phase completion" $
-    it "transitions to clean up phase" $ property $
-      cleanUpPhase . update BuyPhaseComplete . BuyPhase (BuyAllowance 0)
+    it "transitions to clean up phase" $ property $ \coins ->
+      cleanUpPhase . update BuyPhaseComplete . BuyPhase coins (BuyAllowance 0)
 
   describe "discard step completion" $
     it "transitions to draw next hand step" $ property $
@@ -152,5 +157,9 @@ cardsInPlay :: GameState -> [Card]
 cardsInPlay gameState = sortOn arbitraryCardOrder $ concatMap ($ gameState) [concatMap dominion . players, GameState.supply]
 
 buyAllowance :: GameState -> Int
-buyAllowance (BuyPhase (BuyAllowance buys) _) = buys
+buyAllowance (BuyPhase _ (BuyAllowance buys) _) = buys
 buyAllowance _ = 0
+
+coinBalance :: GameState -> Coins
+coinBalance (BuyPhase coins _ _) = coins
+coinBalance _ = Coins 0

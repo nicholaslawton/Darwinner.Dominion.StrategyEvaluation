@@ -13,6 +13,7 @@ data Event
   | InitialHandsDrawn
   | CardDrawn CandidateId Card
   | CardGained CandidateId Card
+  | TreasureCardPlayed CandidateId Card
   | CardDiscarded CandidateId Card
   | DeckReformed CandidateId
   | BuyPhaseCompleted

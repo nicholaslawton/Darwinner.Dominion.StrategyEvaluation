@@ -10,6 +10,7 @@ import PlayerWithDeck
 import PlayerWithHand
 import CompletePlayer
 import Card
+import Coins
 import BuyAllowance
 import Turn
 
@@ -27,6 +28,7 @@ update MarkDecksPrepared = beginDrawingInitialHands
 update MarkInitialHandsDrawn = beginPlay
 update (DrawCard pid card) = drawCard pid card
 update (GainCard pid card) = gainCard pid card
+update (PlayTreasureCard pid card) = playTreasureCard pid card
 update (DiscardCard pid card) = discardCard pid card
 update (ReformDeck pid) = reformDeck pid
 update BuyPhaseComplete = beginCleanUpPhase
@@ -67,7 +69,7 @@ beginDrawingInitialHands _ = error "Drawing initial hands must occur after decks
 
 beginPlay :: GameState -> GameState
 beginPlay (DrawingInitialHands ps cards) =
-  BuyPhase BuyAllowance.initial (PlayState (CompletePlayer.fromPlayerWithHand <$> ps) cards firstTurn)
+  BuyPhase Coins.base BuyAllowance.initial (PlayState (CompletePlayer.fromPlayerWithHand <$> ps) cards firstTurn)
 beginPlay _ = error "Cannot begin play before the game has been fully prepared"
 
 drawCard :: CandidateId -> Card -> GameState -> GameState
@@ -84,12 +86,13 @@ drawCardForPlayer pid card ps
   | otherwise = alterPlayer (alterHand (card :) . alterDeck (delete card)) pid ps
 
 gainCard :: CandidateId -> Card -> GameState -> GameState
-gainCard pid card (BuyPhase (BuyAllowance buys) playState)
+gainCard pid card (BuyPhase coins (BuyAllowance buys) playState)
   | not $ playerExists pid ps = error "Invalid card gain: player not in game"
   | notElem card cards = error "Invalid card gain: card not in supply"
   | buys <= 0 = error "Invalid card gain: buy allowance exhausted"
   | otherwise = 
       BuyPhase
+        coins
         (BuyAllowance (buys - 1))
         (playState
           { players = alterPlayer (alterDiscard (card :)) pid ps
@@ -99,6 +102,15 @@ gainCard pid card (BuyPhase (BuyAllowance buys) playState)
         ps = players playState
         cards = supply playState
 gainCard _ _ _ = error "A card may only be gained during the buy phase"
+
+playTreasureCard :: CandidateId -> Card -> GameState -> GameState
+playTreasureCard pid card (BuyPhase coins buys playState)
+  | not $ playerExists pid ps = error "Invalid treausre card play: player not in game"
+  | not $ cardBelongsToPlayer hand card pid ps = error "Invalid treasure card play: card not in hand of player"
+  | otherwise = BuyPhase (coins + value card) buys playState
+      where
+        ps = players playState
+playTreasureCard _ _ _ = error "A treasure card may only be played during the buy phase"
 
 discardCard :: CandidateId -> Card -> GameState -> GameState
 discardCard pid card (CleanUpPhase Discard playState)
@@ -118,7 +130,7 @@ reformDeck pid (CleanUpPhase DrawHand playState)
 reformDeck _ _ = error "Reforming the deck must occur while drawing the next hand during the clean up phase"
 
 beginCleanUpPhase :: GameState -> GameState
-beginCleanUpPhase (BuyPhase _ playState) = CleanUpPhase Discard playState
+beginCleanUpPhase (BuyPhase _ _ playState) = CleanUpPhase Discard playState
 beginCleanUpPhase _ = error "Clean up phase must follow buy phase"
 
 beginDrawingNextHand :: GameState -> GameState
@@ -131,7 +143,7 @@ advanceToTurnEnd _ = error "Cannot advance to turn end before clean up phase is 
 
 startNextTurn :: GameState -> GameState
 startNextTurn (TurnEnd playState) =
-  BuyPhase BuyAllowance.initial $ playState { turn = nextTurn (turn playState) }
+  BuyPhase Coins.base BuyAllowance.initial $ playState { turn = nextTurn (turn playState) }
 startNextTurn _ = error "Cannot start next turn before current turn is complete"
 
 endGame :: GameState -> GameState
