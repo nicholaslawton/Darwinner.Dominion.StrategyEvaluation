@@ -14,7 +14,7 @@ data Event
   | CardDrawn CandidateId Card
   | CardGained CandidateId Card
   | TreasureCardPlayed CandidateId Card
-  | CardDiscarded CandidateId Card
+  | UnplayedCardDiscarded CandidateId Card
   | PlayedCardDiscarded CandidateId Card
   | DeckReformed CandidateId
   | BuyPhaseCompleted

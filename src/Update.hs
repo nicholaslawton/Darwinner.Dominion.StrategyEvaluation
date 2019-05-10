@@ -29,7 +29,7 @@ update MarkInitialHandsDrawn = beginPlay
 update (DrawCard pid card) = drawCard pid card
 update (GainCard pid card) = gainCard pid card
 update (PlayTreasureCard pid card) = playTreasureCard pid card
-update (DiscardCard pid card) = discardCard pid card
+update (DiscardUnplayedCard pid card) = discardUnplayedCard pid card
 update (DiscardPlayedCard pid card) = discardPlayedCard pid card
 update (ReformDeck pid) = reformDeck pid
 update BuyPhaseComplete = beginCleanUpPhase
@@ -95,10 +95,7 @@ gainCard pid card (BuyPhase coins (BuyAllowance buys) g)
       BuyPhase
         coins
         (BuyAllowance (buys - 1))
-        (g
-          { players = alterPlayer (alterDiscard (card :)) pid ps
-          , supply = delete card cards
-          })
+        (g { players = alterPlayer (alterDiscard (card :)) pid ps , supply = delete card cards })
       where
         ps = players g
         cards = supply g
@@ -113,14 +110,14 @@ playTreasureCard pid card (BuyPhase coins buys g)
         ps = players g
 playTreasureCard _ _ _ = error "A treasure card may only be played during the buy phase"
 
-discardCard :: CandidateId -> Card -> GameState -> GameState
-discardCard pid card (CleanUpPhase Discard g)
-  | not $ playerExists pid ps = error "Invalid discard: player not in game"
-  | not $ cardBelongsToPlayer hand card pid ps = error "Invalid discard: card not in hand of player"
+discardUnplayedCard :: CandidateId -> Card -> GameState -> GameState
+discardUnplayedCard pid card (CleanUpPhase Discard g)
+  | not $ playerExists pid ps = error "Invalid discard of unplayed card: player not in game"
+  | not $ cardBelongsToPlayer hand card pid ps = error "Invalid discard of unplayed card: card not in hand of player"
   | otherwise = CleanUpPhase Discard $ alterPlayerInState (moveFromHandToDiscard card) pid g
       where
         ps = players g
-discardCard _ _ _ = error "A card may only be discarded during the discard step of the clean up phase"
+discardUnplayedCard _ _ _ = error "An unplayed card may only be discarded during the discard step of the clean up phase"
 
 discardPlayedCard :: CandidateId -> Card -> GameState -> GameState
 discardPlayedCard pid card (CleanUpPhase Discard g)

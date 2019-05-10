@@ -95,7 +95,7 @@ nextMessage = do
     CleanUpPhase Discard playState ->
       return $ fromMaybe DiscardStepComplete $ discardUnplayedCard <|> discardPlayedCard
         where
-          discardUnplayedCard = DiscardCard (playerId p) <$> listToMaybe (hand p)
+          discardUnplayedCard = DiscardUnplayedCard (playerId p) <$> listToMaybe (hand p)
           discardPlayedCard = DiscardPlayedCard (playerId p) <$> listToMaybe (playedCards p)
           p = activePlayer playState
 

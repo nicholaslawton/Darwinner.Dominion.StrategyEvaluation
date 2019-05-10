@@ -89,13 +89,13 @@ updateTests = describe "update" $ do
     
   describe "discard unplayed card" $ do
     it "removes card from hand" $ property $ \(CardInHand g pid card) ->
-      verifyPlayerUpdate pid (length . hand) (subtract 1) (DiscardCard pid card) (CleanUpPhase Discard g)
+      verifyPlayerUpdate pid (length . hand) (subtract 1) (DiscardUnplayedCard pid card) (CleanUpPhase Discard g)
 
     it "adds card to discard" $ property $ \(CardInHand g pid card) ->
-      verifyPlayerUpdate pid (length . discard) (+1) (DiscardCard pid card) (CleanUpPhase Discard g)
+      verifyPlayerUpdate pid (length . discard) (+1) (DiscardUnplayedCard pid card) (CleanUpPhase Discard g)
 
     it "does not alter dominion of player" $ property $ \(CardInHand g pid card) ->
-      verifyPlayerUpdate pid dominion id (DiscardCard pid card) (CleanUpPhase Discard g)
+      verifyPlayerUpdate pid dominion id (DiscardUnplayedCard pid card) (CleanUpPhase Discard g)
 
   describe "discard played card" $ do
     it "removes card from played cards" $ property $ \(PlayedCard g pid card) ->

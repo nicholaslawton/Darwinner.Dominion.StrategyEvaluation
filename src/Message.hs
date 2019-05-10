@@ -14,7 +14,7 @@ data Message
   | DrawCard CandidateId Card
   | GainCard CandidateId Card
   | PlayTreasureCard CandidateId Card
-  | DiscardCard CandidateId Card
+  | DiscardUnplayedCard CandidateId Card
   | DiscardPlayedCard CandidateId Card
   | ReformDeck CandidateId
   | BuyPhaseComplete
