@@ -104,6 +104,9 @@ updateTests = describe "update" $ do
     it "adds card to discard" $ property $ \(PlayedCard g pid card) ->
       verifyPlayerUpdate pid (length . discard) (+1) (DiscardPlayedCard pid card) (CleanUpPhase Discard g)
 
+    it "does not alter dominion of player" $ property $ \(PlayedCard g pid card) ->
+      verifyPlayerUpdate pid dominion' id (DiscardPlayedCard pid card) (CleanUpPhase Discard g)
+
   describe "reform deck" $ do
     it "leaves discard empty" $ property $ \(SelectedPlayer g pid) ->
       verifyPlayerState pid (null . discard) $ update (ReformDeck pid) (CleanUpPhase DrawHand g)

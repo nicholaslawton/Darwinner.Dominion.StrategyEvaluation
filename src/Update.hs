@@ -166,7 +166,7 @@ moveFromHandToDiscard :: Card -> CompletePlayer -> CompletePlayer
 moveFromHandToDiscard card = alterDiscard (card :) . alterHand (delete card)
 
 moveFromPlayedCardsToDiscard :: Card -> CompletePlayer -> CompletePlayer
-moveFromPlayedCardsToDiscard card = alterDiscard (Copper :) . alterPlayedCards (delete card)
+moveFromPlayedCardsToDiscard card = alterDiscard (card :) . alterPlayedCards (delete card)
 
 moveDiscardToDeck :: CompletePlayer -> CompletePlayer
 moveDiscardToDeck p = alterDiscard (const []) $ alterDeck (++ discard p) p
