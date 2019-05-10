@@ -9,6 +9,7 @@ import CompletePlayer
 import Card
 import Turn
 
+import Control.Applicative
 import Data.List
 import Data.Maybe
 import Data.Composition
@@ -43,7 +44,7 @@ runTest :: EvaluationParameters -> CleanUpStep -> [CompletePlayer] -> [Card] -> 
 runTest params step ps = execWhile cleanUpPhase (actionLimit ps) params .:. gameInCleanUpPhase step ps
 
 actionLimit :: [CompletePlayer] -> Int
-actionLimit = (+10) . length . hand . head
+actionLimit = (+10) . length . liftA2 (++) hand playedCards . head
 
 gameInCleanUpPhase :: CleanUpStep -> [CompletePlayer] -> [Card] -> Turn -> Int -> Game
 gameInCleanUpPhase step = gameInState . CleanUpPhase step .:. PlayState
