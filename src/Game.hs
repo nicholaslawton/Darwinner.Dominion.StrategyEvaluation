@@ -38,6 +38,7 @@ event (DrawCard pid card) = CardDrawn pid card
 event (GainCard pid card) = CardGained pid card
 event (PlayTreasureCard pid card) = TreasureCardPlayed pid card
 event (DiscardCard pid card) = CardDiscarded pid card
+event (DiscardPlayedCard pid card) = PlayedCardDiscarded pid card
 event (ReformDeck pid) = DeckReformed pid
 event BuyPhaseComplete = BuyPhaseCompleted
 event DiscardStepComplete = HandAndPlayedCardsDiscarded

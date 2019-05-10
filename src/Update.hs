@@ -30,6 +30,7 @@ update (DrawCard pid card) = drawCard pid card
 update (GainCard pid card) = gainCard pid card
 update (PlayTreasureCard pid card) = playTreasureCard pid card
 update (DiscardCard pid card) = discardCard pid card
+update (DiscardPlayedCard pid card) = discardPlayedCard pid card
 update (ReformDeck pid) = reformDeck pid
 update BuyPhaseComplete = beginCleanUpPhase
 update DiscardStepComplete = beginDrawingNextHand
@@ -121,9 +122,18 @@ discardCard pid card (CleanUpPhase Discard g)
         ps = players g
 discardCard _ _ _ = error "A card may only be discarded during the discard step of the clean up phase"
 
+discardPlayedCard :: CandidateId -> Card -> GameState -> GameState
+discardPlayedCard pid card (CleanUpPhase Discard g)
+  | not $ playerExists pid ps = error "Invalid discard of played card: player not in game"
+  | not $ cardBelongsToPlayer playedCards card pid ps = error "Invalid discard of played card: card not played by player"
+  | otherwise = CleanUpPhase Discard $ alterPlayerInState (moveFromPlayedCardsToDiscard card) pid g
+      where
+        ps = players g
+discardPlayedCard _ _ _ = error "A played card may only be discarded during the discard step of the clean up phase"
+
 reformDeck :: CandidateId -> GameState -> GameState
 reformDeck pid (CleanUpPhase DrawHand g)
-  | not $ playerExists pid ps = error "Invalid discard: player not in game"
+  | not $ playerExists pid ps = error "Invalid deck reformation: player not in game"
   | otherwise = CleanUpPhase DrawHand $ alterPlayerInState moveDiscardToDeck pid g
       where
         ps = players g
@@ -154,6 +164,9 @@ playCard card = alterPlayedCards (Copper :) . alterHand (delete card)
 
 moveFromHandToDiscard :: Card -> CompletePlayer -> CompletePlayer
 moveFromHandToDiscard card = alterDiscard (card :) . alterHand (delete card)
+
+moveFromPlayedCardsToDiscard :: Card -> CompletePlayer -> CompletePlayer
+moveFromPlayedCardsToDiscard card = alterPlayedCards (delete card)
 
 moveDiscardToDeck :: CompletePlayer -> CompletePlayer
 moveDiscardToDeck p = alterDiscard (const []) $ alterDeck (++ discard p) p

@@ -174,6 +174,12 @@ data CardInHand = CardInHand PlayState CandidateId Card
 instance Arbitrary CardInHand where
   arbitrary = selectedCardInAreaWithPlayState CardInHand hand
 
+data PlayedCard = PlayedCard PlayState CandidateId Card
+  deriving (Eq, Show)
+
+instance Arbitrary PlayedCard where
+  arbitrary = selectedCardInAreaWithPlayState PlayedCard playedCards
+
 selectedElement :: [a] -> Gen ([a], a)
 selectedElement = selectFrom elements
 

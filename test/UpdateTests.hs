@@ -87,7 +87,7 @@ updateTests = describe "update" $ do
     it "adds card to played cards" $ property $ \(CardInHand g pid card) coins buys ->
       verifyPlayerUpdate pid (length . playedCards) (+1) (PlayTreasureCard pid card) (BuyPhase coins buys g)
     
-  describe "discard card" $ do
+  describe "discard unplayed card" $ do
     it "removes card from hand" $ property $ \(CardInHand g pid card) ->
       verifyPlayerUpdate pid (length . hand) (subtract 1) (DiscardCard pid card) (CleanUpPhase Discard g)
 
@@ -96,6 +96,10 @@ updateTests = describe "update" $ do
 
     it "does not alter dominion of player" $ property $ \(CardInHand g pid card) ->
       verifyPlayerUpdate pid dominion id (DiscardCard pid card) (CleanUpPhase Discard g)
+
+  describe "discard played card" $
+    it "removes card from played cards" $ property $ \(PlayedCard g pid card) ->
+      verifyPlayerUpdate pid (length . playedCards) (subtract 1) (DiscardPlayedCard pid card) (CleanUpPhase Discard g)
 
   describe "reform deck" $ do
     it "leaves discard empty" $ property $ \(SelectedPlayer g pid) ->
