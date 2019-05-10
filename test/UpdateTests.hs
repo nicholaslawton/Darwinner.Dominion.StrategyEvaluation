@@ -77,10 +77,16 @@ updateTests = describe "update" $ do
     it "decrements buy allowance" $ property $ \(SelectedPlayerAndCardInSupply g pid card) coins (Positive buys) ->
       verifyUpdate buyAllowance (subtract 1) (GainCard pid card) (BuyPhase coins (BuyAllowance buys) g)
 
-  describe "playing treasure card" $
+  describe "playing treasure card" $ do
+    it "removes card from hand" $ property $ \(CardInHand g pid card) coins buys ->
+      verifyPlayerUpdate pid (length . hand) (subtract 1) (PlayTreasureCard pid card) (BuyPhase coins buys g)
+
     it "increases the coins to spend" $ property $ \(CardInHand g pid card) coins buys ->
       verifyUpdate coinBalance (+ value card) (PlayTreasureCard pid card) (BuyPhase coins buys g)
 
+    --it "adds card to play area" $ property $ \(CardInHand g pid card) coins buys ->
+    --  verifyPlayerUpdate pid (length . playArea) (+1) (PlayTreasureCard pid card) (BuyPhase coins buys g)
+    
   describe "discard card" $ do
     it "removes card from hand" $ property $ \(CardInHand g pid card) ->
       verifyPlayerUpdate pid (length . hand) (subtract 1) (DiscardCard pid card) (CleanUpPhase Discard g)

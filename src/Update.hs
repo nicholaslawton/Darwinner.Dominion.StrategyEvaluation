@@ -107,7 +107,7 @@ playTreasureCard :: CandidateId -> Card -> GameState -> GameState
 playTreasureCard pid card (BuyPhase coins buys playState)
   | not $ playerExists pid ps = error "Invalid treausre card play: player not in game"
   | not $ cardBelongsToPlayer hand card pid ps = error "Invalid treasure card play: card not in hand of player"
-  | otherwise = BuyPhase (coins + value card) buys playState
+  | otherwise = BuyPhase (coins + value card) buys $ playState { players = alterPlayer (playCard card) pid ps }
       where
         ps = players playState
 playTreasureCard _ _ _ = error "A treasure card may only be played during the buy phase"
@@ -148,6 +148,9 @@ startNextTurn _ = error "Cannot start next turn before current turn is complete"
 
 endGame :: GameState -> GameState
 endGame = const GameOver
+
+playCard :: Card -> CompletePlayer -> CompletePlayer
+playCard card = alterHand (delete card)
 
 moveFromDeckToHand :: Card -> CompletePlayer -> CompletePlayer
 moveFromDeckToHand card = alterDiscard (card :) . alterHand (delete card)
