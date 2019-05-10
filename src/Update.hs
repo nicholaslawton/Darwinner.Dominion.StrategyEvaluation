@@ -74,8 +74,8 @@ beginPlay _ = error "Cannot begin play before the game has been fully prepared"
 
 drawCard :: CandidateId -> Card -> GameState -> GameState
 drawCard pid card (DrawingInitialHands ps cards) = DrawingInitialHands (drawCardForPlayer pid card ps) cards
-drawCard pid card (CleanUpPhase DrawHand playState) =
-  CleanUpPhase DrawHand (playState { players = drawCardForPlayer pid card (players playState) })
+drawCard pid card (CleanUpPhase DrawHand g) =
+  CleanUpPhase DrawHand $ g { players = drawCardForPlayer pid card (players g) }
 drawCard _ _ _ =
   error "A card may only be drawn while players are drawing their initial hands, or during the clean up phase"
 
@@ -86,7 +86,7 @@ drawCardForPlayer pid card ps
   | otherwise = alterPlayer (alterHand (card :) . alterDeck (delete card)) pid ps
 
 gainCard :: CandidateId -> Card -> GameState -> GameState
-gainCard pid card (BuyPhase coins (BuyAllowance buys) playState)
+gainCard pid card (BuyPhase coins (BuyAllowance buys) g)
   | not $ playerExists pid ps = error "Invalid card gain: player not in game"
   | notElem card cards = error "Invalid card gain: card not in supply"
   | buys <= 0 = error "Invalid card gain: buy allowance exhausted"
@@ -94,56 +94,56 @@ gainCard pid card (BuyPhase coins (BuyAllowance buys) playState)
       BuyPhase
         coins
         (BuyAllowance (buys - 1))
-        (playState
+        (g
           { players = alterPlayer (alterDiscard (card :)) pid ps
           , supply = delete card cards
           })
       where
-        ps = players playState
-        cards = supply playState
+        ps = players g
+        cards = supply g
 gainCard _ _ _ = error "A card may only be gained during the buy phase"
 
 playTreasureCard :: CandidateId -> Card -> GameState -> GameState
-playTreasureCard pid card (BuyPhase coins buys playState)
+playTreasureCard pid card (BuyPhase coins buys g)
   | not $ playerExists pid ps = error "Invalid treausre card play: player not in game"
   | not $ cardBelongsToPlayer hand card pid ps = error "Invalid treasure card play: card not in hand of player"
-  | otherwise = BuyPhase (coins + value card) buys $ playState { players = alterPlayer (playCard card) pid ps }
+  | otherwise = BuyPhase (coins + value card) buys $ alterPlayerInState (playCard card) pid g
       where
-        ps = players playState
+        ps = players g
 playTreasureCard _ _ _ = error "A treasure card may only be played during the buy phase"
 
 discardCard :: CandidateId -> Card -> GameState -> GameState
-discardCard pid card (CleanUpPhase Discard playState)
+discardCard pid card (CleanUpPhase Discard g)
   | not $ playerExists pid ps = error "Invalid discard: player not in game"
   | not $ cardBelongsToPlayer hand card pid ps = error "Invalid discard: card not in hand of player"
-  | otherwise = CleanUpPhase Discard (playState { players = alterPlayer (moveFromDeckToHand card) pid ps })
+  | otherwise = CleanUpPhase Discard $ alterPlayerInState (moveFromDeckToHand card) pid g
       where
-        ps = players playState
+        ps = players g
 discardCard _ _ _ = error "A card may only be discarded during the discard step of the clean up phase"
 
 reformDeck :: CandidateId -> GameState -> GameState
-reformDeck pid (CleanUpPhase DrawHand playState)
+reformDeck pid (CleanUpPhase DrawHand g)
   | not $ playerExists pid ps = error "Invalid discard: player not in game"
-  | otherwise = CleanUpPhase DrawHand (playState { players = alterPlayer moveDiscardToDeck pid ps })
+  | otherwise = CleanUpPhase DrawHand $ alterPlayerInState moveDiscardToDeck pid g
       where
-        ps = players playState
+        ps = players g
 reformDeck _ _ = error "Reforming the deck must occur while drawing the next hand during the clean up phase"
 
 beginCleanUpPhase :: GameState -> GameState
-beginCleanUpPhase (BuyPhase _ _ playState) = CleanUpPhase Discard playState
+beginCleanUpPhase (BuyPhase _ _ g) = CleanUpPhase Discard g
 beginCleanUpPhase _ = error "Clean up phase must follow buy phase"
 
 beginDrawingNextHand :: GameState -> GameState
-beginDrawingNextHand (CleanUpPhase Discard playState) = CleanUpPhase DrawHand playState
+beginDrawingNextHand (CleanUpPhase Discard g) = CleanUpPhase DrawHand g
 beginDrawingNextHand _ = error "Drawing the next hand must follow the discard step of the clean up phase"
 
 advanceToTurnEnd :: GameState -> GameState
-advanceToTurnEnd (CleanUpPhase DrawHand playState) = TurnEnd playState
+advanceToTurnEnd (CleanUpPhase DrawHand g) = TurnEnd g
 advanceToTurnEnd _ = error "Cannot advance to turn end before clean up phase is complete"
 
 startNextTurn :: GameState -> GameState
-startNextTurn (TurnEnd playState) =
-  BuyPhase Coins.base BuyAllowance.initial $ playState { turn = nextTurn (turn playState) }
+startNextTurn (TurnEnd g) =
+  BuyPhase Coins.base BuyAllowance.initial $ g { turn = nextTurn (turn g) }
 startNextTurn _ = error "Cannot start next turn before current turn is complete"
 
 endGame :: GameState -> GameState
@@ -169,6 +169,9 @@ alterElem on f x = alterWhere f ((==) x . on)
 
 alterPlayer :: Player p => (p -> p) -> CandidateId -> [p] -> [p]
 alterPlayer = alterElem playerId
+
+alterPlayerInState :: (CompletePlayer -> CompletePlayer) -> CandidateId -> PlayState -> PlayState
+alterPlayerInState alteration pid g = g { players = alterPlayer alteration pid $ players g}
 
 playerExists :: Player p => CandidateId -> [p] -> Bool
 playerExists pid = any ((==) pid . playerId)
