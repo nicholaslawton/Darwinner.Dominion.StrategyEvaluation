@@ -93,8 +93,10 @@ nextMessage = do
           unexpected = error "Active player not found among candidates"
 
     CleanUpPhase Discard playState ->
-      return $ maybe DiscardStepComplete (DiscardCard $ playerId p) (listToMaybe $ hand p)
+      return $ fromMaybe DiscardStepComplete $ discardUnplayedCard <|> discardPlayedCard
         where
+          discardUnplayedCard = DiscardCard (playerId p) <$> listToMaybe (hand p)
+          discardPlayedCard = DiscardPlayedCard (playerId p) <$> listToMaybe (playedCards p)
           p = activePlayer playState
 
     CleanUpPhase DrawHand playState ->

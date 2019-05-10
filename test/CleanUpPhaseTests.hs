@@ -33,6 +33,13 @@ cleanUpPhaseTests = describe "clean up phase" $ do
       . history
       . runTest params Discard ps cards firstTurn
 
+  it "discards all played cards" $ property $ \params (NonEmpty ps) cards ->
+    (===) (sortOn arbitraryCardOrder . playedCards . head $ ps)
+      . sortOn arbitraryCardOrder
+      . mapMaybe playedCardDiscarded
+      . history
+      . runTest params Discard ps cards firstTurn
+
   it "draws new hand" $ property $ \params (NonEmpty ps) cards ->
     (===) (min 5 . length . dominion $ head ps)
       . length

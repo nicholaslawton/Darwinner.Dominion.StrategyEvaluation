@@ -6,6 +6,7 @@ module EventValidation
   , cardDrawn
   , cardGained
   , cardDiscarded
+  , playedCardDiscarded
   ) where
 
 import Event
@@ -40,3 +41,7 @@ cardGained _ = False
 cardDiscarded :: Event -> Maybe Card
 cardDiscarded (CardDiscarded _ card) = Just card
 cardDiscarded _ = Nothing
+
+playedCardDiscarded :: Event -> Maybe Card
+playedCardDiscarded (PlayedCardDiscarded _ card) = Just card
+playedCardDiscarded _ = Nothing
