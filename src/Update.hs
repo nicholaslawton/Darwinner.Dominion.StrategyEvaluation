@@ -150,7 +150,7 @@ endGame :: GameState -> GameState
 endGame = const GameOver
 
 playCard :: Card -> CompletePlayer -> CompletePlayer
-playCard card = alterHand (delete card)
+playCard card = alterPlayedCards (Copper :) . alterHand (delete card)
 
 moveFromHandToDiscard :: Card -> CompletePlayer -> CompletePlayer
 moveFromHandToDiscard card = alterDiscard (card :) . alterHand (delete card)

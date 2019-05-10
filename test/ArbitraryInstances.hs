@@ -35,7 +35,7 @@ instance Arbitrary Candidate where
   arbitrary = liftA2 Candidate arbitrary arbitrary
 
 instance Arbitrary CompletePlayer where
-  arbitrary = liftM4 CompletePlayer.new arbitrary arbitrary arbitrary arbitrary
+  arbitrary = liftM5 CompletePlayer.new arbitrary arbitrary arbitrary arbitrary arbitrary
 
 instance Arbitrary PlayerWithoutDominion where
   arbitrary = PlayerWithoutDominion.new <$> arbitrary
@@ -106,7 +106,7 @@ validPlayersDrawingInitialHands = validCandidateIds <$> arbitrary
   >>= traverse (\cid -> liftA2 (PlayerWithHand.new cid) arbitrary arbitrary)
 
 validPlayer :: CandidateId -> Gen CompletePlayer
-validPlayer cid = liftA3 (CompletePlayer.new cid) arbitrary arbitrary arbitrary
+validPlayer cid = liftM4 (CompletePlayer.new cid) arbitrary arbitrary arbitrary arbitrary
 
 validPlayers :: Gen [CompletePlayer]
 validPlayers = validCandidateIds <$> arbitrary >>= traverse validPlayer

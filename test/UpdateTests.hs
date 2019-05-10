@@ -84,8 +84,8 @@ updateTests = describe "update" $ do
     it "increases the coins to spend" $ property $ \(CardInHand g pid card) coins buys ->
       verifyUpdate coinBalance (+ value card) (PlayTreasureCard pid card) (BuyPhase coins buys g)
 
-    --it "adds card to play area" $ property $ \(CardInHand g pid card) coins buys ->
-    --  verifyPlayerUpdate pid (length . playArea) (+1) (PlayTreasureCard pid card) (BuyPhase coins buys g)
+    it "adds card to played cards" $ property $ \(CardInHand g pid card) coins buys ->
+      verifyPlayerUpdate pid (length . playedCards) (+1) (PlayTreasureCard pid card) (BuyPhase coins buys g)
     
   describe "discard card" $ do
     it "removes card from hand" $ property $ \(CardInHand g pid card) ->

@@ -41,7 +41,7 @@ turnSequenceTests = describe "turn sequence" $ do
         . mapMaybe cardDrawn
         . history
         . execUntil gameOver 1000 params
-        .: gameInProgress ((\pid -> CompletePlayer.new pid deck hand discard) <$> pids) []
+        .: gameInProgress ((\pid -> CompletePlayer.new pid deck hand [] discard) <$> pids) []
 
   describe "turn end" $ do
 
