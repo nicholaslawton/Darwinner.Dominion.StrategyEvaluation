@@ -116,7 +116,7 @@ discardCard :: CandidateId -> Card -> GameState -> GameState
 discardCard pid card (CleanUpPhase Discard g)
   | not $ playerExists pid ps = error "Invalid discard: player not in game"
   | not $ cardBelongsToPlayer hand card pid ps = error "Invalid discard: card not in hand of player"
-  | otherwise = CleanUpPhase Discard $ alterPlayerInState (moveFromDeckToHand card) pid g
+  | otherwise = CleanUpPhase Discard $ alterPlayerInState (moveFromHandToDiscard card) pid g
       where
         ps = players g
 discardCard _ _ _ = error "A card may only be discarded during the discard step of the clean up phase"
@@ -152,8 +152,8 @@ endGame = const GameOver
 playCard :: Card -> CompletePlayer -> CompletePlayer
 playCard card = alterHand (delete card)
 
-moveFromDeckToHand :: Card -> CompletePlayer -> CompletePlayer
-moveFromDeckToHand card = alterDiscard (card :) . alterHand (delete card)
+moveFromHandToDiscard :: Card -> CompletePlayer -> CompletePlayer
+moveFromHandToDiscard card = alterDiscard (card :) . alterHand (delete card)
 
 moveDiscardToDeck :: CompletePlayer -> CompletePlayer
 moveDiscardToDeck p = alterDiscard (const []) $ alterDeck (++ discard p) p
