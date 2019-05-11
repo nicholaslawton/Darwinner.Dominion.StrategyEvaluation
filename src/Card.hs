@@ -1,5 +1,7 @@
 module Card
   ( Card(..)
+  , CardType(..)
+  , cardType
   , cost
   , value
   ) where
@@ -15,6 +17,21 @@ data Card
   | Province
   | Curse
   deriving (Eq, Show)
+
+data CardType
+  = Treasure
+  | Victory
+  | CurseType
+  deriving (Eq)
+
+cardType :: Card -> CardType
+cardType Copper = Treasure
+cardType Silver = Treasure
+cardType Gold = Treasure
+cardType Estate = Victory
+cardType Duchy = Victory
+cardType Province = Victory
+cardType Curse = CurseType
 
 cost :: Card -> Coins
 cost Copper = Coins 0

@@ -5,6 +5,7 @@ module EventValidation
   , cardPutInPlay
   , cardDrawn
   , cardGained
+  , cardPlayed
   , unplayedCardDiscarded
   , playedCardDiscarded
   ) where
@@ -37,6 +38,10 @@ cardDrawn _ = Nothing
 cardGained :: Event -> Bool
 cardGained (CardGained _ _) = True
 cardGained _ = False
+
+cardPlayed :: Event -> Maybe Card
+cardPlayed (TreasureCardPlayed _ card) = Just card
+cardPlayed _ = Nothing
 
 unplayedCardDiscarded :: Event -> Maybe Card
 unplayedCardDiscarded (UnplayedCardDiscarded _ card) = Just card

@@ -86,10 +86,13 @@ nextMessage = do
     BuyPhase _ (BuyAllowance buys) _ | buys <= 0 -> return BuyPhaseComplete
 
     BuyPhase _ _ playState ->
-      return $ maybe BuyPhaseComplete (GainCard activePlayerId) (Strategy.execute s (Coins 100) playState)
+      return $ fromMaybe BuyPhaseComplete $ playTreasureCard <|> gainCard
         where
-          activePlayerId = playerId $ activePlayer playState
-          s = fromMaybe unexpected $ strategy <$> find ((== activePlayerId) . candidateId) candidates
+          p = activePlayer playState
+          pid = playerId p
+          playTreasureCard = PlayTreasureCard pid <$> find ((== Treasure) . cardType) (hand p)
+          gainCard = GainCard pid <$> Strategy.execute strat (Coins 100) playState
+          strat = fromMaybe unexpected $ strategy <$> find ((== pid) . candidateId) candidates
           unexpected = error "Active player not found among candidates"
 
     CleanUpPhase Discard playState ->
