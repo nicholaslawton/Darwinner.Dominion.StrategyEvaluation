@@ -4,17 +4,14 @@ import Update
 import CandidateId
 import Message
 import GameState
-import PlayState hiding (players)
 import Player
 import CompletePlayer
 import PlayerWithoutDominion
 import Card
 import Coins
 import BuyAllowance
-import Turn
 
 import Data.List
-import Data.Composition
 import Control.Applicative
 
 import GameStateValidation
@@ -58,14 +55,22 @@ updateTests = describe "update" $ do
 
   describe "draw card" $ do
     describe "for initial hand" $
-      drawCardProperties
-        (\(CardInStartingDeck ps cards pid card) -> (ps, cards, pid, card))
-        (\ps cards _ -> DrawingInitialHands ps cards)
+      cardMovementProperties
+        (\(CardInStartingDeck ps cards pid card) -> (DrawingInitialHands ps cards, pid, card))
+        DrawCard
+        deck
+        "deck"
+        hand
+        "hand"
 
     describe "during clean up phase" $
-      drawCardProperties
-        (\(CardInDeck (PlayState ps cards _) pid card) -> (ps, cards, pid, card))
-        (CleanUpPhase DrawHand .:. PlayState)
+      cardMovementProperties
+        (\(CardInDeck g pid card) -> (CleanUpPhase DrawHand g, pid, card))
+        DrawCard
+        deck
+        "deck"
+        hand
+        "hand"
 
   describe "gain card" $ do
     it "adds card to discard" $ property $ \(SelectedPlayerAndCardInSupply g pid card) coins (Positive buys) ->
@@ -78,34 +83,34 @@ updateTests = describe "update" $ do
       verifyUpdate buyAllowance (subtract 1) (GainCard pid card) (BuyPhase coins (BuyAllowance buys) g)
 
   describe "playing treasure card" $ do
-    it "removes card from hand" $ property $ \(CardInHand g pid card) coins buys ->
-      verifyPlayerUpdate pid (length . hand) (subtract 1) (PlayTreasureCard pid card) (BuyPhase coins buys g)
+    cardMovementProperties
+      (\(CardInHand g pid card, coins, buys) -> (BuyPhase coins buys g, pid, card))
+      PlayTreasureCard
+      hand
+      "hand"
+      playedCards
+      "played cards"
 
     it "increases the coins to spend" $ property $ \(CardInHand g pid card) coins buys ->
       verifyUpdate coinBalance (+ value card) (PlayTreasureCard pid card) (BuyPhase coins buys g)
-
-    it "adds card to played cards" $ property $ \(CardInHand g pid card) coins buys ->
-      verifyPlayerUpdate pid (length . playedCards) (+1) (PlayTreasureCard pid card) (BuyPhase coins buys g)
     
-  describe "discard unplayed card" $ do
-    it "removes card from hand" $ property $ \(CardInHand g pid card) ->
-      verifyPlayerUpdate pid (length . hand) (subtract 1) (DiscardUnplayedCard pid card) (CleanUpPhase Discard g)
+  describe "discard unplayed card" $
+    cardMovementProperties
+      (\(CardInHand g pid card) -> (CleanUpPhase Discard g, pid, card))
+      DiscardUnplayedCard
+      hand
+      "hand"
+      discard
+      "discard"
 
-    it "adds card to discard" $ property $ \(CardInHand g pid card) ->
-      verifyPlayerUpdate pid (length . discard) (+1) (DiscardUnplayedCard pid card) (CleanUpPhase Discard g)
-
-    it "does not alter dominion of player" $ property $ \(CardInHand g pid card) ->
-      verifyPlayerUpdate pid dominion id (DiscardUnplayedCard pid card) (CleanUpPhase Discard g)
-
-  describe "discard played card" $ do
-    it "removes card from played cards" $ property $ \(PlayedCard g pid card) ->
-      verifyPlayerUpdate pid (length . playedCards) (subtract 1) (DiscardPlayedCard pid card) (CleanUpPhase Discard g)
-
-    it "adds card to discard" $ property $ \(PlayedCard g pid card) ->
-      verifyPlayerUpdate pid (length . discard) (+1) (DiscardPlayedCard pid card) (CleanUpPhase Discard g)
-
-    it "does not alter dominion of player" $ property $ \(PlayedCard g pid card) ->
-      verifyPlayerUpdate pid dominion id (DiscardPlayedCard pid card) (CleanUpPhase Discard g)
+  describe "discard played card" $
+    cardMovementProperties
+      (\(PlayedCard g pid card) -> (CleanUpPhase Discard g, pid, card))
+      DiscardPlayedCard
+      playedCards
+      "played cards"
+      discard
+      "discard"
 
   describe "reform deck" $ do
     it "leaves discard empty" $ property $ \(SelectedPlayer g pid) ->
@@ -134,18 +139,26 @@ updateTests = describe "update" $ do
     it "transitions to game over" $ property $
       gameOver . update EndGame . TurnEnd
 
-drawCardProperties :: (Arbitrary a, Show a, Player p)
-  => (a -> ([p], [Card], CandidateId, Card))
-  -> ([p] -> [Card] -> Turn -> GameState)
+cardMovementProperties :: (Arbitrary a, Show a)
+  => (a -> (GameState, CandidateId, Card))
+  -> (CandidateId -> Card -> Message)
+  -> (CompletePlayer -> [Card])
+  -> String
+  -> (CompletePlayer -> [Card])
+  -> String
   -> SpecWith ()
-drawCardProperties unpack constructGame = do
-  it "adds card to hand" $ property $ \cardInDeck ->
-    let (ps, cards, pid, card) = unpack cardInDeck
-    in verifyPlayerUpdate pid (length . hand) (+1) (DrawCard pid card) . constructGame ps cards
+cardMovementProperties unpack message from fromDescription to toDescription = do
+  it ("removes card from " ++ fromDescription) $ property $ \x ->
+    let (g, pid, card) = unpack x
+    in verifyPlayerUpdate pid (length . from) (subtract 1) (message pid card) g
 
-  it "does not alter dominion of player" $ property $ \cardInDeck ->
-    let (ps, cards, pid, card) = unpack cardInDeck
-    in verifyPlayerUpdate pid dominion id (DrawCard pid card) . constructGame ps cards
+  it ("adds card to " ++ toDescription) $ property $ \x ->
+    let (g, pid, card) = unpack x
+    in verifyPlayerUpdate pid (length . to) (+1) (message pid card) g
+
+  it "does not alter dominion of player" $ property $ \x ->
+    let (g, pid, card) = unpack x
+    in verifyPlayerUpdate pid dominion id (message pid card) g
 
 verifyPlayerUpdate :: (Eq a, Show a) =>
   CandidateId
