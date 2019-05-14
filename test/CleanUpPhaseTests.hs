@@ -6,10 +6,7 @@ import PlayState
 import EvaluationParameters
 import Player
 import CompletePlayer
-import Card
-import Turn
 
-import Control.Applicative
 import Data.List
 import Data.Maybe
 import Data.Composition
@@ -26,32 +23,41 @@ import Test.QuickCheck hiding (Discard)
 cleanUpPhaseTests :: SpecWith ()
 cleanUpPhaseTests = describe "clean up phase" $ do
   
-  it "discards all cards from hand" $ property $ \params (NonEmpty ps) cards ->
-    (===) (sortOn arbitraryCardOrder . hand . head $ ps)
-      . sortOn arbitraryCardOrder
-      . mapMaybe unplayedCardDiscarded
-      . history
-      . runTest params Discard ps cards firstTurn
+  it "discards all cards from hand" $ property $ \params (NonEmpty ps) cards t ->
+    let
+      g = PlayState ps cards t
+    in
+      (===) (sortOn arbitraryCardOrder . hand $ activePlayer g)
+        . sortOn arbitraryCardOrder
+        . mapMaybe unplayedCardDiscarded
+        . history
+        . runTest params Discard g
 
-  it "discards all played cards" $ property $ \params (NonEmpty ps) cards ->
-    (===) (sortOn arbitraryCardOrder . playedCards . head $ ps)
-      . sortOn arbitraryCardOrder
-      . mapMaybe playedCardDiscarded
-      . history
-      . runTest params Discard ps cards firstTurn
+  it "discards all played cards" $ property $ \params (NonEmpty ps) cards t ->
+    let
+      g = PlayState ps cards t
+    in
+      (===) (sortOn arbitraryCardOrder . playedCards $ activePlayer g)
+        . sortOn arbitraryCardOrder
+        . mapMaybe playedCardDiscarded
+        . history
+        . runTest params Discard g
 
-  it "draws new hand" $ property $ \params (NonEmpty ps) cards ->
-    (===) (min 5 . length . dominion $ head ps)
-      . length
-      . filter ((/=) Nothing . cardDrawn)
-      . history
-      . runTest params Discard ps cards firstTurn
+  it "draws new hand" $ property $ \params (NonEmpty ps) cards t ->
+    let
+      g = PlayState ps cards t
+    in
+      (===) (min 5 . length . dominion $ activePlayer g)
+        . length
+        . filter ((/=) Nothing . cardDrawn)
+        . history
+        . runTest params Discard g
 
-runTest :: EvaluationParameters -> CleanUpStep -> [CompletePlayer] -> [Card] -> Turn -> Int -> Game
-runTest params step ps = execWhile cleanUpPhase (actionLimit ps) params .:. gameInCleanUpPhase step ps
+runTest :: EvaluationParameters -> CleanUpStep -> PlayState -> Int -> Game
+runTest params step g@(PlayState ps _ _) = execWhile cleanUpPhase (actionLimit ps) params . gameInCleanUpPhase step g
 
 actionLimit :: [CompletePlayer] -> Int
-actionLimit = (+10) . length . liftA2 (++) hand playedCards . head
+actionLimit = (*2) . sum . fmap (length . dominion)
 
-gameInCleanUpPhase :: CleanUpStep -> [CompletePlayer] -> [Card] -> Turn -> Int -> Game
-gameInCleanUpPhase step = gameInState . CleanUpPhase step .:. PlayState
+gameInCleanUpPhase :: CleanUpStep -> PlayState -> Int -> Game
+gameInCleanUpPhase = gameInState .: CleanUpPhase
