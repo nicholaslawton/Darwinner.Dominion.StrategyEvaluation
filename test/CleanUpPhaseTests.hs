@@ -15,7 +15,7 @@ import GameStateValidation
 import EngineValidation
 import EventValidation
 import PlayerValidation
-import ArbitraryInstances()
+import ArbitraryInstances
 import CardOrder
 import Test.Hspec
 import Test.QuickCheck hiding (Discard)
@@ -23,7 +23,7 @@ import Test.QuickCheck hiding (Discard)
 cleanUpPhaseTests :: SpecWith ()
 cleanUpPhaseTests = describe "clean up phase" $ do
   
-  it "discards all cards from hand" $ property $ \params (NonEmpty ps) cards t ->
+  it "discards all cards from hand" $ property $ \(ValidPlayersWithParams ps params) cards t ->
     let
       g = PlayState ps cards t
     in
@@ -33,7 +33,7 @@ cleanUpPhaseTests = describe "clean up phase" $ do
         . history
         . runTest params Discard g
 
-  it "discards all played cards" $ property $ \params (NonEmpty ps) cards t ->
+  it "discards all played cards" $ property $ \(ValidPlayersWithParams ps params) cards t ->
     let
       g = PlayState ps cards t
     in
@@ -43,7 +43,7 @@ cleanUpPhaseTests = describe "clean up phase" $ do
         . history
         . runTest params Discard g
 
-  it "draws new hand" $ property $ \params (NonEmpty ps) cards t ->
+  it "draws new hand" $ property $ \(ValidPlayersWithParams ps params) cards t ->
     let
       g = PlayState ps cards t
     in

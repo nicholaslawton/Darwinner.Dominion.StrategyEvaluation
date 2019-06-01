@@ -9,4 +9,4 @@ newtype Coins = Coins Int
   deriving (Eq, Show, Ord, Num)
 
 base :: Coins
-base = Coins 100
+base = Coins 0

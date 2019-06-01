@@ -113,7 +113,8 @@ playTreasureCard _ _ _ = error "A treasure card may only be played during the bu
 discardUnplayedCard :: CandidateId -> Card -> GameState -> GameState
 discardUnplayedCard pid card (CleanUpPhase Discard g)
   | not $ playerExists pid ps = error "Invalid discard of unplayed card: player not in game"
-  | not $ cardBelongsToPlayer hand card pid ps = error $ "Invalid discard of unplayed card: card (" ++ show card ++ ") not in hand of player (" ++ show pid ++ ")"
+  | not $ cardBelongsToPlayer hand card pid ps =
+      error $ "Invalid discard of unplayed card: card (" ++ show card ++ ") not in hand of player (" ++ show pid ++ ")"
   | otherwise = CleanUpPhase Discard $ alterPlayerInState (moveFromHandToDiscard card) pid g
       where
         ps = players g
