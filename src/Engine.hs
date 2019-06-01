@@ -10,7 +10,6 @@ import Message
 import EvaluationParameters
 import Candidate
 import CandidateId
-import Coins
 import BuyAllowance
 import Strategy
 
@@ -85,13 +84,13 @@ nextMessage = do
 
     BuyPhase _ (BuyAllowance buys) _ | buys <= 0 -> return BuyPhaseComplete
 
-    BuyPhase _ _ playState ->
+    BuyPhase coins _ playState ->
       return $ fromMaybe BuyPhaseComplete $ playTreasureCard <|> gainCard
         where
           p = activePlayer playState
           pid = playerId p
           playTreasureCard = PlayTreasureCard pid <$> find ((== Treasure) . cardType) (hand p)
-          gainCard = GainCard pid <$> Strategy.execute strat (Coins 100) playState
+          gainCard = GainCard pid <$> Strategy.execute strat coins playState
           strat = fromMaybe unexpected $ strategy <$> find ((== pid) . candidateId) candidates
           unexpected = error "Active player not found among candidates"
 

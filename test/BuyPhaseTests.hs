@@ -13,6 +13,7 @@ import Card
 import Coins
 import BuyAllowance
 
+import Data.Composition
 import Data.List
 import Data.Maybe
 
@@ -39,12 +40,12 @@ buyPhaseTests = describe "buy phase" $ do
           . runTest params coins buys g
 
   it "gains a card which is in both the strategic priority and the supply" $ property $
-    \(ValidPlayersWithParams ps params) coins (Positive buys) (NonEmpty cards) t ->
+    \(ValidPlayersWithParams ps params) (Positive coins) (Positive buys) (NonEmpty cards) t ->
       let
         g = PlayState ps cards t
         card = head cards
       in
-        any cardGained . history . runTest (prioritise card params) (coins + value card) buys g
+        any cardGained . history . runTest (prioritise card params) (Coins coins + cost card) buys g
 
   it "completes" $ property $ \(ValidPlayersWithParams ps params) coins (Positive buys) (NonEmpty cards) t ->
     let
@@ -54,13 +55,10 @@ buyPhaseTests = describe "buy phase" $ do
 
 runTest :: EvaluationParameters -> Coins -> Int -> PlayState -> Int -> Game
 runTest params coins buys g@(PlayState ps cards _) =
-  execWhile buyPhase (actionLimit buys ps cards) params . gameInBuyPhase coins buys g
+  execWhile buyPhase (actionLimit buys ps cards) params . (gameInState .:. BuyPhase) coins (BuyAllowance buys) g
 
 actionLimit :: Int -> [CompletePlayer] -> [Card] -> Int
 actionLimit buys ps cards = min buys (length cards) + sum (length . hand <$> ps) + 10
-
-gameInBuyPhase :: Coins -> Int -> PlayState -> Int -> Game
-gameInBuyPhase coins buys g = gameInState $ BuyPhase coins (BuyAllowance buys) g
 
 prioritise :: Card -> EvaluationParameters -> EvaluationParameters
 prioritise card (EvaluationParameters candidates) =
