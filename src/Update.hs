@@ -20,12 +20,12 @@ import Control.Applicative
 
 update :: Message -> GameState -> GameState
 update (AddPlayer pid) = addPlayer pid
-update MarkPlayersReady = beginPreparingSupply
-update (PlaceCardInSupply card) = placeCardInSupply card
-update MarkSupplyPrepared = beginPreparingDecks
+update MarkPlayersReady = beginPreparingDecks
 update (AddCardToDeck pid card) = addCardToDeck pid card
 update MarkDecksPrepared = beginDrawingInitialHands
-update MarkInitialHandsDrawn = beginPlay
+update MarkInitialHandsDrawn = beginPreparingSupply
+update (PlaceCardInSupply card) = placeCardInSupply card
+update MarkSupplyPrepared = beginPlay
 update (DrawCard pid card) = drawCard pid card
 update (GainCard pid card) = gainCard pid card
 update (PlayTreasureCard pid card) = playTreasureCard pid card
@@ -44,37 +44,34 @@ addPlayer pid (New ps)
   | otherwise = New $ PlayerWithoutDominion.new pid : ps
 addPlayer _ _ = error "A player may not be added after preparation of the game has commenced"
 
+beginPreparingDecks :: GameState -> GameState
+beginPreparingDecks (New pids) = PreparingDecks (PlayerWithDeck.fromPlayerWithoutDominion <$> pids)
+beginPreparingDecks _ = error "Cannot prepare starting decks for a game which has already begun"
+
+addCardToDeck :: CandidateId -> Card -> GameState -> GameState
+addCardToDeck pid card (PreparingDecks ps)
+  | all ((/=) pid . playerId) ps = error "Invalid deck preparation: player not in game"
+  | otherwise = PreparingDecks (alterPlayer (alterDeck (card :)) pid ps)
+addCardToDeck _ _ _ = error "A card may only be added to a deck during game preparation"
+
+beginDrawingInitialHands :: GameState -> GameState
+beginDrawingInitialHands (PreparingDecks ps) = DrawingInitialHands (PlayerWithHand.fromPlayerWithDeck <$> ps)
+beginDrawingInitialHands _ = error "Drawing initial hands must occur after decks have been prepared"
+
 beginPreparingSupply :: GameState -> GameState
-beginPreparingSupply (New pids) = PreparingSupply pids []
-beginPreparingSupply _ = error "Cannot prepare the supply of a game which has already begun"
+beginPreparingSupply (DrawingInitialHands ps) = PreparingSupply (CompletePlayer.fromPlayerWithHand <$> ps) []
+beginPreparingSupply _ = error "Supply preparation should following the drawing of initial hands"
 
 placeCardInSupply :: Card -> GameState -> GameState
 placeCardInSupply card (PreparingSupply pids cards) = PreparingSupply pids $ card : cards
 placeCardInSupply _ _ = error "A card may only be placed in the supply during game preparation"
 
-beginPreparingDecks :: GameState -> GameState
-beginPreparingDecks (PreparingSupply pids cards) =
-  PreparingDecks (PlayerWithDeck.fromPlayerWithoutDominion <$> pids) cards
-beginPreparingDecks _ = error "Deck preparation should occur after the supply has been prepared"
-
-addCardToDeck :: CandidateId -> Card -> GameState -> GameState
-addCardToDeck pid card (PreparingDecks ps cards)
-  | all ((/=) pid . playerId) ps = error "Invalid deck preparation: player not in game"
-  | otherwise = PreparingDecks (alterPlayer (alterDeck (card :)) pid ps) cards
-addCardToDeck _ _ _ = error "A card may only be added to a deck during game preparation"
-
-beginDrawingInitialHands :: GameState -> GameState
-beginDrawingInitialHands (PreparingDecks ps cards) =
-  DrawingInitialHands (PlayerWithHand.fromPlayerWithDeck <$> ps) cards
-beginDrawingInitialHands _ = error "Drawing initial hands must occur after decks have been prepared"
-
 beginPlay :: GameState -> GameState
-beginPlay (DrawingInitialHands ps cards) =
-  BuyPhase Coins.base BuyAllowance.initial (PlayState (CompletePlayer.fromPlayerWithHand <$> ps) cards firstTurn)
+beginPlay (PreparingSupply ps cards) = BuyPhase Coins.base BuyAllowance.initial $ PlayState ps cards firstTurn
 beginPlay _ = error "Cannot begin play before the game has been fully prepared"
 
 drawCard :: CandidateId -> Card -> GameState -> GameState
-drawCard pid card (DrawingInitialHands ps cards) = DrawingInitialHands (drawCardForPlayer pid card ps) cards
+drawCard pid card (DrawingInitialHands ps) = DrawingInitialHands (drawCardForPlayer pid card ps)
 drawCard pid card (CleanUpPhase DrawHand g) =
   CleanUpPhase DrawHand $ g { players = drawCardForPlayer pid card (players g) }
 drawCard _ _ _ =

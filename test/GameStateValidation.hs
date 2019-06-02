@@ -13,17 +13,17 @@ module GameStateValidation
 import GameState
 import Game
 
-preparingSupply :: GameState -> Bool
-preparingSupply (PreparingSupply _ _) = True
-preparingSupply _ = False
-
 preparingDecks :: GameState -> Bool
-preparingDecks (PreparingDecks _ _) = True
+preparingDecks (PreparingDecks _) = True
 preparingDecks _ = False
 
 drawingInitialHands :: GameState -> Bool
-drawingInitialHands (DrawingInitialHands _ _) = True
+drawingInitialHands (DrawingInitialHands _) = True
 drawingInitialHands _ = False
+
+preparingSupply :: GameState -> Bool
+preparingSupply (PreparingSupply _ _) = True
+preparingSupply _ = False
 
 buyPhase :: GameState -> Bool
 buyPhase (BuyPhase _ _ _) = True

@@ -50,6 +50,23 @@ nextMessage = do
           nextPlayer :: [CandidateId] -> State Game (Maybe CandidateId)
           nextPlayer = randomElement . filter (\cid -> all ((/=) cid . playerId) pids)
 
+    PreparingDecks ps ->
+      return $ maybe MarkDecksPrepared (uncurry AddCardToDeck) (playerNeedingCard ps)
+        where
+          playerNeedingCard :: Player p => [p] -> Maybe (CandidateId, Card)
+          playerNeedingCard = liftA2 (<|>) (playerNeeding Copper 7) (playerNeeding Estate 3)
+          playerNeeding :: Player p => Card -> Int -> [p] -> Maybe (CandidateId, Card)
+          playerNeeding card target =
+            fmap (flip (,) card . playerId) . listToMaybe . filter ((< target) . countElem card . deck)
+
+    DrawingInitialHands ps ->
+      maybe (return MarkInitialHandsDrawn) (lift . drawCard unexpected) (playerWithIncompleteHand ps)
+        where
+          playerWithIncompleteHand :: Player p => [p] -> Maybe p
+          playerWithIncompleteHand = listToMaybe . filter ((< 5) . length . hand)
+
+          unexpected = error "Unexpected failure drawing a card for initial hand"
+
     PreparingSupply _ cards
       | countElem Copper cards < 60 - length candidates * 7 -> return $ PlaceCardInSupply Copper
       | countElem Silver cards < 40 -> return $ PlaceCardInSupply Silver
@@ -64,23 +81,6 @@ nextMessage = do
           numVictoryCards = bool 8 12 . (> 2) . length
           numCurseCards :: [Candidate] -> Int
           numCurseCards = (* 10) . subtract 1 . length
-
-    PreparingDecks ps _ ->
-      return $ maybe MarkDecksPrepared (uncurry AddCardToDeck) (playerNeedingCard ps)
-        where
-          playerNeedingCard :: Player p => [p] -> Maybe (CandidateId, Card)
-          playerNeedingCard = liftA2 (<|>) (playerNeeding Copper 7) (playerNeeding Estate 3)
-          playerNeeding :: Player p => Card -> Int -> [p] -> Maybe (CandidateId, Card)
-          playerNeeding card target =
-            fmap (flip (,) card . playerId) . listToMaybe . filter ((< target) . countElem card . deck)
-
-    DrawingInitialHands ps _ ->
-      maybe (return MarkInitialHandsDrawn) (lift . drawCard unexpected) (playerWithIncompleteHand ps)
-        where
-          playerWithIncompleteHand :: Player p => [p] -> Maybe p
-          playerWithIncompleteHand = listToMaybe . filter ((< 5) . length . hand)
-
-          unexpected = error "Unexpected failure drawing a card for initial hand"
 
     BuyPhase _ (BuyAllowance buys) _ | buys <= 0 -> return BuyPhaseComplete
 

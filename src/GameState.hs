@@ -16,9 +16,9 @@ import PlayState
 
 data GameState
   = New [PlayerWithoutDominion]
-  | PreparingSupply [PlayerWithoutDominion] [Card]
-  | PreparingDecks [PlayerWithDeck] [Card]
-  | DrawingInitialHands [PlayerWithHand] [Card]
+  | PreparingDecks [PlayerWithDeck]
+  | DrawingInitialHands [PlayerWithHand]
+  | PreparingSupply [CompletePlayer] [Card]
   | BuyPhase Coins BuyAllowance PlayState
   | CleanUpPhase CleanUpStep PlayState
   | TurnEnd PlayState
@@ -32,9 +32,9 @@ data CleanUpStep
 
 players :: GameState -> [CompletePlayer]
 players (New ps) = CompletePlayer.fromPlayerWithoutDominion <$> ps
-players (PreparingSupply ps _) = CompletePlayer.fromPlayerWithoutDominion <$> ps
-players (PreparingDecks ps _) = CompletePlayer.fromPlayerWithDeck <$> ps
-players (DrawingInitialHands ps _) = CompletePlayer.fromPlayerWithHand <$> ps
+players (PreparingDecks ps) = CompletePlayer.fromPlayerWithDeck <$> ps
+players (DrawingInitialHands ps) = CompletePlayer.fromPlayerWithHand <$> ps
+players (PreparingSupply ps _) = ps
 players (BuyPhase _ _ g) = PlayState.players g
 players (CleanUpPhase _ g) = PlayState.players g
 players (TurnEnd g) = PlayState.players g
@@ -42,9 +42,9 @@ players GameOver = []
 
 supply :: GameState -> [Card]
 supply (New _) = []
+supply (PreparingDecks _) = []
+supply (DrawingInitialHands _) = []
 supply (PreparingSupply _ cards) = cards
-supply (PreparingDecks _ cards) = cards
-supply (DrawingInitialHands _ cards) = cards
 supply (BuyPhase _ _ g) = PlayState.supply g
 supply (CleanUpPhase _ g) = PlayState.supply g
 supply (TurnEnd g) = PlayState.supply g

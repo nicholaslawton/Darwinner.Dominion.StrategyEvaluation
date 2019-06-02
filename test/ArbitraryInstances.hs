@@ -155,12 +155,12 @@ instance Arbitrary SelectedPlayerAndCardInSupply where
     t <- arbitrary
     return $ SelectedPlayerAndCardInSupply (PlayState ps cards t) (playerId p) card
 
-data CardInStartingDeck = CardInStartingDeck [PlayerWithHand] [Card] CandidateId Card
+data CardInStartingDeck = CardInStartingDeck [PlayerWithHand] CandidateId Card
   deriving (Eq, Show)
 
 instance Arbitrary CardInStartingDeck where
   arbitrary =
-    selectedCardInArea CardInStartingDeck deck validPlayersDrawingInitialHands
+    selectedCardInArea (\ps _ -> CardInStartingDeck ps) deck validPlayersDrawingInitialHands
 
 data CardInDeck = CardInDeck PlayState CandidateId Card
   deriving (Eq, Show)

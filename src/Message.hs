@@ -6,11 +6,11 @@ import Card
 data Message 
   = AddPlayer CandidateId 
   | MarkPlayersReady
-  | PlaceCardInSupply Card
-  | MarkSupplyPrepared
   | AddCardToDeck CandidateId Card
   | MarkDecksPrepared
   | MarkInitialHandsDrawn
+  | PlaceCardInSupply Card
+  | MarkSupplyPrepared
   | DrawCard CandidateId Card
   | GainCard CandidateId Card
   | PlayTreasureCard CandidateId Card

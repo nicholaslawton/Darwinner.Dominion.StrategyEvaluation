@@ -6,11 +6,11 @@ import Card
 data Event
   = PlayerAdded CandidateId 
   | PlayersReady
-  | CardPlacedInSupply Card
-  | SupplyPrepared
   | CardAddedToDeck CandidateId Card
   | DecksPrepared
   | InitialHandsDrawn
+  | CardPlacedInSupply Card
+  | SupplyPrepared
   | CardDrawn CandidateId Card
   | CardGained CandidateId Card
   | TreasureCardPlayed CandidateId Card

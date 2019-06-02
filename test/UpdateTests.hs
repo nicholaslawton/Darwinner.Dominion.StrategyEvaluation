@@ -30,33 +30,33 @@ updateTests = describe "update" $ do
       in length (players (update (AddPlayer pid) (New (PlayerWithoutDominion.new <$> pids)))) === length pids + 1
 
   describe "mark players ready" $
+    it "begins preparing decks" $ property $
+      preparingDecks . update MarkPlayersReady . New
+
+  describe "add card to deck of player" $
+    it "adds card to deck of player" $ property $ \(SelectedPlayerWithDeck ps pid) card ->
+      verifyPlayerUpdate pid (length . deck) (+1) (AddCardToDeck pid card) (PreparingDecks ps)
+
+  describe "mark decks prepared" $
+    it "begins drawing initial hands" $ property $
+      drawingInitialHands . update MarkDecksPrepared . PreparingDecks
+
+  describe "mark initial hands drawn" $
     it "begins preparing supply" $ property $
-      preparingSupply . update MarkPlayersReady . New
+      preparingSupply . update MarkInitialHandsDrawn . DrawingInitialHands
 
   describe "place card in supply" $
     it "adds card" $ property $ \ps cards card ->
       length (GameState.supply (update (PlaceCardInSupply card) (PreparingSupply ps cards))) === length cards + 1
 
   describe "mark supply prepared" $
-    it "begins preparing decks" $ property $ \ps cards ->
-      preparingDecks $ update MarkSupplyPrepared $ PreparingSupply ps cards
-
-  describe "add card to deck of player" $
-    it "adds card to deck of player" $ property $ \(SelectedPlayerWithDeck ps pid) cards card ->
-      verifyPlayerUpdate pid (length . deck) (+1) (AddCardToDeck pid card) (PreparingDecks ps cards)
-
-  describe "mark decks prepared" $
-    it "begins drawing initial hands" $ property $ \ps cards ->
-      drawingInitialHands $ update MarkDecksPrepared $ PreparingDecks ps cards
-
-  describe "mark initial hands drawn" $
     it "transitions to buy phase" $ property $ \ps cards ->
-      buyPhase $ update MarkInitialHandsDrawn $ DrawingInitialHands ps cards
+      buyPhase $ update MarkSupplyPrepared $ PreparingSupply ps cards
 
   describe "draw card" $ do
     describe "for initial hand" $
       cardMovementProperties
-        (\(CardInStartingDeck ps cards pid card) -> (DrawingInitialHands ps cards, pid, card))
+        (\(CardInStartingDeck ps pid card) -> (DrawingInitialHands ps, pid, card))
         DrawCard
         deck
         "deck"
