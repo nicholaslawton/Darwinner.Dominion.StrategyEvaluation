@@ -4,6 +4,7 @@ module ArbitraryInstances where
 import Coins
 import BuyAllowance
 import Card
+import Supply
 import EvaluationParameters
 import Player
 import CompletePlayer
@@ -30,6 +31,9 @@ instance Arbitrary BuyAllowance where
 
 instance Arbitrary Card where
   arbitrary = oneof [return Province, return Duchy, return Estate, return Gold, return Silver, return Copper]
+
+instance Arbitrary Supply where
+  arbitrary = Supply <$> arbitrary
 
 instance Arbitrary Candidate where
   arbitrary = liftA2 Candidate arbitrary arbitrary
@@ -141,9 +145,9 @@ data SelectedPlayer = SelectedPlayer PlayState CandidateId
 
 instance Arbitrary SelectedPlayer where
   arbitrary = do
-    cards <- arbitrary
+    s <- arbitrary
     t <- arbitrary
-    validPlayers >>= fmap (\(ps, p) -> SelectedPlayer (PlayState ps cards t) (playerId p)) . selectedElement
+    validPlayers >>= fmap (\(ps, p) -> SelectedPlayer (PlayState ps s t) (playerId p)) . selectedElement
 
 data SelectedPlayerAndCardInSupply = SelectedPlayerAndCardInSupply PlayState CandidateId Card
   deriving (Eq, Show)
@@ -151,9 +155,9 @@ data SelectedPlayerAndCardInSupply = SelectedPlayerAndCardInSupply PlayState Can
 instance Arbitrary SelectedPlayerAndCardInSupply where
   arbitrary = do
     (ps, p) <- validPlayers >>= selectedElement
-    (cards, card) <- arbitrary `suchThat` (not . null) >>= selectedElement
+    (s, card) <- arbitrary `suchThat` (not . null) >>= selectedElement
     t <- arbitrary
-    return $ SelectedPlayerAndCardInSupply (PlayState ps cards t) (playerId p) card
+    return $ SelectedPlayerAndCardInSupply (PlayState ps (Supply s) t) (playerId p) card
 
 data CardInStartingDeck = CardInStartingDeck [PlayerWithHand] CandidateId Card
   deriving (Eq, Show)
@@ -189,15 +193,15 @@ selectedElementMatching predicate = selectedElement . filter predicate
 selectFrom :: (a -> Gen b) -> a -> Gen (a, b)
 selectFrom f x = (,) x <$> f x 
 
-selectedCardInArea :: Player p => ([p] -> [Card] -> CandidateId -> Card -> b) -> (p -> [Card]) -> Gen [p] -> Gen b
+selectedCardInArea :: Player p => ([p] -> Supply -> CandidateId -> Card -> b) -> (p -> [Card]) -> Gen [p] -> Gen b
 selectedCardInArea c area validPs = do
-  cards <- arbitrary
+  s <- arbitrary
   validPs `suchThat` (not . null . concatMap area)
     >>= selectedElementMatching (not . null . area)
-    >>= \(ps, p) -> c ps cards (playerId p) <$> elements (area p)
+    >>= \(ps, p) -> c ps s (playerId p) <$> elements (area p)
 
 selectedCardInAreaWithPlayState :: (PlayState -> CandidateId -> Card -> a) -> (CompletePlayer -> [Card]) -> Gen a
 selectedCardInAreaWithPlayState c area = do
   t <- arbitrary
-  selectedCardInArea (\ps cards -> c $ PlayState ps cards t) area validPlayers
+  selectedCardInArea (\ps s -> c $ PlayState ps s t) area validPlayers
   

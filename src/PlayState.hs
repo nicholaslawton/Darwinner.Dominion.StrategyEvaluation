@@ -6,11 +6,12 @@ module PlayState
 
 import CompletePlayer
 import Card
+import Supply
 import Turn
 
 data PlayState = PlayState
   { players :: [CompletePlayer]
-  , supply :: [Card]
+  , supply :: Supply
   , turn :: Turn
   }
   deriving (Eq, Show)
@@ -26,4 +27,4 @@ activePlayer g =
     else ps !! activeIndex
 
 gameEndConditions :: PlayState -> Bool
-gameEndConditions = notElem Province . supply
+gameEndConditions = not . contains Province . supply

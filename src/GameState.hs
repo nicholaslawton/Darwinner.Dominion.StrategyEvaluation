@@ -9,7 +9,7 @@ import CompletePlayer
 import PlayerWithoutDominion
 import PlayerWithDeck
 import PlayerWithHand
-import Card
+import Supply
 import Coins
 import BuyAllowance
 import PlayState
@@ -18,7 +18,7 @@ data GameState
   = New [PlayerWithoutDominion]
   | PreparingDecks [PlayerWithDeck]
   | DrawingInitialHands [PlayerWithHand]
-  | PreparingSupply [CompletePlayer] [Card]
+  | PreparingSupply [CompletePlayer] Supply
   | BuyPhase Coins BuyAllowance PlayState
   | CleanUpPhase CleanUpStep PlayState
   | TurnEnd PlayState
@@ -40,12 +40,12 @@ players (CleanUpPhase _ g) = PlayState.players g
 players (TurnEnd g) = PlayState.players g
 players GameOver = []
 
-supply :: GameState -> [Card]
-supply (New _) = []
-supply (PreparingDecks _) = []
-supply (DrawingInitialHands _) = []
-supply (PreparingSupply _ cards) = cards
+supply :: GameState -> Supply
+supply (New _) = Supply.empty
+supply (PreparingDecks _) = Supply.empty
+supply (DrawingInitialHands _) = Supply.empty
+supply (PreparingSupply _ s) = s
 supply (BuyPhase _ _ g) = PlayState.supply g
 supply (CleanUpPhase _ g) = PlayState.supply g
 supply (TurnEnd g) = PlayState.supply g
-supply GameOver = []
+supply GameOver = Supply.empty

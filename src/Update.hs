@@ -10,6 +10,7 @@ import PlayerWithDeck
 import PlayerWithHand
 import CompletePlayer
 import Card
+import Supply
 import Coins
 import BuyAllowance
 import Turn
@@ -59,15 +60,15 @@ beginDrawingInitialHands (PreparingDecks ps) = DrawingInitialHands (PlayerWithHa
 beginDrawingInitialHands _ = error "Drawing initial hands must occur after decks have been prepared"
 
 beginPreparingSupply :: GameState -> GameState
-beginPreparingSupply (DrawingInitialHands ps) = PreparingSupply (CompletePlayer.fromPlayerWithHand <$> ps) []
+beginPreparingSupply (DrawingInitialHands ps) = PreparingSupply (CompletePlayer.fromPlayerWithHand <$> ps) Supply.empty
 beginPreparingSupply _ = error "Supply preparation should following the drawing of initial hands"
 
 placeCardInSupply :: Card -> GameState -> GameState
-placeCardInSupply card (PreparingSupply pids cards) = PreparingSupply pids $ card : cards
+placeCardInSupply card (PreparingSupply pids s) = PreparingSupply pids $ add card s
 placeCardInSupply _ _ = error "A card may only be placed in the supply during game preparation"
 
 beginPlay :: GameState -> GameState
-beginPlay (PreparingSupply ps cards) = BuyPhase Coins.base BuyAllowance.initial $ PlayState ps cards firstTurn
+beginPlay (PreparingSupply ps s) = BuyPhase Coins.base BuyAllowance.initial $ PlayState ps s firstTurn
 beginPlay _ = error "Cannot begin play before the game has been fully prepared"
 
 drawCard :: CandidateId -> Card -> GameState -> GameState
@@ -86,16 +87,15 @@ drawCardForPlayer pid card ps
 gainCard :: CandidateId -> Card -> GameState -> GameState
 gainCard pid card (BuyPhase coins (BuyAllowance buys) g)
   | not $ playerExists pid ps = error "Invalid card gain: player not in game"
-  | notElem card cards = error "Invalid card gain: card not in supply"
+  | not $ contains card $ supply g = error "Invalid card gain: card not in supply"
   | buys <= 0 = error "Invalid card gain: buy allowance exhausted"
   | otherwise = 
       BuyPhase
         coins
         (BuyAllowance (buys - 1))
-        (g { players = alterPlayer (alterDiscard (card :)) pid ps , supply = delete card cards })
+        (g { players = alterPlayer (alterDiscard (card :)) pid ps , supply = remove card (supply g) })
       where
         ps = players g
-        cards = supply g
 gainCard _ _ _ = error "A card may only be gained during the buy phase"
 
 playTreasureCard :: CandidateId -> Card -> GameState -> GameState

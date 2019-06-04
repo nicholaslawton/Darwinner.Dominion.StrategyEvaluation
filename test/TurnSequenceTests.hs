@@ -7,6 +7,7 @@ import Coins
 import BuyAllowance
 import CompletePlayer
 import Card
+import Supply
 import Turn
 import EvaluationParameters
 import Candidate
@@ -41,7 +42,7 @@ turnSequenceTests = describe "turn sequence" $ do
         . mapMaybe cardDrawn
         . history
         . execUntil gameOver 1000 params
-        .: gameInProgress ((\pid -> CompletePlayer.new pid deck hand [] discard) <$> pids) []
+        .: gameInProgress ((\pid -> CompletePlayer.new pid deck hand [] discard) <$> pids) Supply.empty
 
   describe "turn end" $ do
 
@@ -52,15 +53,15 @@ turnSequenceTests = describe "turn sequence" $ do
       gameOver . state . execWhile turnEnd 10 params .: gameAtTurnEnd removeProvincesFromSupply
 
 addProvinceToSupply :: PlayState -> PlayState
-addProvinceToSupply g = g { PlayState.supply = Province : PlayState.supply g }
+addProvinceToSupply g = g { PlayState.supply = add Province (PlayState.supply g) }
 
 removeProvincesFromSupply :: PlayState -> PlayState
-removeProvincesFromSupply g = g { PlayState.supply = filter (/= Province) $ PlayState.supply g }
+removeProvincesFromSupply g = g { PlayState.supply = Supply $ filter (/= Province) $ cards $ PlayState.supply g }
 
 addEmpty :: Ord k => [k] -> Map k [a] -> Map k [a]
 addEmpty = flip $ foldr (\k m -> insertWith (flip const) k [] m)
 
-gameInProgress :: [CompletePlayer] -> [Card] -> Turn -> Int -> Game
+gameInProgress :: [CompletePlayer] -> Supply -> Turn -> Int -> Game
 gameInProgress = gameInState . BuyPhase Coins.base BuyAllowance.initial .:. PlayState
 
 gameAtTurnEnd :: (PlayState -> PlayState) -> PlayState -> Int -> Game

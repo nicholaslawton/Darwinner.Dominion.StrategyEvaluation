@@ -8,9 +8,11 @@ import Player
 import CompletePlayer
 import PlayerWithoutDominion
 import Card
+import Supply
 import Coins
 import BuyAllowance
 
+import Data.Composition
 import Data.List
 import Control.Applicative
 
@@ -46,12 +48,12 @@ updateTests = describe "update" $ do
       preparingSupply . update MarkInitialHandsDrawn . DrawingInitialHands
 
   describe "place card in supply" $
-    it "adds card" $ property $ \ps cards card ->
-      length (GameState.supply (update (PlaceCardInSupply card) (PreparingSupply ps cards))) === length cards + 1
+    it "adds card" $ property $ \ps s card ->
+      size (GameState.supply (update (PlaceCardInSupply card) (PreparingSupply ps s))) === size s + 1
 
   describe "mark supply prepared" $
-    it "transitions to buy phase" $ property $ \ps cards ->
-      buyPhase $ update MarkSupplyPrepared $ PreparingSupply ps cards
+    it "transitions to buy phase" $ property $
+      buyPhase . update MarkSupplyPrepared .: PreparingSupply
 
   describe "draw card" $ do
     describe "for initial hand" $
@@ -183,7 +185,8 @@ verifyPlayerState pid verification game =
   fmap verification (find ((==) pid . playerId) (players game)) === Just True
 
 cardsInPlay :: GameState -> [Card]
-cardsInPlay gameState = sortOn arbitraryCardOrder $ concatMap ($ gameState) [concatMap dominion . players, GameState.supply]
+cardsInPlay gameState =
+  sortOn arbitraryCardOrder $ concatMap ($ gameState) [concatMap dominion . players, cards . GameState.supply]
 
 buyAllowance :: GameState -> Int
 buyAllowance (BuyPhase _ (BuyAllowance buys) _) = buys

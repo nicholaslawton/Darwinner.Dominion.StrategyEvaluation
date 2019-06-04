@@ -1,6 +1,7 @@
 module Engine (run, runUntil) where
 
 import Card
+import Supply
 import Game
 import GameState
 import PlayState
@@ -67,14 +68,14 @@ nextMessage = do
 
           unexpected = error "Unexpected failure drawing a card for initial hand"
 
-    PreparingSupply _ cards
-      | countElem Copper cards < 60 - length candidates * 7 -> return $ PlaceCardInSupply Copper
-      | countElem Silver cards < 40 -> return $ PlaceCardInSupply Silver
-      | countElem Gold cards < 30 -> return $ PlaceCardInSupply Gold
-      | countElem Estate cards < numVictoryCards candidates -> return $ PlaceCardInSupply Estate
-      | countElem Duchy cards < numVictoryCards candidates -> return $ PlaceCardInSupply Duchy
-      | countElem Province cards < numVictoryCards candidates -> return $ PlaceCardInSupply Province
-      | countElem Curse cards < numCurseCards candidates -> return $ PlaceCardInSupply Curse
+    PreparingSupply _ s
+      | pileSize Copper s < 60 - length candidates * 7 -> return $ PlaceCardInSupply Copper
+      | pileSize Silver s < 40 -> return $ PlaceCardInSupply Silver
+      | pileSize Gold s < 30 -> return $ PlaceCardInSupply Gold
+      | pileSize Estate s < numVictoryCards candidates -> return $ PlaceCardInSupply Estate
+      | pileSize Duchy s < numVictoryCards candidates -> return $ PlaceCardInSupply Duchy
+      | pileSize Province s < numVictoryCards candidates -> return $ PlaceCardInSupply Province
+      | pileSize Curse s < numCurseCards candidates -> return $ PlaceCardInSupply Curse
       | otherwise -> return MarkSupplyPrepared
         where
           numVictoryCards :: [Candidate] -> Int

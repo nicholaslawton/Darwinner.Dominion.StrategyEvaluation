@@ -10,6 +10,7 @@ import Strategy
 import CompletePlayer
 import Player
 import Card
+import Supply
 import Coins
 import BuyAllowance
 
@@ -29,9 +30,9 @@ buyPhaseTests :: SpecWith ()
 buyPhaseTests = describe "buy phase" $ do
 
   it "plays all treasure cards" $ property $
-    \(ValidPlayersWithParams ps params) coins (Positive buys) (NonEmpty cards) t ->
+    \(ValidPlayersWithParams ps params) coins (Positive buys) (NonEmpty s) t ->
       let
-        g = PlayState ps cards t
+        g = PlayState ps (Supply s) t
       in
         (===) (sortOn arbitraryCardOrder . filter ((== Treasure) . cardType) . hand $ activePlayer g)
           . sortOn arbitraryCardOrder
@@ -40,25 +41,25 @@ buyPhaseTests = describe "buy phase" $ do
           . runTest params coins buys g
 
   it "gains a card which is in both the strategic priority and the supply" $ property $
-    \(ValidPlayersWithParams ps params) (Positive coins) (Positive buys) (NonEmpty cards) t ->
+    \(ValidPlayersWithParams ps params) (Positive coins) (Positive buys) (NonEmpty s) t ->
       let
-        g = PlayState ps cards t
-        card = head cards
+        g = PlayState ps (Supply s) t
+        card = head s
       in
         any cardGained . history . runTest (prioritise card params) (Coins coins + cost card) buys g
 
-  it "completes" $ property $ \(ValidPlayersWithParams ps params) coins (Positive buys) (NonEmpty cards) t ->
+  it "completes" $ property $ \(ValidPlayersWithParams ps params) coins (Positive buys) (NonEmpty s) t ->
     let
-      g = PlayState ps cards t
+      g = PlayState ps (Supply s) t
     in
       (===) BuyPhaseCompleted . last . history . runTest params coins buys g
 
 runTest :: EvaluationParameters -> Coins -> Int -> PlayState -> Int -> Game
-runTest params coins buys g@(PlayState ps cards _) =
-  execWhile buyPhase (actionLimit buys ps cards) params . (gameInState .:. BuyPhase) coins (BuyAllowance buys) g
+runTest params coins buys g@(PlayState ps s _) =
+  execWhile buyPhase (actionLimit buys ps s) params . (gameInState .:. BuyPhase) coins (BuyAllowance buys) g
 
-actionLimit :: Int -> [CompletePlayer] -> [Card] -> Int
-actionLimit buys ps cards = min buys (length cards) + sum (length . hand <$> ps) + 10
+actionLimit :: Int -> [CompletePlayer] -> Supply -> Int
+actionLimit buys ps s = min buys (size s) + sum (length . hand <$> ps) + 10
 
 prioritise :: Card -> EvaluationParameters -> EvaluationParameters
 prioritise card (EvaluationParameters candidates) =

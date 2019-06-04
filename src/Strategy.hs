@@ -4,6 +4,7 @@ module Strategy
   ) where
 
 import Card
+import Supply
 import Coins
 import PlayState
 
@@ -14,4 +15,4 @@ data Strategy = Strategy [Card]
   deriving (Eq, Show)
 
 execute :: Strategy -> Coins -> PlayState -> Maybe Card
-execute (Strategy priority) coins g = find (liftA2 (&&) (`elem` supply g) ((<= coins) . cost)) priority
+execute (Strategy priority) coins g = find (liftA2 (&&) (`contains` supply g) ((<= coins) . cost)) priority
