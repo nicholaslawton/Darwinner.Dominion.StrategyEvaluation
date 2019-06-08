@@ -14,10 +14,9 @@ import Supply
 import Coins
 import BuyAllowance
 import Turn
+import Collections
 
-import Data.Bool
 import Data.List
-import Control.Applicative
 
 update :: Message -> GameState -> GameState
 update (AddPlayer pid) = addPlayer pid
@@ -165,15 +164,6 @@ moveFromPlayedCardsToDiscard card = alterDiscard (card :) . alterPlayedCards (de
 
 moveDiscardToDeck :: CompletePlayer -> CompletePlayer
 moveDiscardToDeck p = alterDiscard (const []) $ alterDeck (++ discard p) p
-
-alterIf :: (a -> a) -> (a -> Bool) -> a -> a
-alterIf = liftA3 bool id
-
-alterWhere :: (a -> a) -> (a -> Bool) -> [a] -> [a]
-alterWhere f p = fmap (alterIf f p)
-
-alterElem :: Eq b => (a -> b) -> (a -> a) -> b -> [a] -> [a]
-alterElem on f x = alterWhere f ((==) x . on)
 
 alterPlayer :: Player p => (p -> p) -> CandidateId -> [p] -> [p]
 alterPlayer = alterElem playerId

@@ -33,7 +33,7 @@ instance Arbitrary Card where
   arbitrary = oneof [return Province, return Duchy, return Estate, return Gold, return Silver, return Copper]
 
 instance Arbitrary Supply where
-  arbitrary = Supply <$> arbitrary
+  arbitrary = foldr Supply.add Supply.empty <$> (arbitrary :: Gen [Card])
 
 instance Arbitrary Candidate where
   arbitrary = liftA2 Candidate arbitrary arbitrary
@@ -149,15 +149,29 @@ instance Arbitrary SelectedPlayer where
     t <- arbitrary
     validPlayers >>= fmap (\(ps, p) -> SelectedPlayer (PlayState ps s t) (playerId p)) . selectedElement
 
+data NonEmptySupply = NonEmptySupply Supply
+  deriving (Eq, Show)
+
+instance Arbitrary NonEmptySupply where
+  arbitrary = (\(CardInSupply s _) -> NonEmptySupply s) <$> arbitrary
+
+data CardInSupply = CardInSupply Supply Card
+  deriving (Eq, Show)
+
+instance Arbitrary CardInSupply where
+  arbitrary =
+    uncurry CardInSupply . first (foldr Supply.add Supply.empty)
+      <$> (arbitrary `suchThat` (not . null) >>= selectedElement)
+
 data SelectedPlayerAndCardInSupply = SelectedPlayerAndCardInSupply PlayState CandidateId Card
   deriving (Eq, Show)
 
 instance Arbitrary SelectedPlayerAndCardInSupply where
   arbitrary = do
     (ps, p) <- validPlayers >>= selectedElement
-    (s, card) <- arbitrary `suchThat` (not . null) >>= selectedElement
+    (CardInSupply s c) <- arbitrary
     t <- arbitrary
-    return $ SelectedPlayerAndCardInSupply (PlayState ps (Supply s) t) (playerId p) card
+    return $ SelectedPlayerAndCardInSupply (PlayState ps s t) (playerId p) c
 
 data CardInStartingDeck = CardInStartingDeck [PlayerWithHand] CandidateId Card
   deriving (Eq, Show)

@@ -30,9 +30,9 @@ buyPhaseTests :: SpecWith ()
 buyPhaseTests = describe "buy phase" $ do
 
   it "plays all treasure cards" $ property $
-    \(ValidPlayersWithParams ps params) coins (Positive buys) (NonEmpty s) t ->
+    \(ValidPlayersWithParams ps params) coins (Positive buys) (NonEmptySupply s) t ->
       let
-        g = PlayState ps (Supply s) t
+        g = PlayState ps s t
       in
         (===) (sortOn arbitraryCardOrder . filter ((== Treasure) . cardType) . hand $ activePlayer g)
           . sortOn arbitraryCardOrder
@@ -41,16 +41,15 @@ buyPhaseTests = describe "buy phase" $ do
           . runTest params coins buys g
 
   it "gains a card which is in both the strategic priority and the supply" $ property $
-    \(ValidPlayersWithParams ps params) (Positive coins) (Positive buys) (NonEmpty s) t ->
+    \(ValidPlayersWithParams ps params) (Positive coins) (Positive buys) (CardInSupply s card) t ->
       let
-        g = PlayState ps (Supply s) t
-        card = head s
+        g = PlayState ps s t
       in
         any cardGained . history . runTest (prioritise card params) (Coins coins + cost card) buys g
 
-  it "completes" $ property $ \(ValidPlayersWithParams ps params) coins (Positive buys) (NonEmpty s) t ->
+  it "completes" $ property $ \(ValidPlayersWithParams ps params) coins (Positive buys) (NonEmptySupply s) t ->
     let
-      g = PlayState ps (Supply s) t
+      g = PlayState ps s t
     in
       (===) BuyPhaseCompleted . last . history . runTest params coins buys g
 

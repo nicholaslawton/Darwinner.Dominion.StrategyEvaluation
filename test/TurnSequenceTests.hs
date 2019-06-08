@@ -47,16 +47,16 @@ turnSequenceTests = describe "turn sequence" $ do
   describe "turn end" $ do
 
     it "transitions to next turn when game end conditions not met" $ property $ \params ->
-      buyPhase . state . execWhile turnEnd 10 params .: gameAtTurnEnd addProvinceToSupply
+      buyPhase . state . execWhile turnEnd 10 params .: gameAtTurnEnd (alterSupply $ Supply.add Province)
 
     it "transitions to game over when no province remains in supply" $ property $ \params ->
-      gameOver . state . execWhile turnEnd 10 params .: gameAtTurnEnd removeProvincesFromSupply
+      gameOver . state . execWhile turnEnd 10 params .: gameAtTurnEnd (alterSupply $ removeAll Province)
 
-addProvinceToSupply :: PlayState -> PlayState
-addProvinceToSupply g = g { PlayState.supply = add Province (PlayState.supply g) }
+alterSupply :: (Supply -> Supply) -> PlayState -> PlayState
+alterSupply f g = g { PlayState.supply = f $ PlayState.supply g }
 
-removeProvincesFromSupply :: PlayState -> PlayState
-removeProvincesFromSupply g = g { PlayState.supply = Supply $ filter (/= Province) $ cards $ PlayState.supply g }
+removeAll :: Card -> Supply -> Supply
+removeAll card = until ((<= 0) . pileSize card) (Supply.remove card)
 
 addEmpty :: Ord k => [k] -> Map k [a] -> Map k [a]
 addEmpty = flip $ foldr (\k m -> insertWith (flip const) k [] m)
