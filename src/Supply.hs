@@ -5,6 +5,7 @@ module Supply
   , size
   , contains
   , pileSize
+  , emptyPiles
   , add
   , remove
   ) where
@@ -33,6 +34,9 @@ contains card = query $ any (\(Pile c count) -> c == card && count > 0)
 pileSize :: Card -> Supply -> Int
 pileSize card = query $ combinedSize . filter ((== card) . pileOf)
 
+emptyPiles :: Supply -> Int
+emptyPiles = query $ length . filter emptyPile
+
 add :: Card -> Supply -> Supply
 add card = alter $ alterIf (Pile card 1 :) (all ((/= card) . pileOf)) . alterElem pileOf (alterPileSize (+1)) card
 
@@ -50,6 +54,10 @@ pileOf (Pile card _) = card
 
 pileNum :: Pile -> Int
 pileNum (Pile _ count) = count
+
+emptyPile :: Pile -> Bool
+emptyPile (Pile _ 0) = True
+emptyPile _ = False
 
 combinedSize :: [Pile] -> Int
 combinedSize = sum . fmap pileNum

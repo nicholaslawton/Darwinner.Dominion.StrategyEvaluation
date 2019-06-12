@@ -52,6 +52,19 @@ turnSequenceTests = describe "turn sequence" $ do
     it "transitions to game over when no province remains in supply" $ property $ \params ->
       gameOver . state . execWhile turnEnd 10 params .: gameAtTurnEnd (alterSupply $ removeAll Province)
 
+    it "transitions to game over when any three supply piles are exhausted" $ property $ \params ->
+      gameOver
+      . state
+      . execWhile turnEnd 10 params
+      .: gameAtTurnEnd (alterSupply
+        $ removeAll Estate
+        . removeAll Duchy
+        . removeAll Copper
+        . Supply.add Province
+        . Supply.add Estate
+        . Supply.add Duchy
+        . Supply.add Copper)
+
 alterSupply :: (Supply -> Supply) -> PlayState -> PlayState
 alterSupply f g = g { PlayState.supply = f $ PlayState.supply g }
 

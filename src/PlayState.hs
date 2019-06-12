@@ -9,6 +9,8 @@ import Card
 import Supply
 import Turn
 
+import Control.Applicative
+
 data PlayState = PlayState
   { players :: [CompletePlayer]
   , supply :: Supply
@@ -27,4 +29,5 @@ activePlayer g =
     else ps !! activeIndex
 
 gameEndConditions :: PlayState -> Bool
-gameEndConditions = not . contains Province . supply
+gameEndConditions =
+  liftA2 (||) (not . contains Province) ((>= 3) . emptyPiles) . supply
