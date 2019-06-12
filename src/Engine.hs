@@ -5,6 +5,7 @@ import Supply
 import Game
 import GameState
 import PlayState
+import Event
 import Update
 import Player
 import Message
@@ -109,9 +110,18 @@ nextMessage = do
 
     TurnEnd playState
       | gameEndConditions playState -> return EndGame
+      | inactivityLimitReached (Game.history game) -> return EndGame
       | otherwise -> return EndTurn
 
     GameOver -> error "Game is over"
+
+inactivityLimitReached :: [Event] -> Bool
+inactivityLimitReached = (>= inactivityLimit) . length . takeWhile (not . cardGained) . reverse
+  where
+    inactivityLimit = 1000
+    cardGained :: Event -> Bool
+    cardGained (CardGained _ _) = True
+    cardGained _ = False
 
 drawCard :: Player p => Message -> p -> State Game Message
 drawCard alternateMessage p
