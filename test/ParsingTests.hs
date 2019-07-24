@@ -19,45 +19,28 @@ parsingTests = describe "parseEvaluationParameters" $ do
 
   it "parses simple definition" $
     parseEvaluationParameters ([r|
-          { players:
-            [ { id: first, strategy: [Province, Gold, Duchy, Silver, Estate] }
-            , { id: second, strategy: [Gold, Silver, Copper] }
-            ]
-          }
-        |] :: ByteString)
+        first: Province, Gold, Duchy, Silver, Estate
+        second: Gold, Silver, Copper |] :: ByteString)
       `shouldBe` Right (EvaluationParameters
         [ Candidate (CandidateId "first") (Strategy [Province, Gold, Duchy, Silver, Estate])
         , Candidate (CandidateId "second") (Strategy [Gold, Silver, Copper])
         ])
   
   it "rejects a single player" $
-    parseEvaluationParameters ([r|
-          { players:
-            [ { id: one, strategy: [Province, Gold, Duchy, Silver, Estate] }
-            ]
-          }
-        |] :: ByteString)
+    parseEvaluationParameters ([r| one: Province, Gold, Duchy, Silver, Estate |] :: ByteString)
       `shouldBe` Left (ParseError "Insufficient number of players (minimum two)")
   
   it "rejects five players" $
     parseEvaluationParameters ([r|
-          { players:
-            [ { id: one, strategy: [Province, Gold, Duchy, Silver, Estate] }
-            , { id: two, strategy: [Province, Gold, Duchy, Silver, Estate] }
-            , { id: three, strategy: [Province, Gold, Duchy, Silver, Estate] }
-            , { id: four, strategy: [Province, Gold, Duchy, Silver, Estate] }
-            , { id: five, strategy: [Province, Gold, Duchy, Silver, Estate] }
-            ]
-          }
-        |] :: ByteString)
+        one: Province, Gold, Duchy, Silver, Estate
+        two: Province, Gold, Duchy, Silver, Estate
+        three: Province, Gold, Duchy, Silver, Estate
+        four: Province, Gold, Duchy, Silver, Estate
+        five: Province, Gold, Duchy, Silver, Estate |] :: ByteString)
       `shouldBe` Left (ParseError "Too many players (maximum four)")
 
   it "rejects duplicate identifiers" $
     parseEvaluationParameters ([r|
-          { players:
-            [ { id: same, strategy: [Province, Gold, Duchy, Silver, Estate] }
-            , { id: same, strategy: [Gold, Silver, Copper] }
-            ]
-          }
-        |] :: ByteString)
+        same: Province, Gold, Duchy, Silver, Estate
+        same: Gold, Silver, Copper |] :: ByteString)
       `shouldBe` Left (ParseError "Duplicate candidate identifiers")

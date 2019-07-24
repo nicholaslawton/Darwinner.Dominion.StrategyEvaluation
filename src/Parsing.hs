@@ -39,21 +39,19 @@ validateCandidateIdentifiers (EvaluationParameters candidates) =
       containsDuplicates = liftA2 (/=) length (length . nub)
 
 parser :: Parser EvaluationParameters
-parser = whiteSpace *> evaluationParameters <* eof
+parser = evaluationParameters <* eof
 
 evaluationParameters :: Parser EvaluationParameters
-evaluationParameters = braces $
-  field "players" $ EvaluationParameters <$> list candidate
+evaluationParameters = EvaluationParameters <$> some (whiteSpace *> candidate)
 
 candidate :: Parser Candidate
-candidate = braces $
-  liftA2 Candidate (field "id" idParser) (token (char ',') *> field "strategy" strategyParser)
+candidate = liftA2 Candidate idParser (token (char ':') *> strategyParser)
 
 idParser :: Parser CandidateId
 idParser = CandidateId <$> token (some letter)
 
 strategyParser :: Parser Strategy
-strategyParser = Strategy <$> list card
+strategyParser = Strategy <$> commaSep card
 
 card :: Parser Card
 card = choice
@@ -64,12 +62,6 @@ card = choice
   , literal "Silver" Silver
   , literal "Copper" Copper
   ]
-
-list :: Parser a -> Parser [a]
-list = brackets . commaSep
-
-field :: String -> Parser a -> Parser a
-field name p =  string name *> token (char ':') *> p
 
 literal :: String -> a -> Parser a
 literal s value = value <$ token (string s)
