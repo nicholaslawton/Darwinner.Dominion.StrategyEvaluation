@@ -30,7 +30,19 @@ instance Arbitrary BuyAllowance where
   arbitrary = BuyAllowance <$> arbitrary
 
 instance Arbitrary Card where
-  arbitrary = oneof [return Province, return Duchy, return Estate, return Gold, return Silver, return Copper]
+  arbitrary = oneof [return Province, return Duchy, return Estate, return Gold, return Silver, return Copper, return Curse]
+
+newtype VictoryCard = VictoryCard Card
+  deriving (Eq, Show)
+
+instance Arbitrary VictoryCard where
+  arbitrary = VictoryCard <$> oneof [return Province, return Duchy, return Estate]
+
+newtype NonVictoryCard = NonVictoryCard Card
+  deriving (Eq, Show)
+
+instance Arbitrary NonVictoryCard where
+  arbitrary = NonVictoryCard <$> oneof [return Gold, return Silver, return Copper, return Curse]
 
 instance Arbitrary Supply where
   arbitrary = foldr Supply.add Supply.empty <$> (arbitrary :: Gen [Card])
