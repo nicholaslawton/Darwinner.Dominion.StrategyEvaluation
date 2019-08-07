@@ -1,4 +1,4 @@
-module PlayerValidation (dominion) where
+module PlayerValidation (comparableDominion) where
 
 import Player
 import Card
@@ -6,5 +6,5 @@ import CardOrder
 
 import Data.List
 
-dominion :: Player p => p -> [Card]
-dominion p = sortOn arbitraryCardOrder $ concatMap ($ p) [deck, hand, playedCards, discard]
+comparableDominion :: Player p => p -> [Card]
+comparableDominion = sortOn arbitraryCardOrder . dominion

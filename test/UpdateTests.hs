@@ -160,7 +160,7 @@ cardMovementProperties unpack message from fromDescription to toDescription = do
 
   it "does not alter dominion of player" $ property $ \x ->
     let (g, pid, card) = unpack x
-    in verifyPlayerUpdate pid dominion id (message pid card) g
+    in verifyPlayerUpdate pid comparableDominion id (message pid card) g
 
 verifyPlayerUpdate :: (Eq a, Show a) =>
   CandidateId
@@ -186,7 +186,8 @@ verifyPlayerState pid verification game =
 
 cardsInPlay :: GameState -> [Card]
 cardsInPlay gameState =
-  sortOn arbitraryCardOrder $ concatMap ($ gameState) [concatMap dominion . players, cards . GameState.supply]
+  sortOn arbitraryCardOrder
+  $ concatMap ($ gameState) [concatMap comparableDominion . players, cards . GameState.supply]
 
 buyAllowance :: GameState -> Int
 buyAllowance (BuyPhase _ (BuyAllowance buys) _) = buys

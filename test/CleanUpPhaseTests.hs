@@ -47,7 +47,7 @@ cleanUpPhaseTests = describe "clean up phase" $ do
     let
       g = PlayState ps cards t
     in
-      (===) (min 5 . length . dominion $ activePlayer g)
+      (===) (min 5 . length . comparableDominion $ activePlayer g)
         . length
         . filter ((/=) Nothing . cardDrawn)
         . history
@@ -57,7 +57,7 @@ runTest :: EvaluationParameters -> CleanUpStep -> PlayState -> Int -> Game
 runTest params step g@(PlayState ps _ _) = execWhile cleanUpPhase (actionLimit ps) params . gameInCleanUpPhase step g
 
 actionLimit :: [CompletePlayer] -> Int
-actionLimit = (*2) . sum . fmap (length . dominion)
+actionLimit = (*2) . sum . fmap (length . comparableDominion)
 
 gameInCleanUpPhase :: CleanUpStep -> PlayState -> Int -> Game
 gameInCleanUpPhase = gameInState .: CleanUpPhase
